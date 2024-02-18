@@ -139,10 +139,12 @@ abcd...
 
 * 下载ChatGLM3模型文件，并拷贝至WSL2的路径：```~/LLM_MODEL```。ChatGLM3模型文件下载地址：<https://huggingface.co/THUDM/chatglm3-6b>，也可以用镜像网址下载：<https://hf-mirror.com/THUDM/chatglm3-6b>。
 
-* 拉取 ubuntu22.04基本镜像，在WSL2命令行执行：
+* 运行create_docker_for_chatglm3.sh，在WSL2命令行执行：
 
     ```bash
-    docker pull ubuntu:22.04
+    cd ~/PyQt_ChatGLM3
+    sudo chmod 774 ./glm3/create_docker_for_chatglm3.sh
+    sudo ./glm3/create_docker_for_chatglm3.sh
     ```
 
 * 

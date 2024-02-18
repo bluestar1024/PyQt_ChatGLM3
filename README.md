@@ -123,25 +123,35 @@ abcd...
     sudo docker run hello-world
     ```
 
-* docker禁用iptables，在 /etc/docker/daemon.json里添加：
+* 默认情况下，只有root用户和docker组的用户才能运行Docker命令。我们可以将当前用户添加到docker组，以避免每次使用Docker时都需要使用sudo。在WSL2命令行执行：
 
     ```bash
-    "iptables": false
+    sudo usermod -aG docker $USER
     ```
 
-    在WSL2命令行执行：
+    重启docker服务，在WSL2命令行执行：
 
     ```bash
     sudo systemctl restart docker
     ```
 
-    或者使用 --net=host 参数运行docker：
+### 2.2. 使用docker部署ChatGLM3
+
+* 下载ChatGLM3模型文件，并拷贝至WSL2的路径：```~/LLM_MODEL```。ChatGLM3模型文件下载地址：<https://huggingface.co/THUDM/chatglm3-6b>，也可以用镜像网址下载：<https://hf-mirror.com/THUDM/chatglm3-6b>。
+
+* 拉取 ubuntu22.04基本镜像，在WSL2命令行执行：
+
+    ```bash
+    docker pull ubuntu:22.04
+    ```
+
+* 
+
+* 使用 --net=host 参数运行docker：
 
     ```bash
     docker run --net=host <image>
     ```
-
-### 2.2. 使用docker部署ChatGLM3
 
 ------------------------------------------------------------------------
 

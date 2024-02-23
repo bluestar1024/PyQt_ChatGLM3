@@ -1,22 +1,21 @@
-FROM nvidia/cuda:12.1.1-base-ubuntu22.04
-
+FROM ubuntu:22.04
 COPY . /root
-
 WORKDIR /root
-
-RUN echo 'deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse' > /etc/apt/sources.list && \
-    echo 'deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse' >> /etc/apt/sources.list && \
-    echo 'deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse' >> /etc/apt/sources.list && \
-    echo 'deb http://security.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse' >> /etc/apt/sources.list && \
+SHELL ["/bin/bash", "-c"]
+RUN cp /etc/apt/sources.list /etc/apt/sources.list.back && \
+    sed -i "s@http://.*archive.ubuntu.com@http://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list && \
+    sed -i "s@http://.*security.ubuntu.com@http://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list && \
     apt-get update -y && \
-    apt install python3.11 -y --force-yes && \
-    apt-get install software-properties-common -y --force-yes && \
-    ln -s /usr/bin/python3.11 /usr/bin/python && \
-    apt-get install python3-pip -y --force-yes && \
+    apt install wget -y --force-yes && \
+    wget -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    bash Miniconda3-latest-Linux-x86_64.sh -p ~/miniconda -b && \
+    PATH=~/miniconda/bin:${PATH} && \
+    conda init && \
+    source ~/.bashrc && \
+    source activate && \
     pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ && \
-    pip install -r requirements.txt
+    pip config set install.trusted-host pypi.tuna.tsinghua.edu.cn  && \
+    pip install --default-timeout=400 torch torchvision torchaudio && \
+    pip install --default-timeout=50 -r requirements.txt
 
-
-    pip --default-timeout=10 install torch torchvision torchaudio -i https://mirrors.aliyun.com/pypi/simple -trusted-host mirrors.aliyun.com && \
-
-
+    

@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
-COPY . /root
 WORKDIR /root
+COPY ./LLM/ChatGLM3 /root/ChatGLM3
 SHELL ["/bin/bash", "-c"]
 RUN cp /etc/apt/sources.list /etc/apt/sources.list.back && \
     sed -i "s@http://.*archive.ubuntu.com@http://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list && \
@@ -16,6 +16,4 @@ RUN cp /etc/apt/sources.list /etc/apt/sources.list.back && \
     pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ && \
     pip config set install.trusted-host pypi.tuna.tsinghua.edu.cn  && \
     pip install --default-timeout=400 torch torchvision torchaudio && \
-    pip install --default-timeout=50 -r requirements.txt
-
-    
+    pip install --default-timeout=50 -r /root/ChatGLM3/requirements.txt

@@ -150,63 +150,37 @@ abcd...
     sudo systemctl restart docker
     ```
 
-### 2.2. 使用docker部署ChatGLM3
+### 2.2. 构建docker镜像并运行docker容器
 
-* 下载ChatGLM3模型文件，并拷贝至WSL2的路径：```~/LLM_MODEL```。ChatGLM3模型文件下载地址：<https://huggingface.co/THUDM/chatglm3-6b>，也可以用镜像网址下载：<https://hf-mirror.com/THUDM/chatglm3-6b>。下载ChatGLM3源码<https://github.com/THUDM/ChatGLM3>。
-在WSL2创建```~/glm3```目录。将ChatGLM3源码拷贝至WSL2的路径```~/glm3/code/ChatGLM3```。在glm3目录下新建Dockerfile和create_docker_for_chatglm3.sh。
-在create_docker_for_chatglm3.sh中将WSL2```~/LLM_MODEL```挂载到容器```/data/LLM_MODEL```。修改源码```~/glm3/code/ChatGLM3/basic_demo/web_demo_gradio.py```文件模型加载地址为```/data/LLM_MODEL/glm模型路径```
-将源码目录中的requirements.txt将拷贝至当前目录glm3中。
+* 下载ChatGLM3模型文件至WSL2的路径：`~/LLM_MODEL/THUDM/chatglm3-6b/`。ChatGLM3模型文件下载地址：<https://huggingface.co/THUDM/chatglm3-6b>，也可以用镜像网址下载：<https://hf-mirror.com/THUDM/chatglm3-6b>。
 
-* create_docker_for_chatglm3.sh内容如下：
+* 拉取docker镜像`ubuntu:22.04`，在WSL2命令行执行：
 
     ```bash
-        docker pull ubuntu:22.04
-        docker build --no-cache --network=host -t glm3_ubuntu:1.0 .
-        docker run -it --name glm3 --privileged=true --net=host -v ~/LLM_MODEL:/data/LLM_MODEL -e NVIDIA_DRIVER_CAPABILITIES=compute,utility -e NVIDIA_VISIBLE_DEVICES=all --gpus=all glm3_ubuntu:1.0
-
+    docker pull ubuntu:22.04
     ```
 
-* Dockerfile内容如下：
+* 构建docker镜像`glm3_image`
 
     ```bash
-    FROM ubuntu:22.04
-    COPY . /root
-    WORKDIR /root
-    SHELL ["/bin/bash", "-c"]
-    RUN cp /etc/apt/sources.list /etc/apt/sources.list.back && \
-        sed -i "s@http://.*archive.ubuntu.com@http://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list && \
-        sed -i "s@http://.*security.ubuntu.com@http://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list && \
-        apt-get update -y && \
-        apt install wget -y --force-yes && \
-        wget -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-        bash Miniconda3-latest-Linux-x86_64.sh -p ~/miniconda -b && \
-        PATH=~/miniconda/bin:${PATH} && \
-        conda init && \
-        source ~/.bashrc && \
-        source activate && \
-        pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/ && \
-        pip config set install.trusted-host pypi.tuna.tsinghua.edu.cn  && \
-        pip install --no-cache-dir --default-timeout=400 torch torchvision torchaudio && \
-        pip install --no-cache-dir --default-timeout=50 -r requirements.txt
-        
+    docker build --no-cache --network=host -t glm3_image:1.0 -f ./LLM/Dockerfile .
     ```
 
-* 运行create_docker_for_chatglm3.sh构建镜像并运行容器，在WSL2命令行执行：
+* 由docker镜像`glm3_image`创建docker容器`glm3`，并运行docker容器`glm3`。在WSL2命令行执行：
 
     ```bash
-    cd ~/PyQt_ChatGLM3
-    sudo chmod 774 ./glm3/create_docker_for_chatglm3.sh
-    sudo ./glm3/create_docker_for_chatglm3.sh
+    docker run -it --name glm3 --privileged=true --net=host -v ~/LLM_MODEL/THUDM/chatglm3-6b/:/root/model/chatglm3-6b/ -e MODEL_PATH=/root/model/chatglm3-6b/ -e NVIDIA_DRIVER_CAPABILITIES=compute,utility -e NVIDIA_VISIBLE_DEVICES=all --gpus=all glm3_image:1.0
     ```
 
-* 在docker运行chatglm。在docker命令行执行：
+### 2.3. 在docker中部署ChatGLM3
+
+* 在docker运行ChatGLM3。在docker容器`glm3`的命令行执行：
 
     ```bash
-    cd ~/glm3/code/ChatGLM3/basic_demo
-    python web_demo_gradio.py
+    python /root/ChatGLM3/basic_demo/web_demo_gradio.py
     ```
 
-* 在主机游览器登录127.0.0.1:7870即可看到chatglm3
+* 在主机游览器登录127.0.0.1:7870，即可看到ChatGLM3网页
 
 ------------------------------------------------------------------------
 

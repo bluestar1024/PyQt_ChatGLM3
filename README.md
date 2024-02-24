@@ -166,21 +166,29 @@ abcd...
     docker build --no-cache --network=host -t glm3_image:1.0 -f ./LLM/Dockerfile .
     ```
 
-* 由docker镜像`glm3_image`创建docker容器`glm3`，并运行docker容器`glm3`。在WSL2命令行执行：
+* 由docker镜像`glm3_image`创建docker容器`glm`，并运行docker容器`glm`。在WSL2命令行执行：
 
     ```bash
-    docker run -it --name glm3 --privileged=true --net=host -v ~/LLM_MODEL/THUDM/chatglm3-6b/:/root/model/chatglm3-6b/ -e MODEL_PATH=/root/model/chatglm3-6b/ -e NVIDIA_DRIVER_CAPABILITIES=compute,utility -e NVIDIA_VISIBLE_DEVICES=all --gpus=all glm3_image:1.0
+    docker run -it --name glm --hostname glm -v ~/LLM_MODEL:/root/LLM_MODEL -e MODEL_PATH=/root/LLM_MODEL/THUDM/chatglm3-6b/ -e EMBEDDING_PATH=/root/LLM_MODEL/BAAI/bge-large-zh-v1.5/ -e NVIDIA_DRIVER_CAPABILITIES=compute,utility -e NVIDIA_VISIBLE_DEVICES=all --privileged=true --net=host --gpus=all glm3_image:1.0
     ```
 
-### 2.3. 在docker中部署ChatGLM3
+### 2.3. 在docker中运行ChatGLM3的网页服务
 
-* 在docker运行ChatGLM3。在docker容器`glm3`的命令行执行：
+* 在docker运行ChatGLM3。在docker容器`glm`的命令行执行：
 
     ```bash
     python /root/ChatGLM3/basic_demo/web_demo_gradio.py
     ```
 
 * 在主机游览器登录127.0.0.1:7870，即可看到ChatGLM3网页
+
+### 2.4. 在docker中运行ChatGLM3的API服务
+
+* 在docker运行ChatGLM3。在docker容器`glm`的命令行执行：
+
+    ```bash
+    python /root/ChatGLM3/openai_api_demo/api_server.py
+    ```
 
 ------------------------------------------------------------------------
 

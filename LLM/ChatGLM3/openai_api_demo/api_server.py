@@ -49,7 +49,7 @@ EventSourceResponse.DEFAULT_PING_INTERVAL = 1000
 
 # set LLM path
 MODEL_PATH = os.environ.get('MODEL_PATH')
-TOKENIZER_PATH = os.environ.get("LLM_MODEL_PATH")
+TOKENIZER_PATH = os.environ.get("MODEL_PATH")
 
 # set Embedding Model path
 EMBEDDING_PATH = os.environ.get('EMBEDDING_PATH', 'C:/Users/45312/Documents/LLM_MODEL/BAAI/bge-large-zh-v1.5')

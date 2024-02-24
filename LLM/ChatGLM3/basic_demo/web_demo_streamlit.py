@@ -15,7 +15,7 @@ import torch
 from transformers import AutoModel, AutoTokenizer
 
 MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
-TOKENIZER_PATH = os.environ.get("LLM_MODEL_PATH", MODEL_PATH)
+TOKENIZER_PATH = os.environ.get("MODEL_PATH", MODEL_PATH)
 MODEL_PATH = os.path.abspath(MODEL_PATH)
 TOKENIZER_PATH = os.path.abspath(TOKENIZER_PATH)
 print(MODEL_PATH)

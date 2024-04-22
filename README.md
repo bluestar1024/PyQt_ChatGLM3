@@ -123,25 +123,72 @@ abcd...
     sudo docker run hello-world
     ```
 
-* docker禁用iptables，在 /etc/docker/daemon.json里添加：
+* 默认安装的docker都是基于cpu版本的，如果想要配合GPU进行一些简单的部署的话，则需要安装nvidia-docker来结合使用。WSL2在安装nvidia-container-toolkit:
 
     ```bash
-    "iptables": false
+    curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey |  sudo apt-key add -
+    distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+    curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+    sudo apt-get update
     ```
 
-    在WSL2命令行执行：
+    安装nvidia-container-runtim
+
+    ```bash
+    sudo apt-get install nvidia-container-runtime
+    ```
+
+* 默认情况下，只有root用户和docker组的用户才能运行Docker命令。我们可以将当前用户添加到docker组，以避免每次使用Docker时都需要使用sudo。在WSL2命令行执行：
+
+    ```bash
+    sudo usermod -aG docker $USER
+    ```
+
+    重启docker服务，在WSL2命令行执行：
 
     ```bash
     sudo systemctl restart docker
     ```
 
-    或者使用 --net=host 参数运行docker：
+### 2.2. 构建docker镜像并运行docker容器
+
+* 下载ChatGLM3模型文件至WSL2的路径：`~/LLM_MODEL/THUDM/chatglm3-6b/`。ChatGLM3模型文件下载地址：<https://huggingface.co/THUDM/chatglm3-6b>，也可以用镜像网址下载：<https://hf-mirror.com/THUDM/chatglm3-6b>。
+
+* 拉取docker镜像`ubuntu:22.04`，在WSL2命令行执行：
 
     ```bash
-    docker run --net=host <image>
+    docker pull ubuntu:22.04
     ```
 
-### 2.2. 使用docker部署ChatGLM3
+* 构建docker镜像`glm3_image`
+
+    ```bash
+    docker build --no-cache --network=host -t glm3_image:1.0 -f ./LLM/Dockerfile .
+    ```
+
+* 由docker镜像`glm3_image`创建docker容器`glm`，并运行docker容器`glm`。在WSL2命令行执行：
+
+    ```bash
+    docker run -it --name glm --hostname glm -v ~/LLM_MODEL:/root/LLM_MODEL -e MODEL_PATH=/root/LLM_MODEL/THUDM/chatglm3-6b/ -e EMBEDDING_PATH=/root/LLM_MODEL/BAAI/bge-large-zh-v1.5/ -e NVIDIA_DRIVER_CAPABILITIES=compute,utility -e NVIDIA_VISIBLE_DEVICES=all --privileged=true --net=host --gpus=all glm3_image:1.0
+    ```
+
+### 2.3. 在docker中运行ChatGLM3的网页服务
+
+* 在docker运行ChatGLM3。在docker容器`glm`的命令行执行：
+
+    ```bash
+    python /root/ChatGLM3/basic_demo/web_demo_gradio.py
+    ```
+
+* 在主机游览器登录127.0.0.1:7870，即可看到ChatGLM3网页
+
+### 2.4. 在docker中运行ChatGLM3的API服务
+
+* 在docker运行ChatGLM3。在docker容器`glm`的命令行执行：
+
+    ```bash
+    python /root/ChatGLM3/openai_api_demo/api_server.py
+    ```
 
 ------------------------------------------------------------------------
 

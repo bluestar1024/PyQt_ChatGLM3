@@ -207,7 +207,7 @@ class ListWidget(QListWidget):
 class ImageLabel(QLabel):
     def __init__(self, isUser=True, parent=None):
         super(ImageLabel, self).__init__(parent)
-        self.setFixedSize(30, 30)
+        self.setFixedSize(36, 36)
         if isUser:
             self.setPixmap(QPixmap("user.png"))
         else:
@@ -256,11 +256,11 @@ class TextLabel(QWidget):
             self.setLayout(self.mainHLayout)
             self.setFixedSize(labelWidth + 10, labelHeight + 10)
         else:
-            self.label.setFixedSize(20, 20)
+            self.label.setFixedSize(26, 26)
             self.mainHLayout.addWidget(self.label)
             self.mainHLayout.setContentsMargins(5, 5, 5, 5)
             self.setLayout(self.mainHLayout)
-            self.setFixedSize(30, 30)
+            self.setFixedSize(36, 36)
         self.isUser = isUser
 
     def paintEvent(self, event):
@@ -315,8 +315,8 @@ class TextLabel(QWidget):
             self.label.setFixedSize(labelWidth, labelHeight)
             self.setFixedSize(labelWidth + 10, labelHeight + 10)
         else:
-            self.label.setFixedSize(20, 20)
-            self.setFixedSize(30, 30)
+            self.label.setFixedSize(26, 26)
+            self.setFixedSize(36, 36)
 
     def setMaxWidth(self, maxWidth):
         self.maxWidth = maxWidth
@@ -347,8 +347,8 @@ class TextLabel(QWidget):
             self.label.setFixedSize(labelWidth, labelHeight)
             self.setFixedSize(labelWidth + 10, labelHeight + 10)
         else:
-            self.label.setFixedSize(20, 20)
-            self.setFixedSize(30, 30)
+            self.label.setFixedSize(26, 26)
+            self.setFixedSize(36, 36)
 
 class MessageWidget(QWidget):
     def __init__(self, text, isUser=True, textMaxWidth=650, parent=None):

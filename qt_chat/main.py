@@ -358,6 +358,17 @@ class MessageWidget(QWidget):
         self.imageLabel = ImageLabel(isUser=self.isUser)
         #TextLabel
         self.textLabel = TextLabel(text, isUser=self.isUser, maxWidth=textMaxWidth)
+        #LoadingLabel
+        self.loadingLabel = LoadingLabel()
+        #LoadingLabel flag
+        self.loadingLabelIsRemove = True
+        #textWidget QWidget
+        self.textWidget = QWidget()
+        #textLayout QHBoxLayout
+        self.textLayout = QVBoxLayout()
+        self.textLayout.addWidget(self.textLabel)
+        self.textLayout.setContentsMargins(0, 0, 0, 0)
+        self.textWidget.setLayout(self.textLayout)
         #mainHLayout QHBoxLayout
         self.mainHLayout = QHBoxLayout()
         self.setLayout(self.mainHLayout)
@@ -370,29 +381,97 @@ class MessageWidget(QWidget):
         self.subVLayout2.setContentsMargins(0, 0, 0, 0)
         #add imageLabel and textLabel
         if self.isUser:
-            self.subVLayout1.addWidget(self.textLabel)
+            #self.subVLayout1.addWidget(self.textLabel)
+            #self.subVLayout2.addWidget(self.imageLabel)
+            self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+            self.subVLayout1.addWidget(self.textWidget)
             self.subVLayout2.addWidget(self.imageLabel)
         else:
+            #self.subVLayout1.addWidget(self.imageLabel)
+            #self.subVLayout2.addWidget(self.textLabel)
             self.subVLayout1.addWidget(self.imageLabel)
-            self.subVLayout2.addWidget(self.textLabel)
+            self.textLayout.addWidget(self.loadingLabel)
+            self.textLayout.setSpacing(0)
+            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingLabel.width() else self.loadingLabel.width(), self.textLabel.height() + self.loadingLabel.height())
+            self.subVLayout2.addWidget(self.textWidget)
+            #LoadingLabel flag
+            self.loadingLabelIsRemove = False
         #mainHLayout add subVLayout
         self.mainHLayout.addLayout(self.subVLayout1)
         self.mainHLayout.addLayout(self.subVLayout2)
         self.mainHLayout.setContentsMargins(0, 0, 0, 0)
         self.mainHLayout.setSpacing(5)
         #main widget set size
-        self.setFixedSize(self.imageLabel.width() + 5 + self.textLabel.width(), self.imageLabel.height() if self.imageLabel.height() > self.textLabel.height() else self.textLabel.height())
+        self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
 
     def setText(self, text):
         self.textLabel.setText(text)
-        self.setFixedSize(self.imageLabel.width() + 5 + self.textLabel.width(), self.imageLabel.height() if self.imageLabel.height() > self.textLabel.height() else self.textLabel.height())
+        if self.isUser:
+            self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+        elif not self.loadingLabelIsRemove:
+            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingLabel.width() else self.loadingLabel.width(), self.textLabel.height() + self.loadingLabel.height())
+        else:
+            self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+        self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
 
     def getIsUser(self):
         return self.isUser
 
     def setTextMaxWidth(self, textMaxWidth):
         self.textLabel.setMaxWidth(textMaxWidth)
-        self.setFixedSize(self.imageLabel.width() + 5 + self.textLabel.width(), self.imageLabel.height() if self.imageLabel.height() > self.textLabel.height() else self.textLabel.height())
+        if self.isUser:
+            self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+        elif not self.loadingLabelIsRemove:
+            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingLabel.width() else self.loadingLabel.width(), self.textLabel.height() + self.loadingLabel.height())
+        else:
+            self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+        self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
+
+    def removeLoadingLabel(self):
+        self.textLayout.removeWidget(self.loadingLabel)
+        self.loadingLabel.hide()
+        self.loadingLabelIsRemove = True
+        self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+        self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
+
+class LoadingLabel(QWidget):
+    def __init__(self, parent=None):
+        super(LoadingLabel, self).__init__(parent)
+        self.subWidget1 = QWidget()
+        self.subWidget2 = QWidget()
+        self.subWidget3 = QWidget()
+        self.subWidgetList = []
+        self.subWidgetList.append(self.subWidget1)
+        self.subWidgetList.append(self.subWidget2)
+        self.subWidgetList.append(self.subWidget3)
+        self.mainHLayout = QHBoxLayout()
+        for subWidget in self.subWidgetList:
+            subWidget.setFixedSize(18, 18)
+            self.mainHLayout.addWidget(subWidget)
+        self.mainHLayout.setContentsMargins(8, 8, 8, 8)
+        self.mainHLayout.setSpacing(8)
+        self.setLayout(self.mainHLayout)
+        self.setFixedSize(86, 34)
+        #QTimer
+        self.loadingTimer = QTimer()
+        self.loadingTimer.timeout.connect(self.loadingShow)
+        self.loadingTimer.start(500)
+        self.loadingNum = 0
+
+    def loadingShow(self):
+        for subWidget in self.subWidgetList:
+            subWidget.setFixedSize(18, 18)
+            subWidget.setStyleSheet('''
+                border: none;
+                border-radius: 9px;
+                background-color: rgb(150, 150, 150);
+            ''')
+        self.subWidgetList[self.loadingNum].setStyleSheet('''
+            border: none;
+            border-radius: 9px;
+            background-color: rgb(80, 80, 80);
+        ''')
+        self.loadingNum = (self.loadingNum + 1) % 3
 
 class PrintLabel(QWidget):
     def __init__(self, parent=None):
@@ -916,6 +995,13 @@ class MainWindow(QMainWindow):
         self.recvItem.setSizeHint(QSize(self.messageList.width(), self.messageRecvWidget.height() + 10))
 
     def messageFinish(self):
+        #messageRecvWidget remove LoadingLabel
+        self.messageRecvWidget.removeLoadingLabel()
+        #messageList itemWidget adjust size
+        self.itemRecvWidget.setFixedSize(self.messageList.width(), self.messageRecvWidget.height() + 10)
+        self.itemRecvHLayout.setContentsMargins(5, 5, self.itemRecvWidget.width() - self.messageRecvWidget.width() - 5, 5)
+        #messageList item adjust size
+        self.recvItem.setSizeHint(QSize(self.messageList.width(), self.messageRecvWidget.height() + 10))
         #enable sendButton
         self.messageInput.enableButton()
 

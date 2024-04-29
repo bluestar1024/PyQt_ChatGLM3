@@ -78,15 +78,11 @@ class TextEdit(QTextEdit):
         self.gLayout.addWidget(self.sendButton, 1, 1)
         self.gLayout.setContentsMargins(10, 10, 25, 10)
         self.gLayout.setSpacing(0)
+        self.textChanged.connect(self.sendButtonShow)
         self.sendButton.setStyleSheet('''
         QPushButton{
             border: none;
             image: url("send.png");
-        }
-        QPushButton:hover{
-            border: 2px solid rgb(150, 10, 250);
-            border-radius: 10px;
-            image: url("send_hover.png");
         }
         QPushButton:disabled{
             border: 2px solid rgb(23, 146, 230);
@@ -133,6 +129,33 @@ class TextEdit(QTextEdit):
 
     def getSendButtonIsEnable(self):
         return self.sendButton.isEnabled()
+
+    def sendButtonShow(self):
+        if self.toPlainText() == '':
+            self.sendButton.setStyleSheet('''
+            QPushButton{
+                border: none;
+                image: url("send.png");
+            }
+            QPushButton:disabled{
+                border: 2px solid rgb(23, 146, 230);
+                border-radius: 10px;
+                image: url("send_disable.png");
+            }
+            ''')
+        else:
+            self.sendButton.setStyleSheet('''
+            QPushButton{
+                border: 2px solid rgb(150, 10, 250);
+                border-radius: 10px;
+                image: url("send_hover.png");
+            }
+            QPushButton:disabled{
+                border: 2px solid rgb(23, 146, 230);
+                border-radius: 10px;
+                image: url("send_disable.png");
+            }
+            ''')
 
 class TextWidget(QWidget):
     def __init__(self, parent=None):

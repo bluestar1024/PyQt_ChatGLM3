@@ -8,8 +8,8 @@ Created on Tue Feb 13 18:31:44 2024
 import sys, os
 import math
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QSpacerItem, QAbstractSpinBox, QGridLayout, QLineEdit, qApp
-from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QEvent
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QMouseEvent
+from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen
 from openai import OpenAI
 
 #Import for test
@@ -189,7 +189,7 @@ class FunWidget(QWidget):
 class TextEdit(QTextEdit):
     def __init__(self, parent=None):
         super(TextEdit, self).__init__(parent)
-        self.resize(944, 120)
+        self.resize(954, 130)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.setPlaceholderText("按Shift+Enter换行、按Enter提交")
         self.sendButton = QPushButton()
@@ -285,59 +285,66 @@ class TextEditFull(QWidget):
     def __init__(self, parent=None):
         super(TextEditFull, self).__init__(parent)
         self.setMinimumHeight(40)
-        #frame QWidget
-        self.frame = QWidget(self)
-        self.frame.setObjectName("frame")
         #TextEdit
         self.textEdit = TextEdit()
         #mainHLayout QHBoxLayout
         self.mainHLayout = QHBoxLayout()
-        self.frame.setLayout(self.mainHLayout)
+        self.setLayout(self.mainHLayout)
         self.mainHLayout.addWidget(self.textEdit)
-        self.mainHLayout.setContentsMargins(20, 20, 20, 20)
-        #adjust size
-        self.frame.resize(self.textEdit.width() + 40, self.textEdit.height() + 40)
-        self.frame.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        self.resize(self.frame.width(), self.frame.height())
+        self.mainHLayout.setContentsMargins(15, 15, 15, 15)
+        #TextEditFull adjust size
+        self.resize(self.textEdit.width() + 30, self.textEdit.height() + 30)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        #frame set styleSheet
-        self.frame.setStyleSheet('''
-        QWidget#frame{
-            border: none;
-            border-radius: 20px;
-            background: #e0e0e0;
-        }
-        ''')
+        #backgroundColorIsLight
+        self.backgroundColorIsLight = False
 
-    def colorShowLight(self):
-        self.frame.setStyleSheet('''
-        QWidget#frame{
-            border: 1px solid black;
-            border-radius: 20px;
-            background: transparent;
-        }
-        ''')
+    def paintEvent(self, event):
+        #QPainter create
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        #QPainterPath
+        path = QPainterPath()
+        path.setFillRule(Qt.WindingFill)
+        path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
+        #QBrush
+        brush = QBrush(Qt.SolidPattern)
+        #add rect and set brush
+        if self.backgroundColorIsLight:
+            #brush set color
+            brush.setColor(QColor(Qt.transparent))
+            #QPainter set pen
+            pen = QPen(QColor(100, 100, 100))
+            painter.setPen(pen)
+        else:
+            #brush set color
+            brush.setColor(QColor(224, 224, 224))
+            #QPainter set pen
+            painter.setPen(Qt.NoPen)
+        #QPainter set brush
+        painter.setBrush(brush)
+        #QPainter set path
+        painter.drawPath(path.simplified())
+        #QPainter end
+        painter.end()
 
-    def colorShowDark(self):
-        self.frame.setStyleSheet('''
-        QWidget#frame{
-            border: none;
-            border-radius: 20px;
-            background: #e0e0e0;
-        }
-        ''')
+    def backgroundColorShowLight(self):
+        self.backgroundColorIsLight = True
+        self.repaint()
 
-    def clearTextEditFocus(self):
+    def backgroundColorShowDark(self):
+        self.backgroundColorIsLight = False
+        self.repaint()
+
+    def clearFocus(self):
         self.textEdit.clearFocus()
 
     def resetWidgetSize(self):
-        self.textEdit.resize(self.width() - 10, self.height() - 10)
-        self.frame.resize(self.width(), self.height())
+        self.textEdit.resize(self.width() - 40, self.height() - 40)
 
     def toPlainText(self):
         return self.textEdit.toPlainText()
 
-    def clear(self):
+    def clearText(self):
         self.textEdit.clear()
 
     def connectSendButtonClick(self, fun):
@@ -421,13 +428,12 @@ class TextLabel(QWidget):
         path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 13, 13)
         #QBrush
         brush = QBrush(Qt.SolidPattern)
+        brush.setColor(QColor(224, 224, 224))
         #add rect and set brush
         if self.isUser:
             path.addRect(self.rect().width() - 15, self.rect().y(), 15, 15)
-            brush.setColor(QColor(10, 160, 10))
         else:
             path.addRect(self.rect().x(), self.rect().y(), 15, 15)
-            brush.setColor(QColor(150, 150, 200))
         #QPainter setting
         painter.setPen(Qt.NoPen)
         painter.setBrush(brush)
@@ -501,21 +507,17 @@ class TextLabel(QWidget):
 class LoadingLabel(QWidget):
     def __init__(self, parent=None):
         super(LoadingLabel, self).__init__(parent)
-        self.subWidget1 = QWidget()
-        self.subWidget2 = QWidget()
-        self.subWidget3 = QWidget()
-        self.subWidgetList = []
-        self.subWidgetList.append(self.subWidget1)
-        self.subWidgetList.append(self.subWidget2)
-        self.subWidgetList.append(self.subWidget3)
+        self.setFixedSize(70, 28)
         self.mainHLayout = QHBoxLayout()
-        for subWidget in self.subWidgetList:
-            subWidget.setFixedSize(18, 18)
-            self.mainHLayout.addWidget(subWidget)
-        self.mainHLayout.setContentsMargins(8, 8, 8, 8)
-        self.mainHLayout.setSpacing(8)
         self.setLayout(self.mainHLayout)
-        self.setFixedSize(86, 34)
+        self.subWidgetList = []
+        for _ in range(3):
+            subWidget = QWidget()
+            subWidget.setFixedSize(14, 14)
+            self.mainHLayout.addWidget(subWidget)
+            self.subWidgetList.append(subWidget)
+        self.mainHLayout.setContentsMargins(7, 7, 7, 7)
+        self.mainHLayout.setSpacing(7)
         #QTimer
         self.loadingTimer = QTimer(self)
         self.loadingTimer.timeout.connect(self.loadingShow)
@@ -524,15 +526,14 @@ class LoadingLabel(QWidget):
 
     def loadingShow(self):
         for subWidget in self.subWidgetList:
-            subWidget.setFixedSize(18, 18)
             subWidget.setStyleSheet('''
                 border: none;
-                border-radius: 9px;
+                border-radius: 7px;
                 background-color: rgb(150, 150, 150);
             ''')
         self.subWidgetList[self.loadingNum].setStyleSheet('''
             border: none;
-            border-radius: 9px;
+            border-radius: 7px;
             background-color: rgb(80, 80, 80);
         ''')
         self.loadingNum = (self.loadingNum + 1) % 3
@@ -1055,9 +1056,10 @@ class MainWindow(QMainWindow):
         if event.button() == Qt.LeftButton:
             chatInputRect = QRect(self.chatInput.geometry().x(), self.chatInput.geometry().y() + self.topWidget.height(), self.chatInput.geometry().width(), self.chatInput.geometry().height())
             if chatInputRect.contains(event.pos()):
-                self.chatInput.colorShowLight()
+                self.chatInput.backgroundColorShowLight()
             else:
-                self.chatInput.colorShowDark()
+                self.chatInput.backgroundColorShowDark()
+                self.chatInput.clearFocus()
         QMainWindow.mousePressEvent(self, event)
 
     def resizeEvent(self, event):
@@ -1308,7 +1310,7 @@ class MainWindow(QMainWindow):
             #disable sendButton
             self.chatInput.disableSendButton()
             #clear text of TextEditFull
-            self.chatInput.clear()
+            self.chatInput.clearText()
         else:
             #print emptyTextLabel
             self.emptyTextLabel.printStart()

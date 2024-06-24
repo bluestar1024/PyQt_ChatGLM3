@@ -699,7 +699,7 @@ class Label(QLabel):
         self.font.setBold(True)
         self.setFont(self.font)
         self.palette = self.palette()
-        self.palette.setColor(QPalette.WindowText, QColor(150, 10, 250))
+        self.palette.setColor(QPalette.WindowText, QColor(23, 171, 227))
         self.setPalette(self.palette)
 
 class SpinBox(QSpinBox):
@@ -710,12 +710,12 @@ class SpinBox(QSpinBox):
         self.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.setStyleSheet('''
         QSpinBox{
-            border: 2px solid rgb(150, 10, 250);
+            border: 2px solid rgb(23, 171, 227);
             border-radius: 8px;
             background: transparent;
             font: bold;
-            color: rgb(150, 10, 250);
-            selection-background-color: rgb(150, 10, 250);
+            color: rgb(23, 171, 227);
+            selection-background-color: rgb(23, 171, 227);
         }
         QSpinBox::up-button{
             width: 12px;
@@ -753,12 +753,12 @@ class DoubleSpinBox(QDoubleSpinBox):
         self.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.setStyleSheet('''
         QDoubleSpinBox{
-            border: 2px solid rgb(150, 10, 250);
+            border: 2px solid rgb(23, 171, 227);
             border-radius: 8px;
             background: transparent;
             font: bold;
-            color: rgb(150, 10, 250);
-            selection-background-color: rgb(150, 10, 250);
+            color: rgb(23, 171, 227);
+            selection-background-color: rgb(23, 171, 227);
         }
         QDoubleSpinBox::up-button{
             width: 12px;
@@ -806,7 +806,7 @@ class Slider(QSlider):
         }
         QSlider::sub-page:horizontal{
             border-radius: 3px;
-            background-color: rgb(150, 10, 250);
+            background-color: rgb(23, 171, 227);
         }
         ''')
 
@@ -961,6 +961,16 @@ class MainWindow(QMainWindow):
         ''')
         self.setObjectName("MainWindow")
         self.installEventFilter(self)
+        #mask
+        self.mask = QWidget(self)
+        self.mask.setFixedSize(self.width(), self.height())
+        self.mask.setStyleSheet('''
+        QWidget{
+            background: rgba(220, 220, 220, 50%);
+        }
+        ''')
+        self.mask.raise_()
+        self.mask.hide()
         #chatShowSpacer QSpacerItem
         self.chatShowSpacer = QSpacerItem(self.width() - 50, 10, hPolicy=QSizePolicy.Expanding, vPolicy=QSizePolicy.Fixed)
         #ListWidget
@@ -1053,6 +1063,7 @@ class MainWindow(QMainWindow):
             if self.settingWidgetIsOpen:
                 notSettingRect = QRect(self.settingWidget.width(), 0, self.width() - self.settingWidget.width(), self.height())
                 if notSettingRect.contains(event.pos()):
+                    self.mask.hide()
                     self.animationMove.setDirection(QAbstractAnimation.Backward)
                     self.animationMove.start()
                     self.settingWidgetIsOpen = False
@@ -1066,6 +1077,10 @@ class MainWindow(QMainWindow):
         QMainWindow.mousePressEvent(self, event)
 
     def resizeEvent(self, event):
+        #mask adjust size
+        self.mask.setFixedSize(self.width(), self.height())
+        #setting widget adjust size
+        self.settingWidget.resize(self.width() // 3, self.height())
         #TextLabel max width
         textMaxWidth = int(self.chatShow.width() * 2 / 3)
         for i in range(0, self.chatShow.count()):
@@ -1135,7 +1150,7 @@ class MainWindow(QMainWindow):
         self.maxTokensWidget.setStyleSheet('''
         QWidget#maxTokensWidget{
             border-radius: 20px;
-            background: #a0a0a0;
+            background: white;
         }
         ''')
         #setting maxTokens top sub QWidget
@@ -1184,7 +1199,7 @@ class MainWindow(QMainWindow):
         self.topPWidget.setStyleSheet('''
         QWidget#topPWidget{
             border-radius: 20px;
-            background: #a0a0a0;
+            background: white;
         }
         ''')
         #setting topP top sub QWidget
@@ -1233,7 +1248,7 @@ class MainWindow(QMainWindow):
         self.temperatureWidget.setStyleSheet('''
         QWidget#temperatureWidget{
             border-radius: 20px;
-            background: #a0a0a0;
+            background: white;
         }
         ''')
         #setting temperature top sub QWidget
@@ -1331,6 +1346,7 @@ class MainWindow(QMainWindow):
         self.buttonVLayout.setContentsMargins(0, 0, 0, 0)
 
     def settingButtonClicked(self):
+        self.mask.show()
         self.settingWidget.raise_()
         self.animationMove.setDirection(QAbstractAnimation.Forward)
         self.animationMove.start()

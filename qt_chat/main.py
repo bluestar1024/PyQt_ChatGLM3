@@ -7,7 +7,7 @@ Created on Tue Feb 13 18:31:44 2024
 
 import sys, os
 import math
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QSpacerItem, QAbstractSpinBox, QGridLayout, QLineEdit, qApp
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QSpacerItem, QAbstractSpinBox, QGridLayout, QLineEdit, QSplitter
 from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QAbstractAnimation, QPropertyAnimation, QEasingCurve
 from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen
 from openai import OpenAI
@@ -975,68 +975,85 @@ class MainWindow(QMainWindow):
         self.chatShowSpacer = QSpacerItem(self.width() - 50, 10, hPolicy=QSizePolicy.Expanding, vPolicy=QSizePolicy.Fixed)
         #ListWidget
         self.chatShow = ListWidget()
-        #chatShowFull QWidget
-        self.chatShowFull = QWidget()
-        self.chatShowFull.resize(974, 390)
-        self.chatShowFull.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        #chatShowFullVLayout QVBoxLayout
-        self.chatShowFullVLayout = QVBoxLayout()
-        self.chatShowFull.setLayout(self.chatShowFullVLayout)
-        self.chatShowFullVLayout.addSpacerItem(self.chatShowSpacer)
-        self.chatShowFullVLayout.addWidget(self.chatShow)
-        self.chatShowFullVLayout.setContentsMargins(0, 0, 0, 0)
-        self.chatShowFullVLayout.setSpacing(0)
-        self.chatShowFullVLayout.setStretch(0, 0)
-        self.chatShowFullVLayout.setStretch(1, 1)
+        #chatShowWidget QWidget
+        self.chatShowWidget = QWidget()
+        self.chatShowWidget.resize(984, 360)
+        self.chatShowWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        #chatShowVLayout QVBoxLayout
+        self.chatShowVLayout = QVBoxLayout()
+        self.chatShowWidget.setLayout(self.chatShowVLayout)
+        self.chatShowVLayout.addSpacerItem(self.chatShowSpacer)
+        self.chatShowVLayout.addWidget(self.chatShow)
+        self.chatShowVLayout.setContentsMargins(0, 0, 10, 0)
+        self.chatShowVLayout.setSpacing(0)
+        self.chatShowVLayout.setStretch(0, 0)
+        self.chatShowVLayout.setStretch(1, 1)
         #setting QWidget init
         self.settingWidgetInit()
-        #topWidget QWidget
-        self.topWidget = QWidget()
-        self.topWidget.resize(1024, 360)
-        self.topWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        #topHLayout QHBoxLayout
-        self.topHLayout = QHBoxLayout()
-        self.topWidget.setLayout(self.topHLayout)
-        self.topHLayout.addWidget(self.buttonWidget)
-        self.topHLayout.addWidget(self.chatShowFull)
-        self.topHLayout.setContentsMargins(0, 0, 10, 0)
-        self.topHLayout.setSpacing(0)
-        self.topHLayout.setStretch(0, 0)
-        self.topHLayout.setStretch(1, 1)
+        #chatShowFullWidget QWidget
+        self.chatShowFullWidget = QWidget()
+        self.chatShowFullWidget.resize(1024, 360)
+        self.chatShowFullWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        #chatShowFullHLayout QHBoxLayout
+        self.chatShowFullHLayout = QHBoxLayout()
+        self.chatShowFullWidget.setLayout(self.chatShowFullHLayout)
+        self.chatShowFullHLayout.addWidget(self.buttonWidget)
+        self.chatShowFullHLayout.addWidget(self.chatShowWidget)
+        self.chatShowFullHLayout.setContentsMargins(0, 0, 0, 0)
+        self.chatShowFullHLayout.setSpacing(0)
+        self.chatShowFullHLayout.setStretch(0, 0)
+        self.chatShowFullHLayout.setStretch(1, 1)
         #FunWidget
         self.chatFun = FunWidget()
         self.chatFun.connectCutButtonClick(self.saveImage)
         self.chatFun.connectChatRecordsButtonClick(self.showChatRecords)
+        #chatFunWidget QWidget
+        self.chatFunWidget = QWidget()
+        self.chatFunWidget.resize(1024, 60)
+        self.chatFunWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        #chatFunHLayout QHBoxLayout
+        self.chatFunHLayout = QHBoxLayout()
+        self.chatFunWidget.setLayout(self.chatFunHLayout)
+        self.chatFunHLayout.addWidget(self.chatFun)
+        self.chatFunHLayout.setContentsMargins(20, 0, 20, 0)
+        #topWidget QWidget
+        self.topWidget = QWidget()
+        self.topWidget.setMinimumHeight(150)
+        self.topWidget.resize(1024, 420)
+        self.topWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        #topVLayout QVBoxLayout
+        self.topVLayout = QVBoxLayout()
+        self.topWidget.setLayout(self.topVLayout)
+        self.topVLayout.addWidget(self.chatShowFullWidget)
+        self.topVLayout.addWidget(self.chatFunWidget)
+        self.topVLayout.setContentsMargins(0, 0, 0, 0)
+        self.topVLayout.setSpacing(0)
+        self.topVLayout.setStretch(0, 6)
+        self.topVLayout.setStretch(1, 1)
         #TextEditFull
         self.chatInput = TextEditFull()
         self.chatInput.connectSendButtonClick(self.sendMessage)
         #bottomWidget QWidget
         self.bottomWidget = QWidget()
-        self.bottomWidget.resize(1024, 240)
+        self.bottomWidget.setMinimumHeight(100)
+        self.bottomWidget.resize(1024, 180)
         self.bottomWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         #bottomVLayout QVBoxLayout
         self.bottomVLayout = QVBoxLayout()
         self.bottomWidget.setLayout(self.bottomVLayout)
-        self.bottomVLayout.addWidget(self.chatFun)
         self.bottomVLayout.addWidget(self.chatInput)
         self.bottomVLayout.setContentsMargins(20, 0, 20, 20)
-        self.bottomVLayout.setSpacing(0)
-        self.bottomVLayout.setStretch(0, 0)
-        self.bottomVLayout.setStretch(1, 1)
-        #mainWidget QWidget
-        self.mainWidget = QWidget()
-        self.setCentralWidget(self.mainWidget)
-        self.mainWidget.resize(1024, 600)
-        self.mainWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        #mainVLayout QVBoxLayout
-        self.mainVLayout = QVBoxLayout()
-        self.mainWidget.setLayout(self.mainVLayout)
-        self.mainVLayout.addWidget(self.topWidget)
-        self.mainVLayout.addWidget(self.bottomWidget)
-        self.mainVLayout.setContentsMargins(0, 0, 0, 0)
-        self.mainVLayout.setSpacing(0)
-        self.mainVLayout.setStretch(0, 3)
-        self.mainVLayout.setStretch(1, 2)
+        #QSplitter
+        self.splitter = QSplitter(Qt.Vertical)
+        self.splitter.resize(1024, 600)
+        self.splitter.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.splitter.setChildrenCollapsible(False)
+        self.splitter.addWidget(self.topWidget)
+        self.splitter.addWidget(self.bottomWidget)
+        self.splitter.setContentsMargins(0, 0, 0, 0)
+        self.splitter.setHandleWidth(0)
+        #MainWindow
+        self.setCentralWidget(self.splitter)
         #messageWidget list
         self.messageWidgetList = []
         #ChatRecordsWidget
@@ -1064,7 +1081,8 @@ class MainWindow(QMainWindow):
                 notSettingRect = QRect(self.settingWidget.width(), 0, self.width() - self.settingWidget.width(), self.height())
                 if notSettingRect.contains(event.pos()):
                     self.mask.hide()
-                    self.animationMove.setDirection(QAbstractAnimation.Backward)
+                    self.animationMove.setStartValue(self.settingWidget.geometry())
+                    self.animationMove.setEndValue(QRect(-self.settingWidget.width(), 0, self.settingWidget.width(), self.settingWidget.height()))
                     self.animationMove.start()
                     self.settingWidgetIsOpen = False
             else:
@@ -1079,8 +1097,11 @@ class MainWindow(QMainWindow):
     def resizeEvent(self, event):
         #mask adjust size
         self.mask.setFixedSize(self.width(), self.height())
-        #setting widget adjust size
-        self.settingWidget.resize(self.width() // 3, self.height())
+        #setting widget set geometry
+        if self.settingWidgetIsOpen:
+            self.settingWidget.resize(self.width() // 3, self.height())
+        else:
+            self.settingWidget.setGeometry(-self.width() // 3, 0, self.width() // 3, self.height())
         #TextLabel max width
         textMaxWidth = int(self.chatShow.width() * 2 / 3)
         for i in range(0, self.chatShow.count()):
@@ -1099,9 +1120,9 @@ class MainWindow(QMainWindow):
         #TextEditFull adjust size
         self.chatInput.resetWidgetSize()
         #move emptyTextLabel
-        self.emptyTextLabel.move(int((self.width() - self.emptyTextLabel.width()) / 2), self.chatShow.height() - self.emptyTextLabel.height() + 60)
+        self.emptyTextLabel.move(int((self.width() - self.emptyTextLabel.width()) / 2), self.topWidget.height() - self.emptyTextLabel.height() - 10)
         #move saveImageLabel
-        self.saveImageLabel.move(int((self.width() - self.saveImageLabel.width()) / 2), self.chatShow.height() - self.saveImageLabel.height() + 60)
+        self.saveImageLabel.move(int((self.width() - self.saveImageLabel.width()) / 2), self.topWidget.height() - self.saveImageLabel.height() - 10)
 
     def settingWidgetInit(self):
         #setting QLabel
@@ -1291,7 +1312,7 @@ class MainWindow(QMainWindow):
         self.temperatureVLayout.setSpacing(0)
         #setting QWidget
         self.settingWidget = QWidget(self)
-        self.settingWidget.resize(self.width() // 3, self.height())
+        self.settingWidget.setGeometry(-self.width() // 3, 0, self.width() // 3, self.height())
         self.settingWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.settingWidget.setObjectName("settingWidget")
         self.settingWidget.setStyleSheet('''
@@ -1299,7 +1320,6 @@ class MainWindow(QMainWindow):
             background: #d0d0d0;
         }
         ''')
-        self.settingWidget.move(-self.settingWidget.width(), 0)
         #setting QVBoxLayout
         self.settingVLayout = QVBoxLayout()
         self.settingWidget.setLayout(self.settingVLayout)
@@ -1312,8 +1332,6 @@ class MainWindow(QMainWindow):
         self.animationMove = QPropertyAnimation(self.settingWidget, b'geometry')
         self.animationMove.setDuration(1000)
         self.animationMove.setEasingCurve(QEasingCurve.OutQuad)
-        self.animationMove.setStartValue(QRect(-self.settingWidget.width(), 0, self.settingWidget.width(), self.settingWidget.height()))
-        self.animationMove.setEndValue(QRect(0, 0, self.settingWidget.width(), self.settingWidget.height()))
         #settingWidgetIsOpen
         self.settingWidgetIsOpen = False
         #settingButton PushButton
@@ -1333,10 +1351,10 @@ class MainWindow(QMainWindow):
         ''')
         self.settingButton.clicked.connect(self.settingButtonClicked)
         #buttonSpacerItem QSpacerItem
-        self.buttonSpacerItem = QSpacerItem(40, self.chatShowFull.height() - 40, hPolicy=QSizePolicy.Fixed, vPolicy=QSizePolicy.Expanding)
+        self.buttonSpacerItem = QSpacerItem(40, self.chatShowWidget.height() - 40, hPolicy=QSizePolicy.Fixed, vPolicy=QSizePolicy.Expanding)
         #buttonWidget QWidget
         self.buttonWidget = QWidget()
-        self.buttonWidget.resize(40, self.chatShowFull.height())
+        self.buttonWidget.resize(40, self.chatShowWidget.height())
         self.buttonWidget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         #buttonVLayout QVBoxLayout
         self.buttonVLayout = QVBoxLayout()
@@ -1348,24 +1366,10 @@ class MainWindow(QMainWindow):
     def settingButtonClicked(self):
         self.mask.show()
         self.settingWidget.raise_()
-        self.animationMove.setDirection(QAbstractAnimation.Forward)
+        self.animationMove.setStartValue(self.settingWidget.geometry())
+        self.animationMove.setEndValue(QRect(0, 0, self.settingWidget.width(), self.settingWidget.height()))
         self.animationMove.start()
         self.settingWidgetIsOpen = True
-        #TextLabel max width
-        '''textMaxWidth = int(self.chatShow.width() * 2 / 3)
-        for i in range(0, self.chatShow.count()):
-            #messageWidget set max width of textLabel
-            self.messageWidgetList[i].setTextMaxWidth(textMaxWidth)
-            messageWidget = self.messageWidgetList[i]
-            #chatShow itemWidget adjust size
-            self.chatShow.itemWidget(self.chatShow.item(i)).setFixedSize(self.chatShow.width(), messageWidget.height() + 10)
-            itemWidget = self.chatShow.itemWidget(self.chatShow.item(i))
-            if messageWidget.getIsUser():
-                self.chatShow.itemWidget(self.chatShow.item(i)).layout().setContentsMargins(itemWidget.width() - messageWidget.width() - 5, 5, 5, 5)
-            else:
-                self.chatShow.itemWidget(self.chatShow.item(i)).layout().setContentsMargins(5, 5, itemWidget.width() - messageWidget.width() - 5, 5)
-            #chatShow item adjust size
-            self.chatShow.item(i).setSizeHint(QSize(self.chatShow.width(), messageWidget.height() + 10))'''
 
     def maxTokensBoxValueChanged(self, i):
         global maxTokens_currentVal

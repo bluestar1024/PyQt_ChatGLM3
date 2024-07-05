@@ -8,7 +8,7 @@ Created on Tue Feb 13 18:31:44 2024
 import sys, os
 import math
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QSpacerItem, QAbstractSpinBox, QGridLayout, QLineEdit, QSplitter
-from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QAbstractAnimation, QPropertyAnimation, QEasingCurve
+from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve
 from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen
 from openai import OpenAI
 
@@ -504,9 +504,15 @@ class TextLabel(QWidget):
             self.label.setFixedSize(22, 22)
             self.setFixedSize(32, 32)
 
-class LoadingLabel(QWidget):
+    def hasSelectedText(self):
+        return self.label.hasSelectedText()
+
+    def selectedText(self):
+        return self.label.selectedText()
+
+class LoadingWidget(QWidget):
     def __init__(self, parent=None):
-        super(LoadingLabel, self).__init__(parent)
+        super(LoadingWidget, self).__init__(parent)
         self.setFixedSize(70, 28)
         self.mainHLayout = QHBoxLayout()
         self.setLayout(self.mainHLayout)
@@ -539,7 +545,7 @@ class LoadingLabel(QWidget):
         self.loadingNum = (self.loadingNum + 1) % 3
 
 class MessageWidget(QWidget):
-    def __init__(self, text, isUser=True, textMaxWidth=650, parent=None):
+    def __init__(self, text, copyFun, renewResponseFun, isUser=True, textMaxWidth=650, parent=None):
         super(MessageWidget, self).__init__(parent)
         self.text = text
         self.isUser = isUser
@@ -547,15 +553,15 @@ class MessageWidget(QWidget):
         self.imageLabel = ImageLabel(isUser=self.isUser)
         #TextLabel
         self.textLabel = TextLabel(text, isUser=self.isUser, maxWidth=textMaxWidth)
-        #LoadingLabel flag
-        self.loadingLabelIsRemove = True
+        #loadingWidgetIsRemove
+        self.loadingWidgetIsRemove = True
         #textWidget QWidget
         self.textWidget = QWidget()
         #textLayout QHBoxLayout
         self.textLayout = QVBoxLayout()
+        self.textWidget.setLayout(self.textLayout)
         self.textLayout.addWidget(self.textLabel)
         self.textLayout.setContentsMargins(0, 0, 0, 0)
-        self.textWidget.setLayout(self.textLayout)
         #mainHLayout QHBoxLayout
         self.mainHLayout = QHBoxLayout()
         self.setLayout(self.mainHLayout)
@@ -573,13 +579,13 @@ class MessageWidget(QWidget):
             self.subVLayout2.addWidget(self.imageLabel)
         else:
             self.subVLayout1.addWidget(self.imageLabel)
-            self.loadingLabel = LoadingLabel()
-            self.textLayout.addWidget(self.loadingLabel)
+            self.loadingWidget = LoadingWidget()
+            self.textLayout.addWidget(self.loadingWidget)
             self.textLayout.setSpacing(0)
-            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingLabel.width() else self.loadingLabel.width(), self.textLabel.height() + self.loadingLabel.height())
+            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textLabel.height() + self.loadingWidget.height())
             self.subVLayout2.addWidget(self.textWidget)
-            #LoadingLabel flag
-            self.loadingLabelIsRemove = False
+            #loadingWidgetIsRemove
+            self.loadingWidgetIsRemove = False
         #mainHLayout add subVLayout
         self.mainHLayout.addLayout(self.subVLayout1)
         self.mainHLayout.addLayout(self.subVLayout2)
@@ -587,16 +593,54 @@ class MessageWidget(QWidget):
         self.mainHLayout.setSpacing(5)
         #main widget set size
         self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
+        #copyButton PushButton
+        self.copyButton = PushButton()
+        self.copyButton.setFixedSize(22, 22)
+        self.copyButton.setStyleSheet('''
+        QPushButton{
+            border-image: url("copy.png");
+        }
+        QPushButton:hover{
+            border-image: url("copy_hover.png");
+        }
+        ''')
+        self.copyButton.clicked.connect(copyFun)
+        #renewResponseButton PushButton
+        self.renewResponseButton = PushButton()
+        self.renewResponseButton.setFixedSize(22, 22)
+        self.renewResponseButton.setStyleSheet('''
+        QPushButton{
+            border-image: url("renewResponse.png");
+        }
+        QPushButton:hover{
+            border-image: url("renewResponse_hover.png");
+        }
+        ''')
+        self.renewResponseButton.clicked.connect(renewResponseFun)
+        #funWidget QWidget
+        self.funWidget = QWidget()
+        self.funWidget.setFixedSize(64, 32)
+        #funHLayout QHBoxLayout
+        self.funHLayout = QHBoxLayout()
+        self.funWidget.setLayout(self.funHLayout)
+        self.funHLayout.addWidget(self.copyButton)
+        self.funHLayout.addWidget(self.renewResponseButton)
+        self.funHLayout.setContentsMargins(5, 5, 5, 5)
+        self.funHLayout.setSpacing(10)
 
     def setText(self, text):
-        self.textLabel.setText(text)
+        self.text = text
+        self.textLabel.setText(self.text)
         if self.isUser:
             self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
-        elif not self.loadingLabelIsRemove:
-            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingLabel.width() else self.loadingLabel.width(), self.textLabel.height() + self.loadingLabel.height())
+        elif not self.loadingWidgetIsRemove:
+            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textLabel.height() + self.loadingWidget.height())
         else:
             self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
         self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
+
+    def getText(self):
+        return self.text
 
     def getIsUser(self):
         return self.isUser
@@ -604,23 +648,35 @@ class MessageWidget(QWidget):
     def setTextMaxWidth(self, textMaxWidth):
         self.textLabel.setMaxWidth(textMaxWidth)
         if self.isUser:
-            self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
-        elif not self.loadingLabelIsRemove:
-            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingLabel.width() else self.loadingLabel.width(), self.textLabel.height() + self.loadingLabel.height())
+            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.funWidget.width() else self.funWidget.width(), self.textLabel.height() + self.funWidget.height())
+        elif not self.loadingWidgetIsRemove:
+            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textLabel.height() + self.loadingWidget.height())
         else:
-            self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.funWidget.width() else self.funWidget.width(), self.textLabel.height() + self.funWidget.height())
         self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
 
-    def removeLoadingLabel(self):
-        if not self.loadingLabelIsRemove:
-            self.textLayout.removeWidget(self.loadingLabel)
-            self.loadingLabel.deleteLater()
-            self.loadingLabelIsRemove = True
+    def removeLoadingWidget(self):
+        if not self.loadingWidgetIsRemove:
+            self.textLayout.removeWidget(self.loadingWidget)
+            self.loadingWidget.deleteLater()
+            self.loadingWidgetIsRemove = True
             self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
             self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
 
-    def getText(self):
-        return self.text
+    def addFunWidget(self):
+        self.textLayout.addWidget(self.funWidget)
+        self.textLayout.setSpacing(0)
+        self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.funWidget.width() else self.funWidget.width(), self.textLabel.height() + self.funWidget.height())
+        self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
+
+    def getCopyButtonId(self):
+        return id(self.copyButton)
+
+    def hasSelectedText(self):
+        return self.textLabel.hasSelectedText()
+
+    def selectedText(self):
+        return self.textLabel.selectedText()
 
 class PrintLabel(QWidget):
     def __init__(self, text, parent=None):
@@ -1056,6 +1112,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.splitter)
         #messageWidget list
         self.messageWidgetList = []
+        #messageCopyId list
+        self.messageCopyIdList = []
         #ChatRecordsWidget
         self.chatRecordsWidget = ChatRecordsWidget(self)
         self.chatRecordsWidget.connectListItemClick(self.generateChatRecord)
@@ -1074,6 +1132,8 @@ class MainWindow(QMainWindow):
         self.saveImageLabel.move(int((self.width() - self.saveImageLabel.width()) / 2), self.chatShow.height() - self.saveImageLabel.height() + 60)
         self.saveImageLabel.raise_()
         self.saveImageLabel.hide()
+        #QClipboard
+        self.clip = QApplication.clipboard()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -1409,8 +1469,10 @@ class MainWindow(QMainWindow):
         text = self.chatInput.toPlainText()
         if not text == '':
             #MessageWidget
-            self.messageSendWidget = MessageWidget(text, isUser=True, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+            self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, isUser=True, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+            self.messageSendWidget.addFunWidget()
             self.messageWidgetList.append(self.messageSendWidget)
+            self.messageCopyIdList.append(self.messageSendWidget.getCopyButtonId())
             #itemSendWidget QWidget
             self.itemSendWidget = QWidget(self)
             self.itemSendHLayout = QHBoxLayout()
@@ -1441,7 +1503,7 @@ class MainWindow(QMainWindow):
         #message
         self.Message = ""
         #MessageWidget
-        self.messageRecvWidget = MessageWidget(self.Message, isUser=False, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+        self.messageRecvWidget = MessageWidget(self.Message, self.textCopy, self.messageRenewResponse, isUser=False, textMaxWidth=int(self.chatShow.width() * 2 / 3))
         self.messageWidgetList.append(self.messageRecvWidget)
         #itemRecvWidget QWidget
         self.itemRecvWidget = QWidget(self)
@@ -1472,8 +1534,10 @@ class MainWindow(QMainWindow):
         self.recvItem.setSizeHint(QSize(self.chatShow.width(), self.messageRecvWidget.height() + 10))
 
     def messageFinish(self):
-        #messageRecvWidget remove LoadingLabel
-        self.messageRecvWidget.removeLoadingLabel()
+        #messageRecvWidget
+        self.messageRecvWidget.removeLoadingWidget()
+        self.messageRecvWidget.addFunWidget()
+        self.messageCopyIdList.append(self.messageRecvWidget.getCopyButtonId())
         #chatShow itemWidget adjust size
         self.itemRecvWidget.setFixedSize(self.chatShow.width(), self.messageRecvWidget.height() + 10)
         self.itemRecvHLayout.setContentsMargins(5, 5, self.itemRecvWidget.width() - self.messageRecvWidget.width() - 5, 5)
@@ -1481,6 +1545,21 @@ class MainWindow(QMainWindow):
         self.recvItem.setSizeHint(QSize(self.chatShow.width(), self.messageRecvWidget.height() + 10))
         #enable sendButton
         self.chatInput.enableSendButton()
+
+    def textCopy(self):
+        copyButton = self.sender()
+        for i in range(0, len(self.messageCopyIdList)):
+            if id(copyButton) == self.messageCopyIdList[i]:
+                if self.messageWidgetList[i].hasSelectedText():
+                    print(self.messageWidgetList[i].selectedText())
+                    self.clip.setText(self.messageWidgetList[i].selectedText())
+                else:
+                    print(self.messageWidgetList[i].getText())
+                    self.clip.setText(self.messageWidgetList[i].getText())
+                break
+
+    def messageRenewResponse(self):
+        return
 
     def saveImage(self):
         #chatRect QRect
@@ -1597,7 +1676,7 @@ class MainWindow(QMainWindow):
             else:
                 isUser = False
             #MessageWidget
-            self.messageWidget = MessageWidget(lines[i], isUser=isUser, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+            self.messageWidget = MessageWidget(lines[i], self.textCopy, self.messageRenewResponse, isUser=isUser, textMaxWidth=int(self.chatShow.width() * 2 / 3))
             self.messageWidgetList.append(self.messageWidget)
             #itemWidget QWidget
             self.itemWidget = QWidget(self)

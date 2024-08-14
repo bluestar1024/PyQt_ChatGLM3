@@ -5,10 +5,10 @@ Created on Tue Feb 13 18:31:44 2024
 @author: YXD
 """
 
-import sys
+import sys, os
 import math
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QSpacerItem, QAbstractSpinBox, QGridLayout, QSplitter
-from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QRect, QPropertyAnimation, QEasingCurve
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QAbstractSpinBox, QGridLayout, QLineEdit, QSplitter, QToolTip
+from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint
 from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen
 from openai import OpenAI
 
@@ -68,8 +68,8 @@ class messageThread(QThread):
 class ListWidget(QListWidget):
     def __init__(self, parent=None):
         super(ListWidget, self).__init__(parent)
-        self.resize(974, 410)
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.resize(984, 370)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setFocusPolicy(Qt.NoFocus)
         self.setStyleSheet('''
@@ -96,23 +96,111 @@ class ListWidget(QListWidget):
         event.ignore()
 
 class PushButton(QPushButton):
-    def __init__(self, parent=None):
+    def __init__(self, tipText='', tipOffsetX=10, tipOffsetY=40, parent=None):
         super(PushButton, self).__init__(parent)
         self.setCursor(Qt.PointingHandCursor)
+        self.tipText = tipText
+        self.tipStartPos = QPoint(self.rect().topLeft().x() - tipOffsetX, self.rect().topLeft().y() - tipOffsetY)
 
     def mousePressEvent(self, event):
         QPushButton.mousePressEvent(self, event)
         event.ignore()
 
+    def event(self, event):
+        if event.type() == QEvent.ToolTip:
+            font = QFont()
+            font.setPixelSize(18)
+            font.setBold(True)
+            QToolTip.setFont(font)
+            QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
+        return QPushButton.event(self, event)
+
+class FunWidget(QWidget):
+    def __init__(self, parent=None):
+        super(FunWidget, self).__init__(parent)
+        #cutButton PushButton
+        self.cutButton = PushButton(tipText='界面截图', tipOffsetX=30, tipOffsetY=40)
+        self.cutButton.setFixedSize(30, 30)
+        self.cutButton.setIconSize(QSize(30, 30))
+        self.cutButton.setStyleSheet('''
+        QPushButton{
+            border-image: url("cut.png");
+        }
+        QPushButton:hover{
+            border-image: url("cut_hover.png");
+        }
+        ''')
+        #chatRecordsButton PushButton
+        self.chatRecordsButton = PushButton(tipText='聊天历史', tipOffsetX=30, tipOffsetY=40)
+        self.chatRecordsButton.setFixedSize(30, 30)
+        self.chatRecordsButton.setIconSize(QSize(30, 30))
+        self.chatRecordsButton.setStyleSheet('''
+        QPushButton{
+            border-image: url("chat_records.png");
+        }
+        QPushButton:hover{
+            border-image: url("chat_records_hover.png");
+        }
+        ''')
+        #newChatButton PushButton
+        self.newChatButton = PushButton(tipText='新聊天', tipOffsetX=20, tipOffsetY=40)
+        self.newChatButton.setFixedSize(30, 30)
+        self.newChatButton.setIconSize(QSize(30, 30))
+        self.newChatButton.setStyleSheet('''
+        QPushButton{
+            border-image: url("new_chat.png");
+        }
+        QPushButton:hover{
+            border-image: url("new_chat_hover.png");
+        }
+        ''')
+        #mainHLayout QHBoxLayout
+        self.mainHLayout = QHBoxLayout()
+        self.setLayout(self.mainHLayout)
+        self.mainHLayout.addWidget(self.cutButton)
+        self.mainHLayout.addWidget(self.chatRecordsButton)
+        self.mainHLayout.addWidget(self.newChatButton)
+        self.mainHLayout.setAlignment(Qt.AlignRight)
+        self.mainHLayout.setContentsMargins(10, 5, 10, 5)
+        self.mainHLayout.setSpacing(10)
+        #FunWidget adjust size
+        self.resize(984, 40)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+
+    def connectCutButtonClick(self, fun):
+        self.cutButton.clicked.connect(fun)
+
+    def connectChatRecordsButtonClick(self, fun):
+        self.chatRecordsButton.clicked.connect(fun)
+
+    def connectNewChatButtonClick(self, fun):
+        self.newChatButton.clicked.connect(fun)
+
+class SendButton(QPushButton):
+    def __init__(self, tipText='', tipOffsetX=10, tipOffsetY=40, parent=None):
+        super(SendButton, self).__init__(parent)
+        self.setCursor(Qt.PointingHandCursor)
+        self.tipText = tipText
+        self.tipStartPos = QPoint(self.rect().topLeft().x() - tipOffsetX, self.rect().topLeft().y() - tipOffsetY)
+
+    def event(self, event):
+        if event.type() == QEvent.ToolTip:
+            font = QFont()
+            font.setPixelSize(18)
+            font.setBold(True)
+            QToolTip.setFont(font)
+            QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
+        return QPushButton.event(self, event)
+
 class TextEdit(QTextEdit):
     def __init__(self, parent=None):
         super(TextEdit, self).__init__(parent)
-        self.resize(954, 110)
+        self.resize(954, 130)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.setPlaceholderText("按Shift+Enter换行、按Enter提交")
-        self.sendButton = QPushButton()
-        self.sendButton.setFixedSize(40, 40)
-        self.sendButton.setCursor(Qt.PointingHandCursor)
+        self.sendButton = SendButton(tipText='发送', tipOffsetX=10, tipOffsetY=40)
+        self.sendButton.setFixedSize(30, 30)
+        self.sendButton.setIconSize(QSize(30, 30))
         self.gLayout = QGridLayout()
         self.setLayout(self.gLayout)
         self.gLayout.setRowStretch(0, 1)
@@ -475,13 +563,16 @@ class LoadingWidget(QWidget):
         ''')
         self.loadingNum = (self.loadingNum + 1) % 3
 
-class CustomButton(QPushButton):
-    def __init__(self, parent=None):
-        super(CustomButton, self).__init__(parent)
+class CopyButton(QPushButton):
+    def __init__(self, tipText='', tipOffsetX=10, tipOffsetY=40, parent=None):
+        super(CopyButton, self).__init__(parent)
         self.parent = parent
         self.setCursor(Qt.PointingHandCursor)
         #QClipboard
         self.clip = QApplication.clipboard()
+        #QToolTip
+        self.tipText = tipText
+        self.tipStartPos = QPoint(self.rect().topLeft().x() - tipOffsetX, self.rect().topLeft().y() - tipOffsetY)
 
     def mousePressEvent(self, event):
         if self.parent.hasSelectedText():
@@ -490,6 +581,15 @@ class CustomButton(QPushButton):
             self.clip.setText(self.parent.getText())
         QPushButton.mousePressEvent(self, event)
         event.ignore()
+
+    def event(self, event):
+        if event.type() == QEvent.ToolTip:
+            font = QFont()
+            font.setPixelSize(18)
+            font.setBold(True)
+            QToolTip.setFont(font)
+            QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
+        return QPushButton.event(self, event)
 
 class MessageWidget(QWidget):
     def __init__(self, text, copyFun, renewResponseFun, isUser=True, textMaxWidth=650, parent=None):
@@ -544,8 +644,8 @@ class MessageWidget(QWidget):
         self.mainHLayout.setSpacing(5)
         #main widget set size
         self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
-        #CustomButton
-        self.copyButton = CustomButton(self)
+        #CopyButton
+        self.copyButton = CopyButton(tipText='复制', tipOffsetX=20, tipOffsetY=40, parent=self)
         self.copyButton.setFixedSize(22, 22)
         self.copyButton.setStyleSheet('''
         QPushButton{
@@ -557,7 +657,7 @@ class MessageWidget(QWidget):
         ''')
         self.copyButton.clicked.connect(copyFun)
         #renewResponseButton PushButton
-        self.renewResponseButton = PushButton()
+        self.renewResponseButton = PushButton(tipText='重新生成响应', tipOffsetX=50, tipOffsetY=40)
         self.renewResponseButton.setFixedSize(22, 22)
         self.renewResponseButton.setStyleSheet('''
         QPushButton{
@@ -674,11 +774,11 @@ class PrintLabel(QWidget):
             self.setLayout(self.mainHLayout)
             self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
         else:
-            self.label.resize(20, 20)
+            self.label.resize(22, 22)
             self.mainHLayout.addWidget(self.label)
             self.mainHLayout.setContentsMargins(5, 5, 5, 5)
             self.setLayout(self.mainHLayout)
-            self.setFixedSize(30, 30)
+            self.setFixedSize(32, 32)
         #printTimer QTimer
         self.printTimer = QTimer(self)
         self.printTimer.timeout.connect(self.printEnd)
@@ -707,8 +807,8 @@ class PrintLabel(QWidget):
             self.label.adjustSize()
             self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
         else:
-            self.label.resize(20, 20)
-            self.setFixedSize(30, 30)
+            self.label.resize(22, 22)
+            self.setFixedSize(32, 32)
 
     def printStart(self):
         #show PrintLabel
@@ -844,6 +944,152 @@ class Slider(QSlider):
         QSlider.mousePressEvent(self, event)
         event.ignore()
 
+class LineEdit(QLineEdit):
+    def __init__(self):
+        super(LineEdit, self).__init__()
+        self.setFixedSize(1024 // 3 - 80, 30)
+        self.setPlaceholderText("输入搜索词")
+        #searchButton QPushButton
+        self.searchButton = PushButton(tipText='搜索', tipOffsetX=10, tipOffsetY=40, parent=self)
+        self.searchButton.setFixedSize(30, 30)
+        self.searchButton.setIcon(QIcon("search.png"))
+        self.searchButton.setIconSize(QSize(30, 30))
+        self.searchButton.move(0, 0)
+        #LineEdit
+        self.setStyleSheet('''
+        QPushButton{
+            border: none;
+        }
+        QLineEdit{
+            border: none;
+            border-radius: 5px;
+            background: #b8b8b8;
+            padding-left: 30px;
+        }
+        ''')
+
+    def connectSearchButtonClick(self, fun):
+        self.searchButton.clicked.connect(fun)
+
+class ChatRecordsWidget(QWidget):
+    def __init__(self, parent=None):
+        super(ChatRecordsWidget, self).__init__(parent)
+        self.resize(1024 // 3, 600)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        #LineEdit
+        self.lineEdit = LineEdit()
+        #clearAllButton QPushButton
+        self.clearAllButton = PushButton(tipText='删除所有记录', tipOffsetX=50, tipOffsetY=40)
+        self.clearAllButton.setFixedSize(30, 30)
+        self.clearAllButton.setIconSize(QSize(30, 30))
+        self.clearAllButton.setStyleSheet('''
+        QPushButton{
+            border: none;
+            border-radius: 5px;
+            background: #e0e0e0;
+            image: url("clearAll.png");
+        }
+        QPushButton:hover{
+            background: #b8b8b8;
+            image: url("clearAll_hover.png");
+        }
+        ''')
+        #searchWidget QWidget
+        self.searchWidget = QWidget()
+        self.searchWidget.resize(self.width() - 40, 30)
+        self.searchWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        #searchHLayout QHBoxLayout
+        self.searchHLayout = QHBoxLayout()
+        self.searchWidget.setLayout(self.searchHLayout)
+        self.searchHLayout.addWidget(self.lineEdit)
+        self.searchHLayout.addWidget(self.clearAllButton)
+        self.searchHLayout.setContentsMargins(0, 0, 0, 0)
+        self.searchHLayout.setSpacing(10)
+        self.searchHLayout.setStretch(0, 1)
+        self.searchHLayout.setStretch(1, 0)
+        #QLabel
+        self.label = QLabel()
+        self.label.resize(self.width() - 40, 50)
+        self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        font = QFont()
+        font.setPixelSize(30)
+        font.setBold(True)
+        self.label.setFont(font)
+        self.label.setText("聊天历史")
+        self.label.setAlignment(Qt.AlignLeft)
+        #QListWidget
+        self.listWidget = QListWidget()
+        self.listWidget.setFixedSize(self.width() - 40, self.height() - 110)
+        self.listWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.listWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.listWidget.setStyleSheet('''
+        QListWidget{
+            border: none;
+            background: transparent;
+        }
+        ''')
+        #mainWidget QWidget
+        self.mainWidget = QWidget(self)
+        self.mainWidget.setObjectName('mainWidget')
+        self.mainWidget.resize(1024 // 3, 600)
+        self.mainWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        #mainVLayout QVBoxLayout
+        self.mainVLayout = QVBoxLayout()
+        self.mainWidget.setLayout(self.mainVLayout)
+        self.mainVLayout.addWidget(self.label)
+        self.mainVLayout.addWidget(self.searchWidget)
+        self.mainVLayout.addWidget(self.listWidget)
+        self.mainVLayout.setContentsMargins(20, 10, 20, 0)
+        self.mainVLayout.setSpacing(10)
+        self.mainVLayout.setStretch(0, 0)
+        self.mainVLayout.setStretch(1, 0)
+        self.mainVLayout.setStretch(2, 1)
+        #mainWidget set styleSheet
+        self.mainWidget.setStyleSheet('''
+        QWidget#mainWidget{
+            background: #d0d0d0;
+        }
+        ''')
+
+    def connectLineEditTextChanged(self, fun):
+        self.lineEdit.textChanged.connect(fun)
+
+    def connectSearchButtonClick(self, fun):
+        self.lineEdit.connectSearchButtonClick(fun)
+
+    def connectClearAllButtonClick(self, fun):
+        self.clearAllButton.clicked.connect(fun)
+
+    def connectListItemClick(self, fun):
+        self.listWidget.itemClicked.connect(fun)
+
+    def resetWidgetSize(self, width, height):
+        self.lineEdit.setFixedSize(width // 3 - 80, 30)
+        self.listWidget.setFixedSize(width // 3 - 40, height - 110)
+        self.mainWidget.resize(width // 3, height)
+        self.resize(width // 3, height)
+
+    def getLineEditText(self):
+        return self.lineEdit.text()
+
+    def addListItem(self, string):
+        self.chatRecordItem = QListWidgetItem(string)
+        self.listWidget.insertItem(0, self.chatRecordItem)
+        self.chatRecordItem.setSizeHint(QSize(self.listWidget.width(), 60))
+        font = QFont()
+        font.setPixelSize(14)
+        self.chatRecordItem.setFont(font)
+        return self.chatRecordItem
+
+    def delAllListItems(self):
+        return self.listWidget.clear()
+
+    def listItemSetData(self, item, string):
+        item.setData(Qt.UserRole, QVariant(string))
+
+    def listItemToString(self, item):
+        return item.data(Qt.UserRole)
+
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -858,7 +1104,6 @@ class MainWindow(QMainWindow):
             font-display: swap;
         }
         ''')
-        self.setObjectName("MainWindow")
         self.installEventFilter(self)
         #mask
         self.mask = QWidget(self)
@@ -874,29 +1119,56 @@ class MainWindow(QMainWindow):
         self.chatShow = ListWidget()
         #chatShowWidget QWidget
         self.chatShowWidget = QWidget()
-        self.chatShowWidget.resize(984, 420)
-        self.chatShowWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.chatShowWidget.resize(994, 380)
+        self.chatShowWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         #chatShowHLayout QHBoxLayout
-        self.chatShowHLayout = QVBoxLayout()
+        self.chatShowHLayout = QHBoxLayout()
         self.chatShowWidget.setLayout(self.chatShowHLayout)
         self.chatShowHLayout.addWidget(self.chatShow)
         self.chatShowHLayout.setContentsMargins(0, 10, 10, 0)
         #setting QWidget init
         self.settingWidgetInit()
+        #chatShowFullWidget QWidget
+        self.chatShowFullWidget = QWidget()
+        self.chatShowFullWidget.resize(1024, 380)
+        self.chatShowFullWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        #chatShowFullHLayout QHBoxLayout
+        self.chatShowFullHLayout = QHBoxLayout()
+        self.chatShowFullWidget.setLayout(self.chatShowFullHLayout)
+        self.chatShowFullHLayout.addWidget(self.buttonWidget)
+        self.chatShowFullHLayout.addWidget(self.chatShowWidget)
+        self.chatShowFullHLayout.setContentsMargins(0, 0, 0, 0)
+        self.chatShowFullHLayout.setSpacing(0)
+        self.chatShowFullHLayout.setStretch(0, 0)
+        self.chatShowFullHLayout.setStretch(1, 1)
+        #FunWidget
+        self.chatFun = FunWidget()
+        self.chatFun.connectCutButtonClick(self.saveImage)
+        self.chatFun.connectChatRecordsButtonClick(self.showChatRecords)
+        self.chatFun.connectNewChatButtonClick(self.newChat)
+        #chatFunWidget QWidget
+        self.chatFunWidget = QWidget()
+        self.chatFunWidget.resize(1024, 40)
+        self.chatFunWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        #chatFunHLayout QHBoxLayout
+        self.chatFunHLayout = QHBoxLayout()
+        self.chatFunWidget.setLayout(self.chatFunHLayout)
+        self.chatFunHLayout.addWidget(self.chatFun)
+        self.chatFunHLayout.setContentsMargins(20, 0, 20, 0)
         #topWidget QWidget
         self.topWidget = QWidget()
         self.topWidget.setMinimumHeight(150)
         self.topWidget.resize(1024, 420)
         self.topWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        #topHLayout QHBoxLayout
-        self.topHLayout = QHBoxLayout()
-        self.topWidget.setLayout(self.topHLayout)
-        self.topHLayout.addWidget(self.buttonWidget)
-        self.topHLayout.addWidget(self.chatShowWidget)
-        self.topHLayout.setContentsMargins(0, 0, 0, 0)
-        self.topHLayout.setSpacing(0)
-        self.topHLayout.setStretch(0, 0)
-        self.topHLayout.setStretch(1, 1)
+        #topVLayout QVBoxLayout
+        self.topVLayout = QVBoxLayout()
+        self.topWidget.setLayout(self.topVLayout)
+        self.topVLayout.addWidget(self.chatShowFullWidget)
+        self.topVLayout.addWidget(self.chatFunWidget)
+        self.topVLayout.setContentsMargins(0, 0, 0, 0)
+        self.topVLayout.setSpacing(0)
+        self.topVLayout.setStretch(0, 6)
+        self.topVLayout.setStretch(1, 1)
         #TextEditFull
         self.chatInput = TextEditFull()
         self.chatInput.connectSendButtonClick(self.sendMessage)
@@ -909,7 +1181,7 @@ class MainWindow(QMainWindow):
         self.bottomVLayout = QVBoxLayout()
         self.bottomWidget.setLayout(self.bottomVLayout)
         self.bottomVLayout.addWidget(self.chatInput)
-        self.bottomVLayout.setContentsMargins(20, 20, 20, 20)
+        self.bottomVLayout.setContentsMargins(20, 0, 20, 20)
         #QSplitter
         self.splitter = QSplitter(Qt.Vertical)
         self.splitter.resize(1024, 600)
@@ -923,16 +1195,71 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.splitter)
         #messageWidget list
         self.messageWidgetList = []
+        #ChatRecordsWidget
+        self.chatRecordsWidget = ChatRecordsWidget(self)
+        self.chatRecordsWidget.connectLineEditTextChanged(self.showSearchRecords)
+        self.chatRecordsWidget.connectSearchButtonClick(self.showSearchRecords)
+        self.chatRecordsWidget.connectClearAllButtonClick(self.clearAllChatRecords)
+        self.chatRecordsWidget.connectListItemClick(self.generateChatRecord)
+        self.chatRecordsWidget.move(self.width(), 0)
+        #init curChatFile
+        self.curChatFile = ''
+        #chatRecordsAnimationMove QPropertyAnimation
+        self.chatRecordsAnimationMove = QPropertyAnimation(self.chatRecordsWidget, b'geometry')
+        self.chatRecordsAnimationMove.setDuration(1000)
+        self.chatRecordsAnimationMove.setEasingCurve(QEasingCurve.OutQuad)
+        self.chatRecordsAnimationMove.finished.connect(self.chatRecordsMoveFinished)
+        #settingWidgetIsOpen
+        self.chatRecordsWidgetIsOpen = False
         #emptyTextLabel PrintLabel
         self.emptyTextLabel = PrintLabel("文本不能为空", self)
-        self.emptyTextLabel.move(int((self.width() - self.emptyTextLabel.width()) / 2), self.topWidget.height() - self.emptyTextLabel.height() - 10)
+        self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.topWidget.height() - self.emptyTextLabel.height() - 10)
         self.emptyTextLabel.raise_()
         self.emptyTextLabel.hide()
+        #saveImageLabel PrintLabel
+        self.saveImageLabel = PrintLabel('', self)
+        self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.topWidget.height() - self.saveImageLabel.height() - 10)
+        self.saveImageLabel.raise_()
+        self.saveImageLabel.hide()
         #textCopyLabel PrintLabel
         self.textCopyLabel = PrintLabel('文本复制成功', self)
-        self.textCopyLabel.move(int((self.width() - self.textCopyLabel.width()) / 2), self.topWidget.height() - self.textCopyLabel.height() - 10)
+        self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.topWidget.height() - self.textCopyLabel.height() - 10)
         self.textCopyLabel.raise_()
         self.textCopyLabel.hide()
+
+    def closeEvent(self, event):
+        #init
+        chatRecordStr = ''
+        chatStrCount = 0
+        #judge whether messageWidgetList is empty
+        if len(self.messageWidgetList) != 0:
+            #judge whether curChatFile is empty
+            if self.curChatFile == '':
+                #chatRecordFileName QString
+                self.chatRecordFileName = "chat_"
+                self.chatRecordFileName += QDateTime.currentDateTime().toString("yyyy_MM_dd_HH_mm_ss")
+                self.chatRecordFileName += ".txt"
+                #write to chatRecord file
+                with open(self.chatRecordFileName, 'a') as f:
+                    for i in range(0, self.chatShow.count()):
+                        chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                        f.write(chatRecordStr)
+            else:
+                for i in range(0, len(self.messageWidgetList)):
+                    chatStrCount += self.messageWidgetList[i].getText().count('\n') + 2
+                #read curChat file
+                with open(self.curChatFile, 'r') as f:
+                    lines = f.readlines()
+                if chatStrCount > len(lines):
+                    #clear curChat file
+                    with open(self.curChatFile, 'w') as f:
+                        f.truncate()
+                    #write to curChat file
+                    with open(self.curChatFile, 'a') as f:
+                        for i in range(0, self.chatShow.count()):
+                            chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                            f.write(chatRecordStr)
+        QMainWindow.closeEvent(self, event)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -945,10 +1272,18 @@ class MainWindow(QMainWindow):
                 notSettingRect = QRect(self.settingWidget.width(), 0, self.width() - self.settingWidget.width(), self.height())
                 if notSettingRect.contains(event.pos()):
                     self.mask.hide()
-                    self.animationMove.setStartValue(self.settingWidget.geometry())
-                    self.animationMove.setEndValue(QRect(-self.settingWidget.width(), 0, self.settingWidget.width(), self.settingWidget.height()))
-                    self.animationMove.start()
+                    self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
+                    self.settingAnimationMove.setEndValue(QRect(-self.settingWidget.width(), 0, self.settingWidget.width(), self.settingWidget.height()))
+                    self.settingAnimationMove.start()
                     self.settingWidgetIsOpen = False
+            elif self.chatRecordsWidgetIsOpen:
+                notChatRecordsRect = QRect(0, 0, self.width() - self.chatRecordsWidget.width(), self.height())
+                if notChatRecordsRect.contains(event.pos()):
+                    self.mask.hide()
+                    self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
+                    self.chatRecordsAnimationMove.setEndValue(QRect(self.width(), 0, self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
+                    self.chatRecordsAnimationMove.start()
+                    self.chatRecordsWidgetIsOpen = False
             else:
                 chatInputRect = QRect(self.chatInput.geometry().x(), self.chatInput.geometry().y() + self.topWidget.height(), self.chatInput.geometry().width(), self.chatInput.geometry().height())
                 if chatInputRect.contains(event.pos()):
@@ -966,6 +1301,12 @@ class MainWindow(QMainWindow):
             self.settingWidget.resize(self.width() // 3, self.height())
         else:
             self.settingWidget.setGeometry(-self.width() // 3, 0, self.width() // 3, self.height())
+        #chatRecords widget set geometry
+        self.chatRecordsWidget.resetWidgetSize(self.width(), self.height())
+        if self.chatRecordsWidgetIsOpen:
+            self.chatRecordsWidget.setGeometry(self.width() - self.chatRecordsWidget.width(), 0, self.chatRecordsWidget.width(), self.chatRecordsWidget.height())
+        else:
+            self.chatRecordsWidget.setGeometry(self.width(), 0, self.chatRecordsWidget.width(), self.chatRecordsWidget.height())
         #TextLabel max width
         textMaxWidth = int(self.chatShow.width() * 2 / 3)
         for i in range(0, self.chatShow.count()):
@@ -984,9 +1325,11 @@ class MainWindow(QMainWindow):
         #TextEditFull adjust size
         self.chatInput.resetWidgetSize()
         #move emptyTextLabel
-        self.emptyTextLabel.move(int((self.width() - self.emptyTextLabel.width()) / 2), self.topWidget.height() - self.emptyTextLabel.height() - 10)
+        self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.topWidget.height() - self.emptyTextLabel.height() - 10)
+        #move saveImageLabel
+        self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.topWidget.height() - self.saveImageLabel.height() - 10)
         #move textCopyLabel
-        self.textCopyLabel.move(int((self.width() - self.textCopyLabel.width()) / 2), self.topWidget.height() - self.textCopyLabel.height() - 10)
+        self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.topWidget.height() - self.textCopyLabel.height() - 10)
 
     def settingWidgetInit(self):
         #setting QLabel
@@ -1192,47 +1535,42 @@ class MainWindow(QMainWindow):
         self.settingVLayout.addWidget(self.temperatureWidget)
         self.settingVLayout.setContentsMargins(20, 60, 20, 60)
         self.settingVLayout.setSpacing(60)
-        #animationMove QPropertyAnimation
-        self.animationMove = QPropertyAnimation(self.settingWidget, b'geometry')
-        self.animationMove.setDuration(1000)
-        self.animationMove.setEasingCurve(QEasingCurve.OutQuad)
+        #settingAnimationMove QPropertyAnimation
+        self.settingAnimationMove = QPropertyAnimation(self.settingWidget, b'geometry')
+        self.settingAnimationMove.setDuration(1000)
+        self.settingAnimationMove.setEasingCurve(QEasingCurve.OutQuad)
         #settingWidgetIsOpen
         self.settingWidgetIsOpen = False
         #settingButton PushButton
-        self.settingButton = PushButton()
-        self.settingButton.setFixedSize(40, 40)
-        self.settingButton.setIcon(QIcon("setting.png"))
-        self.settingButton.setIconSize(QSize(28, 28))
+        self.settingButton = PushButton(tipText='设置', tipOffsetX=10, tipOffsetY=40)
+        self.settingButton.setFixedSize(30, 30)
+        self.settingButton.setIconSize(QSize(30, 30))
         self.settingButton.setStyleSheet('''
         QPushButton{
-            border: none;
-            background: transparent;
+            border-image: url("setting.png");
         }
         QPushButton:hover{
-            border-radius: 20px;
-            background: white;
+            border-image: url("setting_hover.png");
         }
         ''')
         self.settingButton.clicked.connect(self.settingButtonClicked)
-        #buttonSpacerItem QSpacerItem
-        self.buttonSpacerItem = QSpacerItem(40, self.chatShowWidget.height() - 40, hPolicy=QSizePolicy.Fixed, vPolicy=QSizePolicy.Expanding)
         #buttonWidget QWidget
         self.buttonWidget = QWidget()
-        self.buttonWidget.resize(40, self.chatShowWidget.height())
+        self.buttonWidget.resize(30, self.chatShowWidget.height())
         self.buttonWidget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         #buttonVLayout QVBoxLayout
         self.buttonVLayout = QVBoxLayout()
         self.buttonWidget.setLayout(self.buttonVLayout)
         self.buttonVLayout.addWidget(self.settingButton)
-        self.buttonVLayout.addSpacerItem(self.buttonSpacerItem)
+        self.buttonVLayout.setAlignment(Qt.AlignTop)
         self.buttonVLayout.setContentsMargins(0, 0, 0, 0)
 
     def settingButtonClicked(self):
         self.mask.show()
         self.settingWidget.raise_()
-        self.animationMove.setStartValue(self.settingWidget.geometry())
-        self.animationMove.setEndValue(QRect(0, 0, self.settingWidget.width(), self.settingWidget.height()))
-        self.animationMove.start()
+        self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
+        self.settingAnimationMove.setEndValue(QRect(0, 0, self.settingWidget.width(), self.settingWidget.height()))
+        self.settingAnimationMove.start()
         self.settingWidgetIsOpen = True
 
     def maxTokensBoxValueChanged(self, i):
@@ -1375,6 +1713,206 @@ class MainWindow(QMainWindow):
                 break
             else:
                 j += 1
+
+    def saveImage(self):
+        #chatPixmap QPixmap
+        self.chatPixmap = self.grab(self.rect())
+        #chatPixmapName QString
+        self.chatPixmapName = "chat_"
+        self.chatPixmapName += QDateTime.currentDateTime().toString("yyyy_MM_dd_HH_mm_ss")
+        self.chatPixmapName += ".png"
+        #save image
+        if self.chatPixmap.save(self.chatPixmapName, "png"):
+            self.saveImageLabel.setText("图像保存成功")
+            self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.topWidget.height() - self.saveImageLabel.height() - 10)
+            self.saveImageLabel.printStart()
+        else:
+            self.saveImageLabel.setText("图像保存失败")
+            self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.topWidget.height() - self.saveImageLabel.height() - 10)
+            self.saveImageLabel.printStart()
+
+    def showChatRecords(self):
+        #init
+        chatRecordStr = ''
+        chatStrCount = 0
+        #judge whether messageWidgetList is empty
+        if len(self.messageWidgetList) != 0:
+            #judge whether curChatFile is empty
+            if self.curChatFile == '':
+                #chatRecordFileName QString
+                self.chatRecordFileName = "chat_"
+                self.chatRecordFileName += QDateTime.currentDateTime().toString("yyyy_MM_dd_HH_mm_ss")
+                self.chatRecordFileName += ".txt"
+                #write to chatRecord file
+                with open(self.chatRecordFileName, 'a') as f:
+                    for i in range(0, self.chatShow.count()):
+                        chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                        f.write(chatRecordStr)
+                #assign chatRecord fileName to curChatFile
+                self.curChatFile = self.chatRecordFileName
+            else:
+                for i in range(0, len(self.messageWidgetList)):
+                    chatStrCount += self.messageWidgetList[i].getText().count('\n') + 2
+                #read curChat file
+                with open(self.curChatFile, 'r') as f:
+                    lines = f.readlines()
+                if chatStrCount > len(lines):
+                    #clear curChat file
+                    with open(self.curChatFile, 'w') as f:
+                        f.truncate()
+                    #write to curChat file
+                    with open(self.curChatFile, 'a') as f:
+                        for i in range(0, self.chatShow.count()):
+                            chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                            f.write(chatRecordStr)
+        #generate item
+        for fileName in os.listdir(os.curdir):
+            if fileName.endswith(".txt"):
+                with open(fileName, 'r') as f:
+                    lines = f.readlines()
+                #create item
+                chatRecordStr = lines[0] + lines[len(lines) - 2].strip('\n')
+                item = self.chatRecordsWidget.addListItem(chatRecordStr)
+                #item set data
+                self.chatRecordsWidget.listItemSetData(item, fileName)
+        #show chatRecordsWidget
+        self.mask.show()
+        self.chatRecordsWidget.raise_()
+        self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
+        self.chatRecordsAnimationMove.setEndValue(QRect(self.width() - self.chatRecordsWidget.width(), 0, self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
+        self.chatRecordsAnimationMove.start()
+        self.chatRecordsWidgetIsOpen = True
+
+    def showSearchRecords(self):
+        text = self.chatRecordsWidget.getLineEditText()
+        self.chatRecordsWidget.delAllListItems()
+        if not text == '':
+            #generate item
+            for fileName in os.listdir(os.curdir):
+                if fileName.endswith(".txt"):
+                    with open(fileName, 'r') as f:
+                        content = f.read()
+                    if text in content:
+                        with open(fileName, 'r') as f:
+                            lines = f.readlines()
+                        #create item
+                        chatRecordStr = lines[0] + lines[len(lines) - 2].strip('\n')
+                        item = self.chatRecordsWidget.addListItem(chatRecordStr)
+                        #item set data
+                        self.chatRecordsWidget.listItemSetData(item, fileName)
+        else:
+            #generate item
+            for fileName in os.listdir(os.curdir):
+                if fileName.endswith(".txt"):
+                    with open(fileName, 'r') as f:
+                        lines = f.readlines()
+                    #create item
+                    chatRecordStr = lines[0] + lines[len(lines) - 2].strip('\n')
+                    item = self.chatRecordsWidget.addListItem(chatRecordStr)
+                    #item set data
+                    self.chatRecordsWidget.listItemSetData(item, fileName)
+
+    def clearAllChatRecords(self):
+        self.chatRecordsWidget.delAllListItems()
+        for fileName in os.listdir(os.curdir):
+            if fileName.endswith(".txt"):
+                filePath = os.path.join(os.curdir, fileName)
+                os.remove(filePath)
+
+    def generateChatRecord(self, item):
+        #clear
+        self.messageWidgetList.clear()
+        self.chatShow.clear()
+        #init
+        text = ''
+        isUser = True
+        #assign chatRecord fileName to curChatFile
+        self.curChatFile = self.chatRecordsWidget.listItemToString(item)
+        #read curChat file
+        with open(self.curChatFile, 'r') as f:
+            lines = f.readlines()
+        #generate QListWidgetItem
+        for i in range(0, len(lines)):
+            if lines[i] == 'True\n' or lines[i] == 'False\n':
+                if lines[i] == 'True\n':
+                    isUser = True
+                else:
+                    isUser = False
+                #messageWidget remove renewResponseButton
+                j = len(self.messageWidgetList) - 1
+                if j != -1 and j != 0:
+                    if not self.messageWidgetList[j].getIsUser():
+                        self.messageWidgetList[j].removeRenewResponseButton()
+                text = text.strip('\n')
+                #MessageWidget
+                self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, isUser=isUser, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+                if not isUser:
+                    self.messageWidget.removeLoadingWidget()
+                self.messageWidget.addFunWidget()
+                self.messageWidgetList.append(self.messageWidget)
+                #itemWidget QWidget
+                self.itemWidget = QWidget(self)
+                self.itemHLayout = QHBoxLayout()
+                self.itemHLayout.addWidget(self.messageWidget)
+                self.itemWidget.setLayout(self.itemHLayout)
+                self.itemWidget.setFixedSize(self.chatShow.width(), self.messageWidget.height() + 10)
+                if isUser:
+                    self.itemHLayout.setContentsMargins(self.itemWidget.width() - self.messageWidget.width() - 5, 5, 5, 5)
+                else:
+                    self.itemHLayout.setContentsMargins(5, 5, self.itemWidget.width() - self.messageWidget.width() - 5, 5)
+                #QListWidgetItem
+                self.item = QListWidgetItem(self.chatShow)
+                self.item.setSizeHint(QSize(self.chatShow.width(), self.messageWidget.height() + 10))
+                self.chatShow.setItemWidget(self.item, self.itemWidget)
+                self.chatShow.setCurrentItem(self.item)
+                #clear text
+                text = ''
+            else:
+                text += lines[i]
+
+    def chatRecordsMoveFinished(self):
+        if not self.chatRecordsWidgetIsOpen:
+            #delete all item
+            self.chatRecordsWidget.delAllListItems()
+
+    def newChat(self):
+        #init
+        chatRecordStr = ''
+        chatStrCount = 0
+        #judge whether messageWidgetList is empty
+        if len(self.messageWidgetList) != 0:
+            #judge whether curChatFile is empty
+            if self.curChatFile == '':
+                #chatRecordFileName QString
+                self.chatRecordFileName = "chat_"
+                self.chatRecordFileName += QDateTime.currentDateTime().toString("yyyy_MM_dd_HH_mm_ss")
+                self.chatRecordFileName += ".txt"
+                #write to chatRecord file
+                with open(self.chatRecordFileName, 'a') as f:
+                    for i in range(0, self.chatShow.count()):
+                        chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                        f.write(chatRecordStr)
+                #assign chatRecord fileName to curChatFile
+                self.curChatFile = self.chatRecordFileName
+            else:
+                for i in range(0, len(self.messageWidgetList)):
+                    chatStrCount += self.messageWidgetList[i].getText().count('\n') + 2
+                #read curChat file
+                with open(self.curChatFile, 'r') as f:
+                    lines = f.readlines()
+                if chatStrCount > len(lines):
+                    #clear curChat file
+                    with open(self.curChatFile, 'w') as f:
+                        f.truncate()
+                    #write to curChat file
+                    with open(self.curChatFile, 'a') as f:
+                        for i in range(0, self.chatShow.count()):
+                            chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                            f.write(chatRecordStr)
+        #clear
+        self.messageWidgetList.clear()
+        self.chatShow.clear()
+        self.curChatFile = ''
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

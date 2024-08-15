@@ -110,7 +110,6 @@ class PushButton(QPushButton):
         if event.type() == QEvent.ToolTip:
             font = QFont()
             font.setPixelSize(18)
-            font.setBold(True)
             QToolTip.setFont(font)
             QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
         return QPushButton.event(self, event)
@@ -187,7 +186,6 @@ class SendButton(QPushButton):
         if event.type() == QEvent.ToolTip:
             font = QFont()
             font.setPixelSize(18)
-            font.setBold(True)
             QToolTip.setFont(font)
             QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
         return QPushButton.event(self, event)
@@ -586,7 +584,6 @@ class CopyButton(QPushButton):
         if event.type() == QEvent.ToolTip:
             font = QFont()
             font.setPixelSize(18)
-            font.setBold(True)
             QToolTip.setFont(font)
             QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
         return QPushButton.event(self, event)
@@ -645,7 +642,7 @@ class MessageWidget(QWidget):
         #main widget set size
         self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
         #CopyButton
-        self.copyButton = CopyButton(tipText='复制', tipOffsetX=20, tipOffsetY=40, parent=self)
+        self.copyButton = CopyButton(tipText='复制', tipOffsetX=15, tipOffsetY=40, parent=self)
         self.copyButton.setFixedSize(22, 22)
         self.copyButton.setStyleSheet('''
         QPushButton{
@@ -825,7 +822,9 @@ class PrintLabel(QWidget):
 class Label(QLabel):
     def __init__(self, parent=None):
         super(Label, self).__init__(parent)
+        self.setFixedHeight(32)
         self.font = QFont()
+        self.font.setPixelSize(22)
         self.font.setBold(True)
         self.setFont(self.font)
         self.palette = self.palette()
@@ -835,6 +834,7 @@ class Label(QLabel):
 class SpinBox(QSpinBox):
     def __init__(self, parent=None):
         super(SpinBox, self).__init__(parent)
+        self.setFixedHeight(32)
         self.setCursor(Qt.PointingHandCursor)
         self.setAlignment(Qt.AlignHCenter)
         self.setButtonSymbols(QAbstractSpinBox.NoButtons)
@@ -843,21 +843,21 @@ class SpinBox(QSpinBox):
             border: 2px solid rgb(23, 171, 227);
             border-radius: 8px;
             background: transparent;
-            font: bold;
+            font: 22px, bold;
             color: rgb(23, 171, 227);
             selection-background-color: rgb(23, 171, 227);
         }
         QSpinBox::up-button{
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
             border-image: url("up_arrow.png");
         }
         QSpinBox::up-button:pressed{
             margin-top: 1px;
         }
         QSpinBox::down-button{
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
             border-image: url("down_arrow.png");
         }
         QSpinBox::down-button:pressed{
@@ -878,6 +878,7 @@ class SpinBox(QSpinBox):
 class DoubleSpinBox(QDoubleSpinBox):
     def __init__(self, parent=None):
         super(DoubleSpinBox, self).__init__(parent)
+        self.setFixedHeight(32)
         self.setCursor(Qt.PointingHandCursor)
         self.setAlignment(Qt.AlignHCenter)
         self.setButtonSymbols(QAbstractSpinBox.NoButtons)
@@ -886,21 +887,21 @@ class DoubleSpinBox(QDoubleSpinBox):
             border: 2px solid rgb(23, 171, 227);
             border-radius: 8px;
             background: transparent;
-            font: bold;
+            font: 22px, bold;
             color: rgb(23, 171, 227);
             selection-background-color: rgb(23, 171, 227);
         }
         QDoubleSpinBox::up-button{
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
             border-image: url("up_arrow.png");
         }
         QDoubleSpinBox::up-button:pressed{
             margin-top: 1px;
         }
         QDoubleSpinBox::down-button{
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
             border-image: url("down_arrow.png");
         }
         QDoubleSpinBox::down-button:pressed{
@@ -921,21 +922,25 @@ class DoubleSpinBox(QDoubleSpinBox):
 class Slider(QSlider):
     def __init__(self, parent=None):
         super(Slider, self).__init__(parent)
+        self.setFixedHeight(26)
         self.setOrientation(Qt.Horizontal)
         self.setStyleSheet('''
         QSlider::groove:horizontal{
-            height: 6px;
-            border-radius: 3px;
+            height: 8px;
+            border-radius: 4px;
             background-color: rgb(150, 150, 150);
         }
         QSlider::handle:horizontal{
-            width: 20px;
-            margin: -7px 0px -7px 0px;
-            border-radius: 10px;
+            width: 26px;
+            margin: -9px 0px -9px 0px;
+            border-radius: 13px;
             background-color: rgb(80, 80, 80);
         }
+        QSlider::handle:hover:horizontal{
+            background-color: rgb(100, 100, 100);
+        }
         QSlider::sub-page:horizontal{
-            border-radius: 3px;
+            border-radius: 4px;
             background-color: rgb(23, 171, 227);
         }
         ''')
@@ -1372,18 +1377,18 @@ class MainWindow(QMainWindow):
         self.temperatureSlider.valueChanged.connect(self.temperatureSliderValueChanged)
         #setting maxTokens QWidget
         self.maxTokensWidget = QWidget()
-        self.maxTokensWidget.resize(301, 120)
+        self.maxTokensWidget.resize(311, 120)
         self.maxTokensWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.maxTokensWidget.setObjectName("maxTokensWidget")
         self.maxTokensWidget.setStyleSheet('''
         QWidget#maxTokensWidget{
-            border-radius: 20px;
+            border-radius: 15px;
             background: white;
         }
         ''')
         #setting maxTokens top sub QWidget
         self.maxTokensTopSubWidget = QWidget()
-        self.maxTokensTopSubWidget.resize(261, 40)
+        self.maxTokensTopSubWidget.resize(281, 40)
         self.maxTokensTopSubWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.maxTokensTopSubWidget.setObjectName("maxTokensTopSubWidget")
         self.maxTokensTopSubWidget.setStyleSheet('''
@@ -1396,10 +1401,10 @@ class MainWindow(QMainWindow):
         self.maxTokensTopSubWidget.setLayout(self.maxTokensTopSubHLayout)
         self.maxTokensTopSubHLayout.addWidget(self.maxTokensLabel)
         self.maxTokensTopSubHLayout.addWidget(self.maxTokensBox)
-        self.maxTokensTopSubHLayout.setContentsMargins(0, 0, 0, 0)
+        self.maxTokensTopSubHLayout.setContentsMargins(0, 5, 0, 3)
         #setting maxTokens bottom sub QWidget
         self.maxTokensBottomSubWidget = QWidget()
-        self.maxTokensBottomSubWidget.resize(261, 40)
+        self.maxTokensBottomSubWidget.resize(281, 40)
         self.maxTokensBottomSubWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.maxTokensBottomSubWidget.setObjectName("maxTokensBottomSubWidget")
         self.maxTokensBottomSubWidget.setStyleSheet('''
@@ -1411,28 +1416,28 @@ class MainWindow(QMainWindow):
         self.maxTokensBottomSubHLayout = QHBoxLayout()
         self.maxTokensBottomSubWidget.setLayout(self.maxTokensBottomSubHLayout)
         self.maxTokensBottomSubHLayout.addWidget(self.maxTokensSlider)
-        self.maxTokensBottomSubHLayout.setContentsMargins(0, 0, 0, 0)
+        self.maxTokensBottomSubHLayout.setContentsMargins(0, 9, 0, 5)
         #setting maxTokens QVBoxLayout
         self.maxTokensVLayout = QVBoxLayout()
         self.maxTokensWidget.setLayout(self.maxTokensVLayout)
         self.maxTokensVLayout.addWidget(self.maxTokensTopSubWidget)
         self.maxTokensVLayout.addWidget(self.maxTokensBottomSubWidget)
-        self.maxTokensVLayout.setContentsMargins(20, 20, 20, 20)
+        self.maxTokensVLayout.setContentsMargins(15, 20, 15, 20)
         self.maxTokensVLayout.setSpacing(0)
         #setting topP QWidget
         self.topPWidget = QWidget()
-        self.topPWidget.resize(301, 120)
+        self.topPWidget.resize(311, 120)
         self.topPWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.topPWidget.setObjectName("topPWidget")
         self.topPWidget.setStyleSheet('''
         QWidget#topPWidget{
-            border-radius: 20px;
+            border-radius: 15px;
             background: white;
         }
         ''')
         #setting topP top sub QWidget
         self.topPTopSubWidget = QWidget()
-        self.topPTopSubWidget.resize(261, 40)
+        self.topPTopSubWidget.resize(281, 40)
         self.topPTopSubWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.topPTopSubWidget.setObjectName("topPTopSubWidget")
         self.topPTopSubWidget.setStyleSheet('''
@@ -1445,10 +1450,10 @@ class MainWindow(QMainWindow):
         self.topPTopSubWidget.setLayout(self.topPTopSubHLayout)
         self.topPTopSubHLayout.addWidget(self.topPLabel)
         self.topPTopSubHLayout.addWidget(self.topPBox)
-        self.topPTopSubHLayout.setContentsMargins(0, 0, 0, 0)
+        self.topPTopSubHLayout.setContentsMargins(0, 5, 0, 3)
         #setting topP bottom sub QWidget
         self.topPBottomSubWidget = QWidget()
-        self.topPBottomSubWidget.resize(261, 40)
+        self.topPBottomSubWidget.resize(281, 40)
         self.topPBottomSubWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.topPBottomSubWidget.setObjectName("topPBottomSubWidget")
         self.topPBottomSubWidget.setStyleSheet('''
@@ -1460,28 +1465,28 @@ class MainWindow(QMainWindow):
         self.topPBottomSubHLayout = QHBoxLayout()
         self.topPBottomSubWidget.setLayout(self.topPBottomSubHLayout)
         self.topPBottomSubHLayout.addWidget(self.topPSlider)
-        self.topPBottomSubHLayout.setContentsMargins(0, 0, 0, 0)
+        self.topPBottomSubHLayout.setContentsMargins(0, 9, 0, 5)
         #setting topP QVBoxLayout
         self.topPVLayout = QVBoxLayout()
         self.topPWidget.setLayout(self.topPVLayout)
         self.topPVLayout.addWidget(self.topPTopSubWidget)
         self.topPVLayout.addWidget(self.topPBottomSubWidget)
-        self.topPVLayout.setContentsMargins(20, 20, 20, 20)
+        self.topPVLayout.setContentsMargins(15, 20, 15, 20)
         self.topPVLayout.setSpacing(0)
         #setting temperature QWidget
         self.temperatureWidget = QWidget()
-        self.temperatureWidget.resize(301, 120)
+        self.temperatureWidget.resize(311, 120)
         self.temperatureWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.temperatureWidget.setObjectName("temperatureWidget")
         self.temperatureWidget.setStyleSheet('''
         QWidget#temperatureWidget{
-            border-radius: 20px;
+            border-radius: 15px;
             background: white;
         }
         ''')
         #setting temperature top sub QWidget
         self.temperatureTopSubWidget = QWidget()
-        self.temperatureTopSubWidget.resize(261, 40)
+        self.temperatureTopSubWidget.resize(281, 40)
         self.temperatureTopSubWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.temperatureTopSubWidget.setObjectName("temperatureTopSubWidget")
         self.temperatureTopSubWidget.setStyleSheet('''
@@ -1494,10 +1499,10 @@ class MainWindow(QMainWindow):
         self.temperatureTopSubWidget.setLayout(self.temperatureTopSubHLayout)
         self.temperatureTopSubHLayout.addWidget(self.temperatureLabel)
         self.temperatureTopSubHLayout.addWidget(self.temperatureBox)
-        self.temperatureTopSubHLayout.setContentsMargins(0, 0, 0, 0)
+        self.temperatureTopSubHLayout.setContentsMargins(0, 5, 0, 3)
         #setting temperature bottom sub QWidget
         self.temperatureBottomSubWidget = QWidget()
-        self.temperatureBottomSubWidget.resize(261, 40)
+        self.temperatureBottomSubWidget.resize(281, 40)
         self.temperatureBottomSubWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.temperatureBottomSubWidget.setObjectName("temperatureBottomSubWidget")
         self.temperatureBottomSubWidget.setStyleSheet('''
@@ -1509,13 +1514,13 @@ class MainWindow(QMainWindow):
         self.temperatureBottomSubHLayout = QHBoxLayout()
         self.temperatureBottomSubWidget.setLayout(self.temperatureBottomSubHLayout)
         self.temperatureBottomSubHLayout.addWidget(self.temperatureSlider)
-        self.temperatureBottomSubHLayout.setContentsMargins(0, 0, 0, 0)
+        self.temperatureBottomSubHLayout.setContentsMargins(0, 9, 0, 5)
         #setting temperature QVBoxLayout
         self.temperatureVLayout = QVBoxLayout()
         self.temperatureWidget.setLayout(self.temperatureVLayout)
         self.temperatureVLayout.addWidget(self.temperatureTopSubWidget)
         self.temperatureVLayout.addWidget(self.temperatureBottomSubWidget)
-        self.temperatureVLayout.setContentsMargins(20, 20, 20, 20)
+        self.temperatureVLayout.setContentsMargins(15, 20, 15, 20)
         self.temperatureVLayout.setSpacing(0)
         #setting QWidget
         self.settingWidget = QWidget(self)
@@ -1533,7 +1538,7 @@ class MainWindow(QMainWindow):
         self.settingVLayout.addWidget(self.maxTokensWidget)
         self.settingVLayout.addWidget(self.topPWidget)
         self.settingVLayout.addWidget(self.temperatureWidget)
-        self.settingVLayout.setContentsMargins(20, 60, 20, 60)
+        self.settingVLayout.setContentsMargins(15, 60, 15, 60)
         self.settingVLayout.setSpacing(60)
         #settingAnimationMove QPropertyAnimation
         self.settingAnimationMove = QPropertyAnimation(self.settingWidget, b'geometry')
@@ -1916,6 +1921,14 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    app.setStyleSheet('''
+    QToolTip{
+        border: none;
+        border-radius: 10px;
+        color: white;
+        background: #404040;
+    }
+    ''')
     mainWindow = MainWindow()
     mainWindow.show()
     sys.exit(app.exec_())

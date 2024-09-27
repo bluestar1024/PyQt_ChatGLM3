@@ -9,12 +9,9 @@ import sys, os
 import math
 from enum import Enum
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QAbstractSpinBox, QGridLayout, QLineEdit, QSplitter, QToolTip
-from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint
+from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty
 from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor
 from openai import OpenAI
-
-#Import for test
-import random, time
 
 base_url = "https://7613907zg6.vicp.fun/v1"
 client = OpenAI(api_key="EMPTY", base_url=base_url)
@@ -360,6 +357,18 @@ class TextEditFull(QWidget):
         #TextEditFull adjust size
         self.resize(self.textEdit.width() + 30, self.textEdit.height() + 30)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        #background color
+        self.BGColor = QColor(224, 224, 224)
+        #AnimationBackgroundColor QPropertyAnimation
+        self.AnimationBackgroundColor = QPropertyAnimation(self, b'backgroundColor')
+        self.AnimationBackgroundColor.setDuration(400)
+        self.AnimationBackgroundColor.setEasingCurve(QEasingCurve.OutQuad)
+        #border color
+        self.BColor = QColor(100, 100, 100, 0)
+        #AnimationBorderColor QPropertyAnimation
+        self.AnimationBorderColor = QPropertyAnimation(self, b'borderColor')
+        self.AnimationBorderColor.setDuration(400)
+        self.AnimationBorderColor.setEasingCurve(QEasingCurve.OutQuad)
         #backgroundColorIsLight
         self.backgroundColorIsLight = False
         #setMouseTracking
@@ -373,38 +382,57 @@ class TextEditFull(QWidget):
         #QPainter create
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
+        #QPen
+        pen = QPen(self.BColor)
+        painter.setPen(pen)
+        #QBrush
+        brush = QBrush(Qt.SolidPattern)
+        brush.setColor(self.BGColor)
+        painter.setBrush(brush)
         #QPainterPath
         path = QPainterPath()
         path.setFillRule(Qt.WindingFill)
         path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-        #QBrush
-        brush = QBrush(Qt.SolidPattern)
-        #add rect and set brush
-        if self.backgroundColorIsLight:
-            #brush set color
-            brush.setColor(QColor(Qt.transparent))
-            #QPainter set pen
-            pen = QPen(QColor(100, 100, 100))
-            painter.setPen(pen)
-        else:
-            #brush set color
-            brush.setColor(QColor(224, 224, 224))
-            #QPainter set pen
-            painter.setPen(Qt.NoPen)
-        #QPainter set brush
-        painter.setBrush(brush)
-        #QPainter set path
         painter.drawPath(path.simplified())
         #QPainter end
         painter.end()
 
-    def backgroundColorShowLight(self):
-        self.backgroundColorIsLight = True
+    @pyqtProperty(QColor)
+    def backgroundColor(self):
+        return self.BGColor
+
+    @backgroundColor.setter
+    def backgroundColor(self, color):
+        self.BGColor = color
+
+    @pyqtProperty(QColor)
+    def borderColor(self):
+        return self.BColor
+
+    @borderColor.setter
+    def borderColor(self, color):
+        self.BColor = color
         self.repaint()
 
+    def backgroundColorShowLight(self):
+        if not self.backgroundColorIsLight:
+            self.backgroundColorIsLight = True
+            self.AnimationBackgroundColor.setStartValue(QColor(224, 224, 224))
+            self.AnimationBackgroundColor.setEndValue(QColor(224, 224, 224, 0))
+            self.AnimationBackgroundColor.start()
+            self.AnimationBorderColor.setStartValue(QColor(100, 100, 100, 0))
+            self.AnimationBorderColor.setEndValue(QColor(100, 100, 100))
+            self.AnimationBorderColor.start()
+
     def backgroundColorShowDark(self):
-        self.backgroundColorIsLight = False
-        self.repaint()
+        if self.backgroundColorIsLight:
+            self.backgroundColorIsLight = False
+            self.AnimationBackgroundColor.setStartValue(QColor(224, 224, 224, 0))
+            self.AnimationBackgroundColor.setEndValue(QColor(224, 224, 224))
+            self.AnimationBackgroundColor.start()
+            self.AnimationBorderColor.setStartValue(QColor(100, 100, 100))
+            self.AnimationBorderColor.setEndValue(QColor(100, 100, 100, 0))
+            self.AnimationBorderColor.start()
 
     def clearFocus(self):
         self.textEdit.clearFocus()
@@ -521,9 +549,12 @@ class TextLabel(QWidget):
         #QBrush
         brush = QBrush(Qt.SolidPattern)
         if self.isColorful:
-            brush.setColor(QColor(23, 171, 227))
+            brush.setColor(QColor(119, 221, 255))
         else:
-            brush.setColor(QColor(224, 224, 224))
+            if self.isUser:
+                brush.setColor(QColor(255, 238, 153))
+            else:
+                brush.setColor(QColor(209, 187, 255))
         #add rect and set brush
         if self.isUser:
             path.addRect(self.rect().width() - 15, self.rect().y(), 15, 15)

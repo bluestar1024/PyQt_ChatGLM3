@@ -10,7 +10,7 @@ import math
 from enum import Enum
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QAbstractSpinBox, QGridLayout, QLineEdit, QSplitter, QToolTip
 from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase
 from openai import OpenAI
 
 base_url = "https://7613907zg6.vicp.fun/v1"
@@ -761,7 +761,7 @@ class MessageWidget(QWidget):
         self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
         #CopyButton
         self.copyButton = CopyButton(tipText='复制', tipOffsetX=15, tipOffsetY=40, parent=self)
-        self.copyButton.setFixedSize(22, 22)
+        self.copyButton.setFixedSize(18, 18)
         self.copyButton.setStyleSheet('''
         QPushButton{
             border-image: url("copy.png");
@@ -773,7 +773,7 @@ class MessageWidget(QWidget):
         self.copyButton.clicked.connect(copyFun)
         #renewResponseButton PushButton
         self.renewResponseButton = PushButton(tipText='重新生成响应', tipOffsetX=50, tipOffsetY=40)
-        self.renewResponseButton.setFixedSize(22, 22)
+        self.renewResponseButton.setFixedSize(18, 18)
         self.renewResponseButton.setStyleSheet('''
         QPushButton{
             border-image: url("renewResponse.png");
@@ -791,11 +791,11 @@ class MessageWidget(QWidget):
         self.funHLayout.addWidget(self.copyButton)
         self.funHLayout.setContentsMargins(5, 5, 5, 5)
         if self.isUser:
-            self.funWidget.setFixedSize(32, 32)
+            self.funWidget.setFixedSize(28, 28)
         else:
             self.funHLayout.addWidget(self.renewResponseButton)
             self.funHLayout.setSpacing(10)
-            self.funWidget.setFixedSize(64, 32)
+            self.funWidget.setFixedSize(56, 28)
             #renewResponseButtonIsRemove
             self.renewResponseButtonIsRemove = False
         #funWidgetIsAdd
@@ -864,7 +864,7 @@ class MessageWidget(QWidget):
             self.funHLayout.removeWidget(self.renewResponseButton)
             self.renewResponseButton.deleteLater()
             self.renewResponseButtonIsRemove = True
-            self.funWidget.setFixedSize(32, 32)
+            self.funWidget.setFixedSize(28, 28)
 
     def setSelectedText(self, text):
         self.selectedText = text
@@ -1113,6 +1113,14 @@ class LineEdit(QLineEdit):
         super(LineEdit, self).__init__()
         self.setFixedSize(1024 // 3 - 80, 30)
         self.setPlaceholderText("输入搜索词")
+        font_file_path = 'STXINGKA.ttf'
+        font_id = QFontDatabase.addApplicationFont(font_file_path)  
+        if font_id != -1:
+            font_families = QFontDatabase.applicationFontFamilies(font_id)  
+            if font_families:  
+                font_family = font_families[0]
+                self.font = QFont(font_family, 10)
+                self.setFont(self.font)
         #searchButton QPushButton
         self.searchButton = PushButton(tipText='搜索', tipOffsetX=10, tipOffsetY=40, parent=self)
         self.searchButton.setFixedSize(30, 30)
@@ -1140,6 +1148,13 @@ class ChatRecordsWidget(QWidget):
         super(ChatRecordsWidget, self).__init__(parent)
         self.resize(1024 // 3, 564)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        font_file_path = 'STXINGKA.ttf'
+        font_id = QFontDatabase.addApplicationFont(font_file_path)  
+        if font_id != -1:
+            font_families = QFontDatabase.applicationFontFamilies(font_id)  
+            if font_families:  
+                font_family = font_families[0]
+                self.font = QFont(font_family, 10)
         #LineEdit
         self.lineEdit = LineEdit()
         #clearAllButton QPushButton
@@ -1256,9 +1271,7 @@ class ChatRecordsWidget(QWidget):
         self.chatRecordItem = QListWidgetItem(string)
         self.listWidget.insertItem(0, self.chatRecordItem)
         self.chatRecordItem.setSizeHint(QSize(self.listWidget.width(), 60))
-        font = QFont()
-        font.setPixelSize(14)
-        self.chatRecordItem.setFont(font)
+        self.chatRecordItem.setFont(self.font)
         return self.chatRecordItem
 
     def delAllListItems(self):
@@ -1360,15 +1373,6 @@ class MainWindow(QMainWindow):
         self.resize(1024, 600)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.setWindowFlags(Qt.FramelessWindowHint)
-        self.setStyleSheet('''
-        @font-face{
-            font-family: "阿里妈妈东方大楷 Regular";
-            font-weight: 484;
-            src: url("EastDakaiFont/XO2u6KVS95AG.woff2") format("woff2"), url("EastDakaiFont/XO2u6KVS95AG.woff") format("woff");
-            font-display: swap;
-        }
-        ''')
-        self.setObjectName("MainWindow")
         self.setMouseTracking(True)
         #mouseLeftButtonIsPress
         self.mouseLeftButtonIsPress = False
@@ -1441,6 +1445,8 @@ class MainWindow(QMainWindow):
         self.splitter.addWidget(self.topWidget)
         self.splitter.addWidget(self.bottomWidget)
         self.splitter.setContentsMargins(0, 0, 0, 0)
+        self.splitter.setStretchFactor(0, 1)
+        self.splitter.setStretchFactor(1, 0)
         self.splitter.setHandleWidth(0)
         #MainWindow
         self.setCentralWidget(self.splitter)
@@ -2419,6 +2425,14 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    font_file_path = 'STXINGKA.ttf'
+    font_id = QFontDatabase.addApplicationFont(font_file_path)  
+    if font_id != -1:
+        font_families = QFontDatabase.applicationFontFamilies(font_id)  
+        if font_families:  
+            font_family = font_families[0]
+            font = QFont(font_family, 22)
+            QApplication.setFont(font)
     app.setStyleSheet('''
     QToolTip{
         border: none;

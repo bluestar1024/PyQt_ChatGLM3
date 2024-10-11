@@ -438,7 +438,7 @@ class TextEditFull(QWidget):
         self.textEdit.clearFocus()
 
     def resetWidgetSize(self):
-        self.textEdit.resize(self.width() - 40, self.height() - 40)
+        self.textEdit.resize(self.width() - 30, self.height() - 30)
 
     def toPlainText(self):
         return self.textEdit.toPlainText()
@@ -1136,7 +1136,7 @@ class LineEdit(QLineEdit):
             border: none;
             border-radius: 5px;
             background: #b8b8b8;
-            padding-left: 30px;
+            self.padding-left: 30px;
         }
         ''')
 
@@ -1369,7 +1369,7 @@ class RegionEnum(Enum):
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        self.setMinimumSize(425, 250)
+        self.setMinimumSize(532, 312)
         self.resize(1024, 600)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -1378,6 +1378,8 @@ class MainWindow(QMainWindow):
         self.mouseLeftButtonIsPress = False
         #RegionEnum
         self.regionDir = RegionEnum.MIDDLE
+        #padding
+        self.padding = 2
         #mask
         self.mask = QWidget(self)
         self.mask.setFixedSize(self.width(), self.height())
@@ -1401,55 +1403,66 @@ class MainWindow(QMainWindow):
         self.chatShow.itemClicked.connect(self.itemShowColorful)
         #chatShowWidget QWidget
         self.chatShowWidget = Widget()
+        self.chatShowWidget.setMinimumHeight(168)
         self.chatShowWidget.resize(1024, 378)
         self.chatShowWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        #chatShowHLayout QHBoxLayout
-        self.chatShowHLayout = QHBoxLayout()
-        self.chatShowWidget.setLayout(self.chatShowHLayout)
-        self.chatShowHLayout.addWidget(self.chatShow)
-        self.chatShowHLayout.setContentsMargins(27, 12, 2, 16)
-        #topWidget QWidget
-        self.topWidget = Widget()
-        self.topWidget.setMinimumHeight(150)
-        self.topWidget.resize(1024, 450)
-        self.topWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        #topVLayout QVBoxLayout
-        self.topVLayout = QVBoxLayout()
-        self.topWidget.setLayout(self.topVLayout)
-        self.topVLayout.addWidget(self.titleWidget)
-        self.topVLayout.addWidget(self.chatFun)
-        self.topVLayout.addWidget(self.chatShowWidget)
-        self.topVLayout.setContentsMargins(0, 0, 0, 0)
-        self.topVLayout.setSpacing(0)
-        self.topVLayout.setStretch(0, 0)
-        self.topVLayout.setStretch(1, 0)
-        self.topVLayout.setStretch(2, 1)
+        #chatShowVLayout QVBoxLayout
+        self.chatShowVLayout = QVBoxLayout()
+        self.chatShowWidget.setLayout(self.chatShowVLayout)
+        self.chatShowVLayout.addWidget(self.chatShow)
+        self.chatShowVLayout.setContentsMargins(27, 12, 2, 16)
         #TextEditFull
         self.chatInput = TextEditFull()
         self.chatInput.connectSendButtonClick(self.sendMessage)
-        #bottomWidget QWidget
-        self.bottomWidget = Widget()
-        self.bottomWidget.setMinimumHeight(100)
-        self.bottomWidget.resize(1024, 150)
-        self.bottomWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        #bottomVLayout QVBoxLayout
-        self.bottomVLayout = QVBoxLayout()
-        self.bottomWidget.setLayout(self.bottomVLayout)
-        self.bottomVLayout.addWidget(self.chatInput)
-        self.bottomVLayout.setContentsMargins(20, 0, 20, 20)
+        #chatInputWidget QWidget
+        self.chatInputWidget = Widget()
+        self.chatInputWidget.setMinimumHeight(72)
+        self.chatInputWidget.resize(1024, 150)
+        self.chatInputWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        #chatInputVLayout QVBoxLayout
+        self.chatInputVLayout = QVBoxLayout()
+        self.chatInputWidget.setLayout(self.chatInputVLayout)
+        self.chatInputVLayout.addWidget(self.chatInput)
+        self.chatInputVLayout.setContentsMargins(20, 0, 20, 20)
         #QSplitter
         self.splitter = Splitter(Qt.Vertical)
-        self.splitter.resize(1024, 600)
+        self.splitter.resize(1024, 528)
         self.splitter.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.splitter.setChildrenCollapsible(False)
-        self.splitter.addWidget(self.topWidget)
-        self.splitter.addWidget(self.bottomWidget)
+        self.splitter.addWidget(self.chatShowWidget)
+        self.splitter.addWidget(self.chatInputWidget)
         self.splitter.setContentsMargins(0, 0, 0, 0)
         self.splitter.setStretchFactor(0, 1)
         self.splitter.setStretchFactor(1, 0)
         self.splitter.setHandleWidth(0)
+        #contentWidget QWidget
+        self.contentWidget = Widget()
+        self.contentWidget.resize(1024, 564)
+        self.contentWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        #contentVLayout QVBoxLayout
+        self.contentVLayout = QVBoxLayout()
+        self.contentWidget.setLayout(self.contentVLayout)
+        self.contentVLayout.addWidget(self.chatFun)
+        self.contentVLayout.addWidget(self.splitter)
+        self.contentVLayout.setContentsMargins(0, 0, 0, 0)
+        self.contentVLayout.setSpacing(0)
+        self.contentVLayout.setStretch(0, 0)
+        self.contentVLayout.setStretch(1, 1)
+        #mainWidget QWidget
+        self.mainWidget = Widget()
+        self.mainWidget.resize(1024, 600)
+        self.mainWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        #mainVLayout QVBoxLayout
+        self.mainVLayout = QVBoxLayout()
+        self.mainWidget.setLayout(self.mainVLayout)
+        self.mainVLayout.addWidget(self.titleWidget)
+        self.mainVLayout.addWidget(self.contentWidget)
+        self.mainVLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainVLayout.setSpacing(0)
+        self.mainVLayout.setStretch(0, 0)
+        self.mainVLayout.setStretch(1, 1)
         #MainWindow
-        self.setCentralWidget(self.splitter)
+        self.setCentralWidget(self.mainWidget)
         #messageWidget list
         self.messageWidgetList = []
         #setting QWidget init
@@ -1467,22 +1480,23 @@ class MainWindow(QMainWindow):
         self.chatRecordsAnimationMove = QPropertyAnimation(self.chatRecordsWidget, b'geometry')
         self.chatRecordsAnimationMove.setDuration(1000)
         self.chatRecordsAnimationMove.setEasingCurve(QEasingCurve.OutQuad)
+        self.chatRecordsAnimationMove.valueChanged.connect(self.chatRecordsUiAnimationMove)
         self.chatRecordsAnimationMove.finished.connect(self.chatRecordsMoveFinished)
         #settingWidgetIsOpen
         self.chatRecordsWidgetIsOpen = False
         #emptyTextLabel PrintLabel
         self.emptyTextLabel = PrintLabel('文本不能为空', self)
-        self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.topWidget.height() - self.emptyTextLabel.height() - 10)
+        self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.emptyTextLabel.height() - 10)
         self.emptyTextLabel.raise_()
         self.emptyTextLabel.hide()
         #saveImageLabel PrintLabel
         self.saveImageLabel = PrintLabel('', self)
-        self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.topWidget.height() - self.saveImageLabel.height() - 10)
+        self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.saveImageLabel.height() - 10)
         self.saveImageLabel.raise_()
         self.saveImageLabel.hide()
         #textCopyLabel PrintLabel
         self.textCopyLabel = PrintLabel('文本复制成功', self)
-        self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.topWidget.height() - self.textCopyLabel.height() - 10)
+        self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.textCopyLabel.height() - 10)
         self.textCopyLabel.raise_()
         self.textCopyLabel.hide()
 
@@ -1564,32 +1578,31 @@ class MainWindow(QMainWindow):
                         self.chatShow.item(i).setSizeHint(QSize(self.chatShow.width(), messageWidget.height() + 10))
 
     def regionDivision(self):
-        PADDING = 2
-        if self.cursorGlobalX >= self.uiGlobalTL.x() and self.cursorGlobalX <= self.uiGlobalTL.x() + PADDING and self.cursorGlobalY >= self.uiGlobalTL.y() and self.cursorGlobalY <= self.uiGlobalTL.y() + PADDING:
+        if self.cursorGlobalX >= self.uiGlobalTL.x() and self.cursorGlobalX <= self.uiGlobalTL.x() + self.padding and self.cursorGlobalY >= self.uiGlobalTL.y() and self.cursorGlobalY <= self.uiGlobalTL.y() + self.padding:
             self.regionDir = RegionEnum.LEFTTOP
             self.setCursor(QCursor(Qt.SizeFDiagCursor))
-        elif self.cursorGlobalX >= self.uiGlobalBR.x() - PADDING and self.cursorGlobalX <= self.uiGlobalBR.x() and self.cursorGlobalY >= self.uiGlobalTL.y() and self.cursorGlobalY <= self.uiGlobalTL.y() + PADDING:
+        elif self.cursorGlobalX >= self.uiGlobalBR.x() - self.padding and self.cursorGlobalX <= self.uiGlobalBR.x() and self.cursorGlobalY >= self.uiGlobalTL.y() and self.cursorGlobalY <= self.uiGlobalTL.y() + self.padding:
             self.regionDir = RegionEnum.RIGHTTOP
             self.setCursor(QCursor(Qt.SizeBDiagCursor))
-        elif self.cursorGlobalX >= self.uiGlobalTL.x() and self.cursorGlobalX <= self.uiGlobalTL.x() + PADDING and self.cursorGlobalY >= self.uiGlobalBR.y() - PADDING and self.cursorGlobalY <= self.uiGlobalBR.y():
+        elif self.cursorGlobalX >= self.uiGlobalTL.x() and self.cursorGlobalX <= self.uiGlobalTL.x() + self.padding and self.cursorGlobalY >= self.uiGlobalBR.y() - self.padding and self.cursorGlobalY <= self.uiGlobalBR.y():
             self.regionDir = RegionEnum.LEFTBOTTOM
             self.setCursor(QCursor(Qt.SizeBDiagCursor))
-        elif self.cursorGlobalX >= self.uiGlobalBR.x() - PADDING and self.cursorGlobalX <= self.uiGlobalBR.x() and self.cursorGlobalY >= self.uiGlobalBR.y() - PADDING and self.cursorGlobalY <= self.uiGlobalBR.y():
+        elif self.cursorGlobalX >= self.uiGlobalBR.x() - self.padding and self.cursorGlobalX <= self.uiGlobalBR.x() and self.cursorGlobalY >= self.uiGlobalBR.y() - self.padding and self.cursorGlobalY <= self.uiGlobalBR.y():
             self.regionDir = RegionEnum.RIGHTBOTTOM
             self.setCursor(QCursor(Qt.SizeFDiagCursor))
-        elif self.cursorGlobalX >= self.uiGlobalTL.x() and self.cursorGlobalX <= self.uiGlobalTL.x() + PADDING:
+        elif self.cursorGlobalX >= self.uiGlobalTL.x() and self.cursorGlobalX <= self.uiGlobalTL.x() + self.padding:
             self.regionDir = RegionEnum.LEFT
             self.setCursor(QCursor(Qt.SizeHorCursor))
-        elif self.cursorGlobalX >= self.uiGlobalBR.x() - PADDING and self.cursorGlobalX <= self.uiGlobalBR.x():
+        elif self.cursorGlobalX >= self.uiGlobalBR.x() - self.padding and self.cursorGlobalX <= self.uiGlobalBR.x():
             self.regionDir = RegionEnum.RIGHT
             self.setCursor(QCursor(Qt.SizeHorCursor))
-        elif self.cursorGlobalY >= self.uiGlobalTL.y() and self.cursorGlobalY <= self.uiGlobalTL.y() + PADDING:
+        elif self.cursorGlobalY >= self.uiGlobalTL.y() and self.cursorGlobalY <= self.uiGlobalTL.y() + self.padding:
             self.regionDir = RegionEnum.TOP
             self.setCursor(QCursor(Qt.SizeVerCursor))
-        elif self.cursorGlobalY >= self.uiGlobalBR.y() - PADDING and self.cursorGlobalY <= self.uiGlobalBR.y():
+        elif self.cursorGlobalY >= self.uiGlobalBR.y() - self.padding and self.cursorGlobalY <= self.uiGlobalBR.y():
             self.regionDir = RegionEnum.BOTTOM
             self.setCursor(QCursor(Qt.SizeVerCursor))
-        elif self.cursorGlobalX >= self.uiGlobalTL.x() + PADDING + 1 and self.cursorGlobalX <= self.uiGlobalBR.x() - PADDING - 1 and self.cursorGlobalY >= self.uiGlobalTL.y() + PADDING + 1 and self.cursorGlobalY <= self.uiGlobalTL.y() + self.titleWidget.height():
+        elif self.cursorGlobalX >= self.uiGlobalTL.x() + self.padding + 1 and self.cursorGlobalX <= self.uiGlobalBR.x() - self.padding - 1 and self.cursorGlobalY >= self.uiGlobalTL.y() + self.padding + 1 and self.cursorGlobalY <= self.uiGlobalTL.y() + self.titleWidget.height():
             if self.cursorGlobalX <= self.uiGlobalBR.x() - self.minButton.width() - self.maxButton.width() - self.closeButton.width() - 1:
                 self.regionDir = RegionEnum.TITLE
             else:
@@ -1651,7 +1664,7 @@ class MainWindow(QMainWindow):
                     self.messageWidgetList[i].clearSelectedText()
             #judge mouse press position
             if self.settingWidgetIsOpen:
-                notSettingRect = QRect(self.settingWidget.width(), self.titleWidget.height(), self.width() - self.settingWidget.width(), self.height() - self.titleWidget.height())
+                notSettingRect = QRect(self.settingWidget.width(), self.titleWidget.height(), self.width() - self.settingWidget.width() - self.padding - 1, self.height() - self.titleWidget.height() - self.padding - 1)
                 if notSettingRect.contains(event.pos()):
                     self.mask.hide()
                     self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
@@ -1659,7 +1672,7 @@ class MainWindow(QMainWindow):
                     self.settingAnimationMove.start()
                     self.settingWidgetIsOpen = False
             elif self.chatRecordsWidgetIsOpen:
-                notChatRecordsRect = QRect(self.chatRecordsWidget.width(), self.titleWidget.height(), self.width() - self.chatRecordsWidget.width(), self.height() - self.titleWidget.height())
+                notChatRecordsRect = QRect(self.chatRecordsWidget.width(), self.titleWidget.height(), self.width() - self.chatRecordsWidget.width() - self.padding - 1, self.height() - self.titleWidget.height() - self.padding - 1)
                 if notChatRecordsRect.contains(event.pos()):
                     self.mask.hide()
                     self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
@@ -1667,7 +1680,7 @@ class MainWindow(QMainWindow):
                     self.chatRecordsAnimationMove.start()
                     self.chatRecordsWidgetIsOpen = False
             else:
-                chatShowRect = QRect(self.chatShowWidget.geometry().x() + 27, self.chatShowWidget.geometry().y() + 12, self.chatShowWidget.geometry().width() - 54, self.chatShowWidget.geometry().height() - 28)
+                chatShowRect = QRect(self.chatShow.geometry().x(), self.chatShow.geometry().y() + self.titleWidget.height() + self.chatFun.height(), self.chatShow.geometry().width(), self.chatShow.geometry().height())
                 if not chatShowRect.contains(event.pos()):
                     for i in range(0, len(self.messageWidgetList)):
                         self.messageWidgetList[i].showDefaultColor()
@@ -1679,7 +1692,7 @@ class MainWindow(QMainWindow):
                             messageWidget.showDefaultColor()
                             if widget == messageWidget.getTextLabel().getCustomLabel():
                                 messageWidget.showColorful()
-                chatInputRect = QRect(self.chatInput.geometry().x(), self.chatInput.geometry().y() + self.topWidget.height(), self.chatInput.geometry().width(), self.chatInput.geometry().height())
+                chatInputRect = QRect(self.chatInput.geometry().x(), self.chatInput.geometry().y() + self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height(), self.chatInput.geometry().width(), self.chatInput.geometry().height())
                 if chatInputRect.contains(event.pos()):
                     self.chatInput.backgroundColorShowLight()
                 else:
@@ -1697,11 +1710,27 @@ class MainWindow(QMainWindow):
         self.mask.setFixedSize(self.width(), self.height())
         #setting widget set geometry
         self.settingWidget.resize(self.width() // 3, self.height() - self.titleWidget.height())
-        if not self.settingWidgetIsOpen:
+        if self.settingWidgetIsOpen:
+            self.chatShow.resize(self.width() * 2 // 3 - 29, self.chatShow.height())
+            self.chatShowWidget.resize(self.width() * 2 // 3, self.chatShowWidget.height())
+            self.chatInput.resize(self.width() * 2 // 3 - 40, self.chatInput.height())
+            self.chatInput.resetWidgetSize()
+            self.chatInputWidget.resize(self.width() * 2 // 3, self.chatInputWidget.height())
+            self.splitter.resize(self.width() * 2 // 3, self.splitter.height())
+            self.contentVLayout.setContentsMargins(self.width() // 3, 0, 0, 0)
+        else:
             self.settingWidget.move(-self.settingWidget.width(), self.titleWidget.height())
         #chatRecords widget set geometry
         self.chatRecordsWidget.resetWidgetSize(self.width() // 3, self.height() - self.titleWidget.height())
-        if not self.chatRecordsWidgetIsOpen:
+        if self.chatRecordsWidgetIsOpen:
+            self.chatShow.resize(self.width() * 2 // 3 - 29, self.chatShow.height())
+            self.chatShowWidget.resize(self.width() * 2 // 3, self.chatShowWidget.height())
+            self.chatInput.resize(self.width() * 2 // 3 - 40, self.chatInput.height())
+            self.chatInput.resetWidgetSize()
+            self.chatInputWidget.resize(self.width() * 2 // 3, self.chatInputWidget.height())
+            self.splitter.resize(self.width() * 2 // 3, self.splitter.height())
+            self.contentVLayout.setContentsMargins(self.width() // 3, 0, 0, 0)
+        else:
             self.chatRecordsWidget.move(-self.chatRecordsWidget.width(), self.titleWidget.height())
         #TextLabel max width
         textMaxWidth = int(self.chatShow.width() * 2 / 3)
@@ -1721,11 +1750,11 @@ class MainWindow(QMainWindow):
         #TextEditFull adjust size
         self.chatInput.resetWidgetSize()
         #move emptyTextLabel
-        self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.topWidget.height() - self.emptyTextLabel.height() - 10)
+        self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.emptyTextLabel.height() - 10)
         #move saveImageLabel
-        self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.topWidget.height() - self.saveImageLabel.height() - 10)
+        self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.saveImageLabel.height() - 10)
         #move textCopyLabel
-        self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.topWidget.height() - self.textCopyLabel.height() - 10)
+        self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.textCopyLabel.height() - 10)
 
     def itemShowColorful(self, item):
         for i in range(0, len(self.messageWidgetList)):
@@ -2074,6 +2103,7 @@ class MainWindow(QMainWindow):
         self.settingAnimationMove = QPropertyAnimation(self.settingWidget, b'geometry')
         self.settingAnimationMove.setDuration(1000)
         self.settingAnimationMove.setEasingCurve(QEasingCurve.OutQuad)
+        self.settingAnimationMove.valueChanged.connect(self.settingUiAnimationMove)
         #settingWidgetIsOpen
         self.settingWidgetIsOpen = False
 
@@ -2084,6 +2114,59 @@ class MainWindow(QMainWindow):
         self.settingAnimationMove.setEndValue(QRect(0, self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
         self.settingAnimationMove.start()
         self.settingWidgetIsOpen = True
+
+    def settingUiAnimationMove(self, rect):
+        self.chatShow.resize(self.width() - rect.x() - self.settingWidget.width() - 29, self.chatShow.height())
+        self.chatShowWidget.resize(self.width() - rect.x() - self.settingWidget.width(), self.chatShowWidget.height())
+        self.chatInput.resize(self.width() - rect.x() - self.settingWidget.width() - 40, self.chatInput.height())
+        self.chatInput.resetWidgetSize()
+        self.chatInputWidget.resize(self.width() - rect.x() - self.settingWidget.width(), self.chatInputWidget.height())
+        self.splitter.resize(self.width() - rect.x() - self.settingWidget.width(), self.splitter.height())
+        self.contentVLayout.setContentsMargins(rect.x() + self.settingWidget.width(), 0, 0, 0)
+        #TextLabel max width
+        textMaxWidth = int(self.chatShow.width() * 2 / 3)
+        for i in range(0, self.chatShow.count()):
+            #messageWidget set max width of textLabel
+            messageWidget = self.messageWidgetList[i]
+            messageWidget.setTextMaxWidth(textMaxWidth)
+            #chatShow itemWidget adjust size
+            itemWidget = self.chatShow.itemWidget(self.chatShow.item(i))
+            itemWidget.setFixedSize(self.chatShow.width(), messageWidget.height() + 10)
+            if messageWidget.getIsUser():
+                itemWidget.layout().setContentsMargins(itemWidget.width() - messageWidget.width() - 25, 5, 25, 5)
+            else:
+                itemWidget.layout().setContentsMargins(0, 5, itemWidget.width() - messageWidget.width(), 5)
+            #chatShow item adjust size
+            self.chatShow.item(i).setSizeHint(QSize(self.chatShow.width(), messageWidget.height() + 10))
+
+    def chatRecordsUiAnimationMove(self, rect):
+        self.chatShow.resize(self.width() - rect.x() - self.chatRecordsWidget.width() - 29, self.chatShow.height())
+        self.chatShowWidget.resize(self.width() - rect.x() - self.chatRecordsWidget.width(), self.chatShowWidget.height())
+        self.chatInput.resize(self.width() - rect.x() - self.chatRecordsWidget.width() - 40, self.chatInput.height())
+        self.chatInput.resetWidgetSize()
+        self.chatInputWidget.resize(self.width() - rect.x() - self.chatRecordsWidget.width(), self.chatInputWidget.height())
+        self.splitter.resize(self.width() - rect.x() - self.chatRecordsWidget.width(), self.splitter.height())
+        self.contentVLayout.setContentsMargins(rect.x() + self.chatRecordsWidget.width(), 0, 0, 0)
+        #TextLabel max width
+        textMaxWidth = int(self.chatShow.width() * 2 / 3)
+        for i in range(0, self.chatShow.count()):
+            #messageWidget set max width of textLabel
+            messageWidget = self.messageWidgetList[i]
+            messageWidget.setTextMaxWidth(textMaxWidth)
+            #chatShow itemWidget adjust size
+            itemWidget = self.chatShow.itemWidget(self.chatShow.item(i))
+            itemWidget.setFixedSize(self.chatShow.width(), messageWidget.height() + 10)
+            if messageWidget.getIsUser():
+                itemWidget.layout().setContentsMargins(itemWidget.width() - messageWidget.width() - 25, 5, 25, 5)
+            else:
+                itemWidget.layout().setContentsMargins(0, 5, itemWidget.width() - messageWidget.width(), 5)
+            #chatShow item adjust size
+            self.chatShow.item(i).setSizeHint(QSize(self.chatShow.width(), messageWidget.height() + 10))
+
+    def chatRecordsMoveFinished(self):
+        if not self.chatRecordsWidgetIsOpen:
+            #delete all item
+            self.chatRecordsWidget.delAllListItems()
 
     def maxTokensBoxValueChanged(self, i):
         global maxTokens_currentVal
@@ -2234,11 +2317,11 @@ class MainWindow(QMainWindow):
         #save image
         if self.chatPixmap.save(self.chatPixmapName, "png"):
             self.saveImageLabel.setText("图像保存成功")
-            self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.topWidget.height() - self.saveImageLabel.height() - 10)
+            self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.saveImageLabel.height() - 10)
             self.saveImageLabel.printStart()
         else:
             self.saveImageLabel.setText("图像保存失败")
-            self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.topWidget.height() - self.saveImageLabel.height() - 10)
+            self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.saveImageLabel.height() - 10)
             self.saveImageLabel.printStart()
 
     def showChatRecords(self):
@@ -2378,11 +2461,6 @@ class MainWindow(QMainWindow):
                 text = ''
             else:
                 text += lines[i]
-
-    def chatRecordsMoveFinished(self):
-        if not self.chatRecordsWidgetIsOpen:
-            #delete all item
-            self.chatRecordsWidget.delAllListItems()
 
     def newChat(self):
         #init

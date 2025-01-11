@@ -6,14 +6,17 @@ Created on Tue Feb 13 18:31:44 2024
 """
 
 import sys, os
-import math
 from enum import Enum
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QAbstractSpinBox, QGridLayout, QLineEdit, QSplitter, QToolTip
-from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QAbstractSpinBox, QGridLayout, QLineEdit, QSplitter, QToolTip, QTextEdit
+from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QTextDocument, QTextOption
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 from openai import OpenAI
+import mistune
+import time
 
-base_url = "http://7613907zg6.vicp.fun:45861/v1"
+#base_url = "https://7613907zg6.vicp.fun/v1"
+base_url = "http://7613907zg6.vicp.fun:45861"
 client = OpenAI(api_key="EMPTY", base_url=base_url)
 
 maxTokens_minimum = 0
@@ -28,7 +31,128 @@ temperature_maximum = 1
 temperature_currentVal = 0.8
 temperature_singleStep = 0.01
 
-class messageThread(QThread):
+# 定义 Markdown 内容
+markdown_content = """
+一级标题
+========
+二级标题
+--------
+------------------
+# 一级标题
+## 二级标题
+### 三级标题
+这是一个段落，包含一些 *Markdown* 语法。  
+*斜体文本*  
+_斜体文本_  
+**粗体文本**  
+__粗体文本__  
+***粗斜体文本***  
+___粗斜体文本___  
+~~删除线文本~~  
+<u>带下划线文本</u>  
+苹果10$，梨子20$，香蕉30$，橘子40$。  
+苹果10\$，梨子20\$，香蕉30\$，橘子40\$。  
+
+创建脚注格式类似这样 [^RUNOOB]。  
+[^RUNOOB]: 菜鸟教程 -- 学的不仅是技术，更是梦想！！！  
+
+******************
+### 无序列表
+* 第一项
+* 第二项
+* 第三项
+
++ 第一项
++ 第二项
++ 第三项
+
+- 第一项
+- 第二项
+- 第三项
+
+### 有序列表
+1. 第一项
+2. 第二项
+3. 第三项
+
+### 列表嵌套
+1. 第一项
+    - 第一项嵌套的第一个元素
+    - 第一项嵌套的第二个元素
+2. 第二项
+    1. 第二项嵌套的第一个元素
+    2. 第二项嵌套的第二个元素
+******************
+### 区块
+> 菜鸟教程
+> 学的不仅是技术更是梦想
+
+> 最外层
+> > 第一层嵌套
+> > > 第二层嵌套
+
+> 区块中使用列表
+> 1. 第一项
+> 2. 第二项
+> + 第一项
+> + 第二项
+> + 第三项
+
+列表中使用区块
+* 第一项
+    > 菜鸟教程
+    > 学的不仅是技术更是梦想
+* 第二项
+******************
+### 代码
+`printf()`函数
+
+    def printHelloWorld():
+        print('hello world')
+
+```python:
+def printHelloWorld():
+    print('hello world')
+```
+******************
+### 链接
+这是一个链接 [菜鸟教程](https://www.runoob.com)  
+这个链接用 1 作为网址变量 [Google][1]  
+这个链接用 runoob 作为网址变量 [Runoob][runoob]  
+然后在文档的结尾为变量赋值（网址）  
+
+[1]: http://www.google.com/  
+[runoob]: http://www.runoob.com/  
+******************
+### 图片
+![RUNOOB 图标](https://static.jyshare.com/images/runoob-logo.png "RUNOOB")
+
+这个链接用 1 作为网址变量 [RUNOOB][2]  
+然后在文档的结尾为变量赋值（网址）  
+
+[2]: https://static.jyshare.com/images/runoob-logo.png
+
+<img src="https://static.jyshare.com/images/runoob-logo.png" width="25%">
+
+******************
+### 表格
+| 表头 | 表头 | 表头 |  
+| :--- | ---: | :---: |  
+| 单元格 | 单元格 | 单元格 |  
+| 单元格 | 单元格 | 单元格 |  
+******************
+### LaTeX公式：
+这是一个行内公式 $E=mc^2$ 的示例。  
+行间公式：
+$$\sum_{i=1}^n a_i$$
+$$\frac{a}{b} = c$$
+积分公式：
+$$\int_{a}^{b} {f(x)} \, \mathrm{d}x = F(b) - F(a)$$
+微分公式：
+$$\frac{d}{dx} e^x = e^x$$
+"""
+
+'''class messageThread(QThread):
     newMessage = pyqtSignal(str)
 
     def __init__(self, contentInput, use_stream=True, parent=None):
@@ -43,7 +167,7 @@ class messageThread(QThread):
 
     def run(self):
         response = client.chat.completions.create(
-            model="qwen2.5:14b",
+            model="chatglm3-6b",
             messages=self.text,
             stream=self.use_stream,
             max_tokens=maxTokens_currentVal,
@@ -61,6 +185,28 @@ class messageThread(QThread):
                 self.newMessage.emit(self.contentOutput)
         else:
             print("Error:", response.status_code)
+        return'''
+class messageThread(QThread):
+    newMessage = pyqtSignal(str)
+
+    def __init__(self, contentInput, use_stream=True, parent=None):
+        super(messageThread, self).__init__(parent)
+        self.text = [
+            {
+                "role": "user",
+                "content": contentInput
+            }
+        ]
+        self.use_stream = use_stream
+
+    def run(self):
+        self.contentOutput = markdown_content
+        if self.use_stream:
+            for i in range(0, len(self.contentOutput), 2):
+                self.newMessage.emit(self.contentOutput[i:i+2])
+                time.sleep(0.1)
+        else:
+            self.newMessage.emit(self.contentOutput)
         return
 
 class PushButton(QPushButton):
@@ -137,6 +283,21 @@ class FunWidget(QWidget):
             border-image: url("new_chat_hover.png");
         }
         ''')
+
+        #modelButton PushButton
+        '''self.modelButton = PushButton(tipText='模型', tipOffsetX=20, tipOffsetY=40)
+        self.modelButton.setFixedSize(30, 30)
+        self.modelButton.setIconSize(QSize(30, 30))'''
+        #self.modelButton.setStyleSheet('''
+        #QPushButton{
+        #    border-image: url("model.png");
+        #}
+        #QPushButton:hover{
+        #    border-image: url("model_hover.png");
+        #}
+        #''')
+        '''self.modelButton.clicked.connect(self.modelSelect)'''
+
         #mainHLayout QHBoxLayout
         self.mainHLayout = QHBoxLayout()
         self.setLayout(self.mainHLayout)
@@ -186,6 +347,7 @@ class ListWidget(QListWidget):
         self.resize(995, 350)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.setFocusPolicy(Qt.NoFocus)
         self.setStyleSheet('''
         QListWidget{
@@ -222,6 +384,12 @@ class ListWidget(QListWidget):
     def mouseReleaseEvent(self, event):
         QListWidget.mouseReleaseEvent(self, event)
         event.ignore()
+
+    def resizeEvent(self, event):
+        return
+
+    def toList(self, sourceList):
+        self.messageWidgetList = sourceList
 
 class SendButton(QPushButton):
     def __init__(self, tipText='', tipOffsetX=10, tipOffsetY=40, parent=None):
@@ -467,7 +635,443 @@ class ImageLabel(QLabel):
         else:
             self.setPixmap(QPixmap("ai.png"))
 
-class CustomLabel(QLabel):
+class WebEngineView(QWebEngineView):
+    def __init__(self, parent=None):
+        super(WebEngineView, self).__init__(parent)
+        self.page().setBackgroundColor(Qt.transparent)
+
+    def mousePressEvent(self, event):
+        WebEngineView.mousePressEvent(self, event)
+        event.ignore()
+
+    def mouseReleaseEvent(self, event):
+        '''if event.button() == Qt.LeftButton:
+            if self.hasSelectedText():
+                self.textSelected.emit(self.selectedText())'''
+        WebEngineView.mouseReleaseEvent(self, event)
+        event.ignore()
+
+    def connectPageLoadFinished(self, fun):
+        self.page().loadFinished.connect(fun)
+
+'''class TextRead(QTextEdit):
+    #textSelected = pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        super(TextRead, self).__init__(parent)
+        self.setReadOnly(True)
+        self.setStyleSheet('''
+'''
+        QTextEdit{
+            border: none;
+            background: transparent;
+        }'''
+'''     )
+
+    def mousePressEvent(self, event):
+        QTextEdit.mousePressEvent(self, event)
+        event.ignore()
+
+    def mouseReleaseEvent(self, event):'''
+'''     if event.button() == Qt.LeftButton:
+            if self.hasSelectedText():
+                self.textSelected.emit(self.selectedText())'''
+'''     QTextEdit.mouseReleaseEvent(self, event)
+        event.ignore()'''
+
+class TextShow(QWidget):
+    def __init__(self, text, isUser=True, maxWidth=650, parent=None):
+        super(TextShow, self).__init__(parent)
+        self.text = text.strip('\n')
+
+        #self.textRead = TextRead()
+        #self.textRead.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        #self.textRead.setTextInteractionFlags(Qt.TextSelectableByMouse)
+
+        self.webEngineView = WebEngineView()
+        #self.webEngineView.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        #self.webEngineView.setTextInteractionFlags(Qt.TextSelectableByMouse)
+
+        #self.textRead.setWordWrap(True)
+        #self.textRead.setWordWrapMode(QTextOption.WordWrap)
+        self.maxWidth = maxWidth
+
+        #self.textRead.setMaximumWidth(self.maxWidth)
+
+        self.webEngineView.setMaximumWidth(self.maxWidth)
+
+        self.font = QFont()
+        self.font.setPixelSize(22)
+
+        #self.textRead.setFont(self.font)
+
+        self.webEngineView.setFont(self.font)
+
+        #self.font_metrics = QFontMetricsF(self.font)
+        self.mainHLayout = QHBoxLayout()
+
+        self.zoomFactorWidth = 1
+        self.zoomFactorHeight = 1
+        self.webEngineView.connectPageLoadFinished(self.setSize)
+
+        if not self.text == '':
+            '''textWidth = 0
+            textHeight = int(self.font_metrics.height())
+            count = self.text.count('\n')
+            textList = self.text.split('\n', count)
+            maxTempTextWidth = 0
+            for i in range(0, count + 1):
+                if int(self.font_metrics.width(textList[i])) > maxTempTextWidth:
+                    maxTempTextWidth = int(self.font_metrics.width(textList[i]))
+            if (maxTempTextWidth + 10) < self.maxWidth:
+                showWidth = maxTempTextWidth + 10
+                showHeight = (count + 1) * (textHeight + 1) - 1 + 9
+            else:
+                for i in range(0, count + 1):
+                    if i != count:
+                        tempTextWidth = self.font_metrics.width(textList[i] + ' ')
+                        tempTextWidth = math.ceil(tempTextWidth / (self.maxWidth - 32)) * (self.maxWidth - 32)
+                    else:
+                        tempTextWidth = self.font_metrics.width(textList[i])
+                    textWidth += int(tempTextWidth)
+                showWidth = self.maxWidth
+                showHeight = int(math.ceil(textWidth / (self.maxWidth - 32)) * (textHeight + 1) - 1) + 9
+            self.textRead.setText(self.text)'''
+            #document = QTextDocument(self.text)
+            #htmlText = document.toHtml()
+            #self.modifiedHtmlText = self.replaceFontSizeUnit(htmlText)
+            #self.textRead.setHtml(self.modifiedHtmlText)
+            '''self.textRead.setFixedSize(showWidth, showHeight)'''
+
+            #self.textRead.setMarkdown(self.text)
+            #self.textRead.document().adjustSize()
+            #self.textRead.resize(int(self.textRead.document().size().width()), int(self.textRead.document().size().height()) + 2)
+
+            markdown_content = self.text.replace('\$', '\\\$')
+            markdown_content = markdown_content.replace('\frac', '\\frac')
+            markdown_content = markdown_content.replace('\,', '\\\,')
+            # 使用 mistune 将 Markdown 转换为 HTML
+            markdown = mistune.create_markdown(escape=False, renderer='html')
+            self.html_text = markdown(markdown_content)
+
+            # 添加 MathJax CDN 链接到 HTML 头部
+            self.mathjax_cdn = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown with MathJax</title>
+    <script type="text/javascript">
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"], ["\\(", "\\)"]],
+                displayMath: [["$$", "$$"], ["\\[", "\\]"]]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.1.2/es5/tex-mml-chtml.js">
+    </script>
+</head>
+"""
+
+            # 将转换后的 HTML 内容添加到 body 中
+            self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
+
+            #self.webEngineView.setMarkdown(self.text)
+            #self.webEngineView.setMinimumSize(100, 100)
+            self.webEngineView.setHtml(str(self.full_html_text))
+
+            #self.webEngineView.document().adjustSize()
+            #self.webEngineView.resize(int(self.webEngineView.document().size().width()), int(self.webEngineView.document().size().height()) + 2)
+
+            #self.webEngineView.resize(self.webEngineView.page().contentsSize().toSize())
+            print('web_size:', self.webEngineView.page().contentsSize().toSize().width(), self.webEngineView.page().contentsSize().toSize().height())
+
+            '''self.webEngineView.page().runJavaScript("document.body.scrollWidth", self.adjustWidth)
+            self.webEngineView.page().runJavaScript("document.body.scrollHeight", self.adjustHeight)
+
+            self.webEngineView.setZoomFactor(min(self.zoomFactorWidth, self.zoomFactorHeight))'''
+            #self.webEngineView.adjustSize()
+
+            #self.mainHLayout.addWidget(self.textRead)
+
+            self.mainHLayout.addWidget(self.webEngineView)
+
+            self.mainHLayout.setContentsMargins(5, 5, 5, 5)
+            self.setLayout(self.mainHLayout)
+
+            #self.setFixedSize(showWidth + 10, showHeight + 10)
+
+            #self.setFixedSize(self.textRead.width() + 10, self.textRead.height() + 10)
+
+            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
+        else:
+            #self.textRead.setFixedSize(22, 22)
+
+            #self.textRead.resize(22, 22)
+
+            self.webEngineView.resize(22, 22)
+
+            #self.mainHLayout.addWidget(self.textRead)
+
+            self.mainHLayout.addWidget(self.webEngineView)
+
+            self.mainHLayout.setContentsMargins(5, 5, 5, 5)
+            self.setLayout(self.mainHLayout)
+            self.setFixedSize(32, 32)
+        self.isUser = isUser
+        self.isColorful = False
+
+    def adjustWidth(self, width):
+        #self.webEngineView.resize(width, self.webEngineView.height())
+        if width:
+            pageWidth = width
+            print('pageWidth', pageWidth)
+            viewWidth = self.webEngineView.width()
+            print('viewWidth', viewWidth)
+            self.zoomFactorWidth = viewWidth / pageWidth
+            print('zoomFactorWidth', self.zoomFactorWidth)
+
+    def adjustHeight(self, height):
+        #self.webEngineView.resize(self.webEngineView.height(), height)
+        if height:
+            pageHeight = height
+            print('pageHeight', pageHeight)
+            viewHeight = self.webEngineView.height()
+            print('viewHeight', viewHeight)
+            self.zoomFactorHeight = viewHeight / pageHeight
+            print('zoomFactorHeight', self.zoomFactorHeight)
+            self.webEngineView.setZoomFactor(min(self.zoomFactorWidth, self.zoomFactorHeight))
+
+    def setSize(self, success):
+        if success:
+            print('setSize')
+            QTimer.singleShot(100, lambda: self.webEngineView.page().runJavaScript("document.body.scrollWidth", self.adjustWidth))
+            QTimer.singleShot(100, lambda: self.webEngineView.page().runJavaScript("document.body.scrollHeight", self.adjustHeight))
+
+    '''def replaceFontSizeUnit(self, htmlText):
+        fontSizeRegex = re.compile('font-size:\s*(\d+(\.\d+)?)pt\s*;?')
+        def replaceFunc(match):
+            originalSize = match.group(1)
+            return f'font-size:{originalSize}px;'
+        newHtmlText = re.sub(fontSizeRegex, replaceFunc, htmlText)
+        return newHtmlText'''
+
+    def paintEvent(self, event):
+        #QPainter create
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        #QPainterPath
+        path = QPainterPath()
+        path.setFillRule(Qt.WindingFill)
+        path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 13, 13)
+        #QBrush
+        brush = QBrush(Qt.SolidPattern)
+        if self.isColorful:
+            brush.setColor(QColor(119, 221, 255))
+        else:
+            if self.isUser:
+                brush.setColor(QColor(255, 238, 153))
+            else:
+                brush.setColor(QColor(209, 187, 255))
+        #add rect and set brush
+        if self.isUser:
+            path.addRect(self.rect().width() - 15, self.rect().y(), 15, 15)
+        else:
+            path.addRect(self.rect().x(), self.rect().y(), 15, 15)
+        #QPainter setting
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(brush)
+        painter.drawPath(path.simplified())
+        #QPainter end
+        painter.end()
+
+    def setText(self, text):
+        self.text = text.strip('\n')
+        if not self.text == '':
+            '''textWidth = 0
+            textHeight = int(self.font_metrics.height())
+            count = self.text.count('\n')
+            textList = self.text.split('\n', count)
+            maxTempTextWidth = 0
+            for i in range(0, count + 1):
+                if int(self.font_metrics.width(textList[i])) > maxTempTextWidth:
+                    maxTempTextWidth = int(self.font_metrics.width(textList[i]))
+            if (maxTempTextWidth + 4) < self.maxWidth:
+                labelWidth = maxTempTextWidth + 4
+                labelHeight = (count + 1) * (textHeight + 3) - 3
+            else:
+                for i in range(0, count + 1):
+                    if i != count:
+                        tempTextWidth = self.font_metrics.width(textList[i] + ' ')
+                        tempTextWidth = math.ceil(tempTextWidth / (self.maxWidth - 24)) * (self.maxWidth - 24)
+                    else:
+                        tempTextWidth = self.font_metrics.width(textList[i])
+                    textWidth += int(tempTextWidth)
+                labelWidth = self.maxWidth
+                labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
+            self.label.setText(self.text)
+            self.label.setFixedSize(labelWidth, labelHeight)
+            self.setFixedSize(labelWidth + 10, labelHeight + 10)'''
+
+            #self.textRead.setMarkdown(self.text)
+            #self.textRead.document().adjustSize()
+            #self.textRead.resize(int(self.textRead.document().size().width()), int(self.textRead.document().size().height()) + 2)
+            #self.setFixedSize(self.textRead.width() + 10, self.textRead.height() + 10)
+
+            markdown_content = self.text.replace('\$', '\\\$')
+            markdown_content = markdown_content.replace('\frac', '\\frac')
+            markdown_content = markdown_content.replace('\,', '\\\,')
+            # 使用 mistune 将 Markdown 转换为 HTML
+            markdown = mistune.create_markdown(escape=False, renderer='html')
+            self.html_text = markdown(markdown_content)
+
+            # 添加 MathJax CDN 链接到 HTML 头部
+            self.mathjax_cdn = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown with MathJax</title>
+    <script type="text/javascript">
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"], ["\\(", "\\)"]],
+                displayMath: [["$$", "$$"], ["\\[", "\\]"]]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.1.2/es5/tex-mml-chtml.js">
+    </script>
+</head>
+            """
+
+            # 将转换后的 HTML 内容添加到 body 中
+            self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
+
+            #self.webEngineView.setMarkdown(self.text)
+
+            self.webEngineView.setHtml(str(self.full_html_text))
+
+            #self.webEngineView.document().adjustSize()
+            #self.webEngineView.resize(int(self.webEngineView.document().size().width()), int(self.webEngineView.document().size().height()) + 2)
+
+            #self.webEngineView.resize(self.webEngineView.page().contentsSize().toSize())
+
+            '''self.webEngineView.page().runJavaScript("document.body.scrollWidth", self.adjustWidth)
+            self.webEngineView.page().runJavaScript("document.body.scrollHeight", self.adjustHeight)
+
+            self.webEngineView.setZoomFactor(min(self.zoomFactorWidth, self.zoomFactorHeight))'''
+            #self.webEngineView.adjustSize()
+
+            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
+        else:
+            #self.label.setFixedSize(22, 22)
+
+            #self.textRead.resize(22, 22)
+
+            self.webEngineView.resize(22, 22)
+            self.setFixedSize(32, 32)
+
+    def setMaxWidth(self, maxWidth):
+        self.maxWidth = maxWidth
+
+        #self.textRead.setMaximumWidth(self.maxWidth)
+
+        self.webEngineView.setMaximumWidth(self.maxWidth)
+        if not self.text == '':
+            '''textWidth = 0
+            textHeight = int(self.font_metrics.height())
+            count = self.text.count('\n')
+            textList = self.text.split('\n', count)
+            maxTempTextWidth = 0
+            for i in range(0, count + 1):
+                if int(self.font_metrics.width(textList[i])) > maxTempTextWidth:
+                    maxTempTextWidth = int(self.font_metrics.width(textList[i]))
+            if (maxTempTextWidth + 10) < self.maxWidth:
+                showWidth = maxTempTextWidth + 10
+                showHeight = (count + 1) * (textHeight + 1) - 1 + 9
+            else:
+                for i in range(0, count + 1):
+                    if i != count:
+                        tempTextWidth = self.font_metrics.width(textList[i] + ' ')
+                        tempTextWidth = math.ceil(tempTextWidth / (self.maxWidth - 32)) * (self.maxWidth - 32)
+                    else:
+                        tempTextWidth = self.font_metrics.width(textList[i])
+                    textWidth += int(tempTextWidth)
+                showWidth = self.maxWidth
+                showHeight = int(math.ceil(textWidth / (self.maxWidth - 32)) * (textHeight + 1) - 1) + 9
+            self.textRead.setText(self.text)'''
+            #self.textRead.setHtml(self.modifiedHtmlText)
+            '''self.textRead.setFixedSize(showWidth, showHeight)'''
+
+            #print('textShow maxWidth:', self.maxWidth)
+            #print('textRead width:', self.textRead.width())
+            #print('textRead height:', self.textRead.height())
+            #print('textRead width:', self.textRead.width())
+            #print('textRead height:', self.textRead.height())
+            #print('document width:', self.textRead.document().size().width())
+            #print('document height:', self.textRead.document().size().height())
+
+            #self.textRead.setFixedWidth(self.maxWidth)
+            #self.textRead.setFixedSize(int(self.textRead.document().size().width()), int(self.textRead.document().size().height()))
+
+            #self.textRead.setMarkdown(self.text)
+            #self.textRead.document().adjustSize()
+            #self.textRead.resize(int(self.textRead.document().size().width()), int(self.textRead.document().size().height()) + 2)
+
+            #self.webEngineView.setMarkdown(self.text)
+
+            self.webEngineView.setHtml(str(self.full_html_text))
+
+            #self.webEngineView.document().adjustSize()
+            #self.webEngineView.resize(int(self.webEngineView.document().size().width()), int(self.webEngineView.document().size().height()) + 2)
+
+            #self.webEngineView.resize(self.webEngineView.page().contentsSize().toSize())
+
+            #self.webEngineView.page().runJavaScript("document.body.scrollWidth", self.adjustWidth)
+            #self.webEngineView.page().runJavaScript("document.body.scrollHeight", self.adjustHeight)
+
+            self.webEngineView.adjustSize()
+
+            #print('document width:', self.textRead.document().size().width())
+            #print('document height:', self.textRead.document().size().height())
+            #print('textRead width:', self.textRead.width())
+            #print('textRead height:', self.textRead.height())
+
+            #self.setFixedSize(showWidth + 10, showHeight + 10)
+
+            #self.setFixedSize(self.textRead.width() + 10, self.textRead.height() + 10)
+
+            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
+        else:
+            #self.textRead.setFixedSize(22, 22)
+
+            #self.textRead.resize(22, 22)
+
+            self.webEngineView.resize(22, 22)
+            self.setFixedSize(32, 32)
+
+    '''def getTextRead(self):
+        return self.textRead'''
+
+    def getWebEngineView(self):
+        return self.webEngineView
+
+    '''def connectTextSelect(self, fun):
+        self.textRead.textSelected.connect(fun)'''
+
+'''class CustomLabel(QLabel):
     textSelected = pyqtSignal(str)
 
     def __init__(self, parent=None):
@@ -485,9 +1089,9 @@ class CustomLabel(QLabel):
         if event.button() == Qt.LeftButton:
             if self.hasSelectedText():
                 self.textSelected.emit(self.selectedText())
-        QLabel.mouseReleaseEvent(self, event)
+        QLabel.mouseReleaseEvent(self, event)'''
 
-class TextLabel(QWidget):
+'''class TextLabel(QWidget):
     def __init__(self, text, isUser=True, maxWidth=650, parent=None):
         super(TextLabel, self).__init__(parent)
         self.text = text.strip('\n')
@@ -634,7 +1238,7 @@ class TextLabel(QWidget):
         return self.label
 
     def connectTextSelect(self, fun):
-        self.label.textSelected.connect(fun)
+        self.label.textSelected.connect(fun)'''
 
 class TextWidget(QWidget):
     def __init__(self, parent=None):
@@ -712,13 +1316,19 @@ class MessageWidget(QWidget):
         self.text = text
         self.isUser = isUser
         #selectedText
-        self.selectedText = ''
-        self.selectedTextIsLatest = False
+        '''self.selectedText = ''
+        self.selectedTextIsLatest = False'''
         #ImageLabel
         self.imageLabel = ImageLabel(isUser=self.isUser)
+
         #TextLabel
-        self.textLabel = TextLabel(text, isUser=self.isUser, maxWidth=textMaxWidth)
-        self.textLabel.connectTextSelect(self.setSelectedText)
+        #self.textLabel = TextLabel(text, isUser=self.isUser, maxWidth=textMaxWidth)
+        #self.textLabel.connectTextSelect(self.setSelectedText)
+
+        #TextShow
+        self.textShow = TextShow(text, isUser=self.isUser, maxWidth=textMaxWidth)
+        #self.textShow.connectTextSelect(self.setSelectedText)
+
         #loadingWidgetIsRemove
         self.loadingWidgetIsRemove = True
         #textWidget QWidget
@@ -726,7 +1336,11 @@ class MessageWidget(QWidget):
         #textLayout QHBoxLayout
         self.textLayout = QVBoxLayout()
         self.textWidget.setLayout(self.textLayout)
-        self.textLayout.addWidget(self.textLabel)
+
+        #self.textLayout.addWidget(self.textLabel)
+
+        self.textLayout.addWidget(self.textShow)
+
         self.textLayout.setContentsMargins(0, 0, 0, 0)
         #mainHLayout QHBoxLayout
         self.mainHLayout = QHBoxLayout()
@@ -740,7 +1354,11 @@ class MessageWidget(QWidget):
         self.subVLayout2.setContentsMargins(0, 0, 0, 0)
         #add imageLabel and textLabel
         if self.isUser:
-            self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+
+            #self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+
+            self.textWidget.setFixedSize(self.textShow.width(), self.textShow.height())
+
             self.subVLayout1.addWidget(self.textWidget)
             self.subVLayout2.addWidget(self.imageLabel)
         else:
@@ -748,7 +1366,11 @@ class MessageWidget(QWidget):
             self.loadingWidget = LoadingWidget()
             self.textLayout.addWidget(self.loadingWidget)
             self.textLayout.setSpacing(0)
-            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textLabel.height() + self.loadingWidget.height())
+
+            #self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textLabel.height() + self.loadingWidget.height())
+
+            self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textShow.height() + self.loadingWidget.height())
+
             self.subVLayout2.addWidget(self.textWidget)
             #loadingWidgetIsRemove
             self.loadingWidgetIsRemove = False
@@ -804,7 +1426,7 @@ class MessageWidget(QWidget):
         self.setMouseTracking(True)
 
     def setText(self, text):
-        self.text = text
+        '''self.text = text
         self.textLabel.setText(self.text)
         if self.isUser:
             self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
@@ -812,6 +1434,23 @@ class MessageWidget(QWidget):
             self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textLabel.height() + self.loadingWidget.height())
         else:
             self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+        self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())'''
+
+        self.text = text
+        self.textShow.setText(self.text)
+        if self.isUser:
+            if self.funWidgetIsAdd:
+                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+            else:
+                self.textWidget.setFixedSize(self.textShow.width(), self.textShow.height())
+        else:
+            if self.loadingWidgetIsRemove:
+                if self.funWidgetIsAdd:
+                    self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+                else:
+                    self.textWidget.setFixedSize(self.textShow.width(), self.textShow.height())
+            else:
+                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textShow.height() + self.loadingWidget.height())
         self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
 
     def getText(self):
@@ -820,20 +1459,36 @@ class MessageWidget(QWidget):
     def getIsUser(self):
         return self.isUser
 
-    def getTextLabel(self):
-        return self.textLabel
+    def getTextShow(self):
+        return self.textShow
 
     def getTextWidget(self):
         return self.textWidget
 
     def setTextMaxWidth(self, textMaxWidth):
-        self.textLabel.setMaxWidth(textMaxWidth)
+        '''self.textLabel.setMaxWidth(textMaxWidth)
         if self.isUser:
             self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
         elif not self.loadingWidgetIsRemove:
             self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textLabel.height() + self.loadingWidget.height())
         else:
             self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+        self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())'''
+
+        self.textShow.setMaxWidth(textMaxWidth)
+        if self.isUser:
+            if self.funWidgetIsAdd:
+                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+            else:
+                self.textWidget.setFixedSize(self.textShow.width(), self.textShow.height())
+        else:
+            if self.loadingWidgetIsRemove:
+                if self.funWidgetIsAdd:
+                    self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+                else:
+                    self.textWidget.setFixedSize(self.textShow.width(), self.textShow.height())
+            else:
+                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textShow.height() + self.loadingWidget.height())
         self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
 
     def removeLoadingWidget(self):
@@ -841,21 +1496,36 @@ class MessageWidget(QWidget):
             self.textLayout.removeWidget(self.loadingWidget)
             self.loadingWidget.deleteLater()
             self.loadingWidgetIsRemove = True
-            self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+
+            #self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+
+            if self.funWidgetIsAdd:
+                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+            else:
+                self.textWidget.setFixedSize(self.textShow.width(), self.textShow.height())
             self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
 
     def addFunWidget(self):
         if not self.funWidgetIsAdd:
-            self.textLayout.addWidget(self.funWidget)
-            self.textLayout.setSpacing(0)
-            self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.funWidget.width() else self.funWidget.width(), self.textLabel.height() + self.funWidget.height())
+
+            #self.textWidget.setFixedSize(self.textLabel.width() if self.textLabel.width() > self.funWidget.width() else self.funWidget.width(), self.textLabel.height() + self.funWidget.height())
+
+            if self.loadingWidgetIsRemove:
+                self.textLayout.addWidget(self.funWidget)
+                self.textLayout.setSpacing(0)
+                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+                self.funWidgetIsAdd = True
+            else:
+                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textShow.height() + self.loadingWidget.height())
             self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
-            self.funWidgetIsAdd = True
 
     def removeFunWidget(self):
         if self.funWidgetIsAdd:
             self.textLayout.removeWidget(self.funWidget)
-            self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+
+            #self.textWidget.setFixedSize(self.textLabel.width(), self.textLabel.height())
+
+            self.textWidget.setFixedSize(self.textShow.width(), self.textShow.height())
             self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
             self.funWidgetIsAdd = False
 
@@ -866,7 +1536,7 @@ class MessageWidget(QWidget):
             self.renewResponseButtonIsRemove = True
             self.funWidget.setFixedSize(28, 28)
 
-    def setSelectedText(self, text):
+    '''def setSelectedText(self, text):
         self.selectedText = text
         self.selectedTextIsLatest = True
 
@@ -881,15 +1551,21 @@ class MessageWidget(QWidget):
 
     def clearSelectedText(self):
         self.selectedText = ''
-        self.selectedTextIsLatest = False
+        self.selectedTextIsLatest = False'''
 
     def showColorful(self):
-        self.textLabel.isColorful = True
-        self.textLabel.repaint()
+        '''self.textLabel.isColorful = True
+        self.textLabel.repaint()'''
+
+        self.textShow.isColorful = True
+        self.textShow.repaint()
 
     def showDefaultColor(self):
-        self.textLabel.isColorful = False
-        self.textLabel.repaint()
+        '''self.textLabel.isColorful = False
+        self.textLabel.repaint()'''
+
+        self.textShow.isColorful = False
+        self.textShow.repaint()
 
 class ItemWidget(QWidget):
     def __init__(self, parent=None):
@@ -1465,6 +2141,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.mainWidget)
         #messageWidget list
         self.messageWidgetList = []
+        self.chatShow.toList(self.messageWidgetList)
         #setting QWidget init
         self.settingWidgetInit()
         #ChatRecordsWidget
@@ -1659,9 +2336,9 @@ class MainWindow(QMainWindow):
             if self.regionDir == RegionEnum.TITLE:
                 self.pressPosDistanceUiGlobalTL = self.geometry().topLeft() - event.globalPos()
             #messageWidget clear selectedText
-            for i in range(0, len(self.messageWidgetList)):
+            '''for i in range(0, len(self.messageWidgetList)):
                 if self.messageWidgetList[i].hasSelectedText():
-                    self.messageWidgetList[i].clearSelectedText()
+                    self.messageWidgetList[i].clearSelectedText()'''
             #judge mouse press position
             if self.settingWidgetIsOpen:
                 notSettingRect = QRect(self.settingWidget.width(), self.titleWidget.height(), self.width() - self.settingWidget.width() - self.padding - 1, self.height() - self.titleWidget.height() - self.padding - 1)
@@ -1686,11 +2363,11 @@ class MainWindow(QMainWindow):
                         self.messageWidgetList[i].showDefaultColor()
                 else:
                     widget = self.childAt(event.pos())
-                    if isinstance(widget, CustomLabel):
+                    if isinstance(widget, TextRead):
                         for i in range(0, len(self.messageWidgetList)):
                             messageWidget = self.messageWidgetList[i]
                             messageWidget.showDefaultColor()
-                            if widget == messageWidget.getTextLabel().getCustomLabel():
+                            if widget == messageWidget.getTextShow().getTextRead():
                                 messageWidget.showColorful()
                 chatInputRect = QRect(self.chatInput.geometry().x(), self.chatInput.geometry().y() + self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height(), self.chatInput.geometry().width(), self.chatInput.geometry().height())
                 if chatInputRect.contains(event.pos()):
@@ -1732,8 +2409,8 @@ class MainWindow(QMainWindow):
             self.contentVLayout.setContentsMargins(self.width() // 3, 0, 0, 0)
         else:
             self.chatRecordsWidget.move(-self.chatRecordsWidget.width(), self.titleWidget.height())
-        #TextLabel max width
-        textMaxWidth = int(self.chatShow.width() * 2 / 3)
+        #TextShow max width
+        textMaxWidth = self.chatShow.width() * 2 // 3
         for i in range(0, self.chatShow.count()):
             #messageWidget set max width of textLabel
             messageWidget = self.messageWidgetList[i]
@@ -1790,6 +2467,22 @@ class MainWindow(QMainWindow):
         self.titleLeftSubHLayout.setAlignment(Qt.AlignLeft)
         self.titleLeftSubHLayout.setContentsMargins(3, 3, 3, 3)
         self.titleLeftSubHLayout.setSpacing(5)
+
+        #themeButton PushButton
+        '''self.themeButton = PushButton(tipText='主题', tipOffsetX=20, tipOffsetY=40)
+        self.themeButton.setFixedSize(50, 36)
+        self.themeButton.setIcon(QIcon("theme.png"))
+        self.themeButton.setIconSize(QSize(20, 20))'''
+        #self.themeButton.setStyleSheet('''
+        #QPushButton{
+        #    border-image: url("theme.png");
+        #}
+        #QPushButton:hover{
+        #    border-image: url("theme_hover.png");
+        #}
+        #''')
+        '''self.themeButton.clicked.connect(self.themeSelect)'''
+
         #minButton PushButton
         self.minButton = PushButton(tipText='', tipOffsetX=20, tipOffsetY=40)
         self.minButton.setFixedSize(50, 36)
@@ -2123,8 +2816,9 @@ class MainWindow(QMainWindow):
         self.chatInputWidget.resize(self.width() - rect.x() - self.settingWidget.width(), self.chatInputWidget.height())
         self.splitter.resize(self.width() - rect.x() - self.settingWidget.width(), self.splitter.height())
         self.contentVLayout.setContentsMargins(rect.x() + self.settingWidget.width(), 0, 0, 0)
-        #TextLabel max width
-        textMaxWidth = int(self.chatShow.width() * 2 / 3)
+        #TextShow max width
+        textMaxWidth = self.chatShow.width() * 2 // 3
+        print('setting:', textMaxWidth)
         for i in range(0, self.chatShow.count()):
             #messageWidget set max width of textLabel
             messageWidget = self.messageWidgetList[i]
@@ -2147,8 +2841,8 @@ class MainWindow(QMainWindow):
         self.chatInputWidget.resize(self.width() - rect.x() - self.chatRecordsWidget.width(), self.chatInputWidget.height())
         self.splitter.resize(self.width() - rect.x() - self.chatRecordsWidget.width(), self.splitter.height())
         self.contentVLayout.setContentsMargins(rect.x() + self.chatRecordsWidget.width(), 0, 0, 0)
-        #TextLabel max width
-        textMaxWidth = int(self.chatShow.width() * 2 / 3)
+        #TextShow max width
+        textMaxWidth = self.chatShow.width() * 2 // 3
         for i in range(0, self.chatShow.count()):
             #messageWidget set max width of textLabel
             messageWidget = self.messageWidgetList[i]
@@ -2438,7 +3132,7 @@ class MainWindow(QMainWindow):
                         self.messageWidgetList[j].removeRenewResponseButton()
                 text = text.strip('\n')
                 #MessageWidget
-                self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, isUser=isUser, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+                self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, isUser=isUser, textMaxWidth=self.chatShow.width() * 2 // 3)
                 if not isUser:
                     self.messageWidget.removeLoadingWidget()
                 self.messageWidgetList.append(self.messageWidget)

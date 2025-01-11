@@ -120,6 +120,36 @@ abcd...
     sudo systemctl start docker
     sudo apt-get -y install apt-transport-https ca-certificates curl software-properties-common
     sudo service docker restart
+    ```
+
+* docker源修改
+    sudo nano /etc/docker/daemon.json
+    添加以下内容
+    {
+    "registry-mirrors": ["https://docker.registry.cyou",
+    "https://docker-cf.registry.cyou",
+    https://dockercf.jsdelivr.fyi",
+    "https://docker.jsdelivr.fyi",
+    "https://dockertest.jsdelivr.fyi",
+    "https://mirror.aliyuncs.com",
+    "https://dockerproxy.com",
+    "https://mirror.baidubce.com",
+    "https://docker.m.daocloud.io",
+    "https://docker.nju.edu.cn",
+    "https://docker.mirrors.sjtug.sjtu.edu.cn",
+    "https://docker.mirrors.ustc.edu.cn",
+    "https://mirror.iscas.ac.cn",
+    "https://docker.rainbond.cc"]
+    }
+
+* 重启docker
+    ```bash
+    sudo systemctl daemon-reload
+    sudo systemctl restart docker
+    ```
+
+* 测试
+    ```bash
     sudo docker run hello-world
     ```
 
@@ -132,7 +162,7 @@ abcd...
     sudo apt-get update
     ```
 
-    安装nvidia-container-runtim
+    安装nvidia-container-runtime
 
     ```bash
     sudo apt-get install nvidia-container-runtime

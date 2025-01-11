@@ -13,7 +13,7 @@ from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRec
 from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase
 from openai import OpenAI
 
-base_url = "https://7613907zg6.vicp.fun/v1"
+base_url = "http://7613907zg6.vicp.fun:45861/v1"
 client = OpenAI(api_key="EMPTY", base_url=base_url)
 
 maxTokens_minimum = 0
@@ -43,7 +43,7 @@ class messageThread(QThread):
 
     def run(self):
         response = client.chat.completions.create(
-            model="chatglm3-6b",
+            model="qwen2.5:14b",
             messages=self.text,
             stream=self.use_stream,
             max_tokens=maxTokens_currentVal,

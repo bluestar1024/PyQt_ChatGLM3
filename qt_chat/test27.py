@@ -92,11 +92,11 @@ def printHelloWorld():
 ******************
 ### 链接
 这是一个链接 [菜鸟教程](https://www.runoob.com)  
-这个链接用 1 作为网址变量 [Google][1]  
+这个链接用 1 作为网址变量 [Baidu][1]  
 这个链接用 runoob 作为网址变量 [Runoob][runoob]  
 然后在文档的结尾为变量赋值（网址）  
 
-[1]: http://www.google.com/  
+[1]: http://www.baidu.com/  
 [runoob]: http://www.runoob.com/  
 ******************
 ### 图片
@@ -111,11 +111,20 @@ def printHelloWorld():
 
 ******************
 ### 表格
-|表头|表头|表头|
-|:----|----:|:----:|
-|单元格|单元格|单元格|
-|单元格|单元格|单元格|
+| 表头1| 表头2|表头3  |  
+|:---- |----: | :----:|  
+|单元格1  | 单元格2|单元格3  |  
+| 单元格4|  单元格5| 单元格6|  
 """
+
+class MyWebEngineView(QWebEngineView):  
+    def __init__(self):  
+        super(MyWebEngineView, self).__init__()  
+        self.setFocus()
+
+    def mousePressEvent(self, event):  
+        print("Mouse pressed at: ", event.pos())  
+        super(MyWebEngineView, self).mousePressEvent(event) 
 
 class MarkdownViewer(QMainWindow):  
     def __init__(self):  
@@ -126,19 +135,23 @@ class MarkdownViewer(QMainWindow):
         self.setCentralWidget(self.mainWidget)
         self.mainWidget.setLayout(self.mainVLayout)
         self.text_browser = QTextBrowser()
-        self.web_view = QWebEngineView()
-        self.mainVLayout.addWidget(self.text_browser)
+        self.web_view = MyWebEngineView()
+        #self.mainVLayout.addWidget(self.text_browser)
+        self.mainVLayout.addWidget(self.web_view)
         self.mainWidget.resize(600, 400)
         self.resize(600, 400)
 
+        tableText, tableItemList, tableAlignList, row, column = self.getTable(markdown_content)
+        self.content = markdown_content.replace(tableText, '')
+
         # 使用 mistune 将 Markdown 转换为 HTML
         markdown = mistune.create_markdown()
-        html_content = markdown(markdown_content)
+        html_content = markdown(self.content)
 
         # 添加 MathJax CDN 链接到 HTML 头部
         mathjax_cdn = """
         <!DOCTYPE html>
-        <html lang="en">
+        <html lang="zh">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -157,8 +170,50 @@ class MarkdownViewer(QMainWindow):
             <script type="text/javascript" async
                 src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.1.2/es5/tex-mml-chtml.js">
             </script>
+            <style>  
+                table {  
+                    width: 50%;  
+                    border-collapse: collapse;
+                    margin: 10px 0;  
+                }  
+                th, td {  
+                    border: 1px solid #ccc;  
+                    padding: 8px;  
+                }  
+                th {  
+                    background-color: #f2f2f2;  
+                }
+                .left-align { text-align: left; }  
+                .center-align { text-align: center; }  
+                .right-align { text-align: right; }  
+            </style>  
         </head>
         """
+
+        if tableItemList:
+            html_content += """
+            <table>  
+                <thead>  
+                    <tr>  
+            """  
+            # 添加表头  
+            for i in range(column):  
+                html_content += f"<th class='{self.getAlignmentClass(tableAlignList[i])}'>{tableItemList[i]}</th>"  
+            html_content += """  
+                    </tr>  
+                </thead>  
+                <tbody>  
+            """  
+            # 添加数据行
+            for i in range(1, row):  # 共有6个单元格，每行3个  
+                html_content += "<tr>"  
+                for j in range(column):  
+                    html_content += f"<td class='{self.getAlignmentClass(tableAlignList[j])}'>{tableItemList[i * column + j]}</td>"  
+                html_content += "</tr>"  
+            html_content += """  
+                </tbody>  
+            </table>  
+            """
 
         # 将转换后的 HTML 内容添加到 body 中
         full_html_content = f"{mathjax_cdn}<body>\n{html_content}\n</body>\n</html>\n"
@@ -166,13 +221,10 @@ class MarkdownViewer(QMainWindow):
         # 打印生成的 HTML 内容（在实际应用中，你可以将这段 HTML 加载到 QWebEngineView 中）
         print(full_html_content)
 
-        tableItemList = self.showTable(markdown_content)
-        print(tableItemList)
-
-        self.text_browser.setMarkdown(str(markdown_content))
-        self.text_browser.show()
-        #self.web_view.setHtml(str(full_html_content))
-        #self.web_view.show()
+        #self.text_browser.setMarkdown(str(markdown_content))
+        #self.text_browser.show()
+        self.web_view.setHtml(str(full_html_content))
+        self.web_view.show()
 
     def showText(self, text):
         backslashInFront = False
@@ -208,21 +260,60 @@ class MarkdownViewer(QMainWindow):
                 return
             i += 1
 
-    def showTable(self, text):
+    def getAlignmentClass(self, format_string):  
+        """根据对齐格式返回相应的class名"""  
+        if ':-' in format_string and '-:' in format_string:  
+            return 'center-align'  # 居中对齐  
+        elif ':-' in format_string:
+            return 'left-align'   # 左对齐  
+        elif '-:' in format_string:  
+            return 'right-align'  # 右对齐  
+        else:  
+            return ''
+
+    def getTable(self, text):
+        tableText = ''
         tableItemList = []
+        tableItemList1 = []
+        tableAlignList = []
         i = 0
+        r = 0
+        row = 0
+        row_full = 0
+        column = 0
         while(i < len(text)):
             if text[i] == '|':
+                tableText += '|'
                 j = i
                 k = j + 1
                 while(k < len(text)):
                     if text[k] == '|':
-                        tableItemList.append(text[j + 1 : k])
+                        tableText += text[j + 1 : k] + '|'
+                        tableItemList.append(text[j + 1 : k].strip(' '))
                         j = k
                     k += 1
                 break
             i += 1
-        return tableItemList
+        for tableItem in tableItemList:
+            if '\n' in tableItem:
+                row_full += 1
+            else:
+                if row_full == 0:
+                    column += 1
+                if tableItem == tableItemList[-1]:
+                    row_full += 1
+        if row_full > 1:
+            row = row_full - 1
+        else:
+            row = row_full
+        if row >= 1:
+            tableItemList1 = tableItemList1 + tableItemList[0 : column]
+        if row_full >= 2:
+            tableAlignList = tableItemList[column + 1 : 2 * (column + 1) - 1]
+        if row >= 2:
+            for r in range(1, row):
+                tableItemList1 = tableItemList1 + tableItemList[(r + 1) * (column + 1) : (r + 2) * (column + 1) - 1]
+        return tableText, tableItemList1, tableAlignList, row, column
 
     def showImage(self, text):
         #渲染图片

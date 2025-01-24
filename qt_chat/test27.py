@@ -174,19 +174,19 @@ class MarkdownViewer(QMainWindow):
                 table {  
                     width: 50%;  
                     border-collapse: collapse;
-                    margin: 10px 0;  
+                    margin: 10px 0;
                 }  
                 th, td {  
-                    border: 1px solid #ccc;  
-                    padding: 8px;  
+                    border: 1px solid #ccc;
+                    padding: 8px;
                 }  
                 th {  
-                    background-color: #f2f2f2;  
+                    background-color: #f2f2f2;
                 }
-                .left-align { text-align: left; }  
-                .center-align { text-align: center; }  
-                .right-align { text-align: right; }  
-            </style>  
+                .left-align { text-align: left; }
+                .center-align { text-align: center; }
+                .right-align { text-align: right; }
+            </style>
         </head>
         """
 

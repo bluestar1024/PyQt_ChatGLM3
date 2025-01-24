@@ -127,7 +127,7 @@ def printHelloWorld():
 ### 图片
 ![RUNOOB 图标](https://static.jyshare.com/images/runoob-logo.png "RUNOOB")
 
-这个链接用 1 作为网址变量 [RUNOOB][2]  
+这个链接用 2 作为网址变量 [RUNOOB][2]  
 然后在文档的结尾为变量赋值（网址）  
 
 [2]: https://static.jyshare.com/images/runoob-logo.png
@@ -655,8 +655,6 @@ class WebEnginePage(QWebEnginePage):
         return True  # 处理其它导航请求
 
 class WebEngineView(QWebEngineView):
-    """ textSelected = pyqtSignal(str) """
-
     def __init__(self, parent=None):
         super(WebEngineView, self).__init__(parent)
         self.setPage(WebEnginePage(self))  # 将自定义页面设置给视图
@@ -669,13 +667,6 @@ class WebEngineView(QWebEngineView):
             newMouseEvent = QMouseEvent(event.type(), event.pos(), event.button(), event.buttons(), event.modifiers())
             QCoreApplication.postEvent(obj.parent(), newMouseEvent)
         return QWebEngineView.eventFilter(self, obj, event)
-
-    def mouseReleaseEvent(self, event):
-        '''if event.button() == Qt.LeftButton:
-            if self.hasSelectedText():
-                self.textSelected.emit(self.selectedText())'''
-        QWebEngineView.mouseReleaseEvent(self, event)
-        event.ignore()
 
     def connectPageLoadFinished(self, fun):
         self.page().loadFinished.connect(fun)
@@ -699,57 +690,60 @@ class TextShow(QWidget):
             self.webEngineView.resize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 36)) * 21 + 32)
         else:
             self.webEngineView.resize(int(initWidth), 53)
+        markdown_content = ''
+        self.html_text = ''
+        self.full_html_text = ''
+        # 添加 MathJax CDN 链接到 HTML 头部
+        self.mathjax_cdn = """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Markdown with MathJax</title>
+                <script type="text/javascript">
+                    MathJax = {
+                        tex: {
+                            inlineMath: [["$", "$"], ["\\(", "\\)"]],
+                            displayMath: [["$$", "$$"], ["\\[", "\\]"]]
+                        },
+                        svg: {
+                            fontCache: 'global'
+                        }
+                    };
+                </script>
+                <script type="text/javascript" async
+                    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.1.2/es5/tex-mml-chtml.js">
+                </script>
+                <style>
+                    table {
+                        width: 50%;
+                        border-collapse: collapse;
+                        margin: 10px 0;
+                    }  
+                    th, td {
+                        border: 1px solid #000;
+                        padding: 8px;
+                    }
+                    th {
+                        background-color: #b0b0b0;
+                    }
+                    .left-align { text-align: left; }
+                    .center-align { text-align: center; }
+                    .right-align { text-align: right; }
+                </style>
+            </head>
+        """
         if not self.text == '':
-            tableText, tableItemList, tableAlignList, row, column = self.getTable(self.text)
-            markdown_content = self.text.replace(tableText, '')
-            markdown_content = markdown_content.replace('\$', '\\\$')
-            markdown_content = markdown_content.replace('\frac', '\\frac')
-            markdown_content = markdown_content.replace('\,', '\\\,')
-            # 使用 mistune 将 Markdown 转换为 HTML
-            markdown = mistune.create_markdown(escape=False, renderer='html')
-            self.html_text = markdown(markdown_content)
-            # 添加 MathJax CDN 链接到 HTML 头部
-            self.mathjax_cdn = """
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Markdown with MathJax</title>
-                    <script type="text/javascript">
-                        MathJax = {
-                            tex: {
-                                inlineMath: [["$", "$"], ["\\(", "\\)"]],
-                                displayMath: [["$$", "$$"], ["\\[", "\\]"]]
-                            },
-                            svg: {
-                                fontCache: 'global'
-                            }
-                        };
-                    </script>
-                    <script type="text/javascript" async
-                        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.1.2/es5/tex-mml-chtml.js">
-                    </script>
-                    <style>
-                        table {
-                            width: 50%;
-                            border-collapse: collapse;
-                            margin: 10px 0;
-                        }  
-                        th, td {
-                            border: 1px solid #ccc;
-                            padding: 8px;
-                        }
-                        th {
-                            background-color: #f2f2f2;
-                        }
-                        .left-align { text-align: left; }
-                        .center-align { text-align: center; }
-                        .right-align { text-align: right; }
-                    </style>
-                </head>
-            """
-            if tableItemList:
+            tableText, tableItemList, tableAlignList, row, column, tableIsComplete= self.getTable(self.text)
+            if tableIsComplete:
+                textList = self.text.split(tableText, 1)
+                markdown_content = textList[0].replace('\$', '\\\$')
+                markdown_content = markdown_content.replace('\frac', '\\frac')
+                markdown_content = markdown_content.replace('\,', '\\\,')
+                # 使用 mistune 将 Markdown 转换为 HTML
+                markdown = mistune.create_markdown(escape=False, renderer='html')
+                self.html_text = markdown(markdown_content)
                 self.html_text += """
                     <table>
                         <thead>
@@ -763,23 +757,33 @@ class TextShow(QWidget):
                         </thead>
                         <tbody>
                 """
-                """ print(tableItemList)
-                print(row)
-                print(column) """
                 # 添加数据行
                 for i in range(1, row):
                     self.html_text += "<tr>"
                     for j in range(column):
-                        """ print('o_i', i)
-                        print('o_j', j) """
                         self.html_text += f"<td class='{self.getAlignmentClass(tableAlignList[j])}'>{tableItemList[i * column + j]}</td>"
                     self.html_text += "</tr>"
                 self.html_text += """
                         </tbody>
                     </table>
                 """
-            # 将转换后的 HTML 内容添加到 body 中
-            self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
+                markdown_content = textList[1].replace('\$', '\\\$')
+                markdown_content = markdown_content.replace('\frac', '\\frac')
+                markdown_content = markdown_content.replace('\,', '\\\,')
+                # 使用 mistune 将 Markdown 转换为 HTML
+                markdown = mistune.create_markdown(escape=False, renderer='html')
+                self.html_text += markdown(markdown_content)
+                # 将转换后的 HTML 内容添加到 body 中
+                self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
+            else:
+                markdown_content = self.text.replace('\$', '\\\$')
+                markdown_content = markdown_content.replace('\frac', '\\frac')
+                markdown_content = markdown_content.replace('\,', '\\\,')
+                # 使用 mistune 将 Markdown 转换为 HTML
+                markdown = mistune.create_markdown(escape=False, renderer='html')
+                self.html_text = markdown(markdown_content)
+                # 将转换后的 HTML 内容添加到 body 中
+                self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
             self.webEngineView.setHtml(str(self.full_html_text))
         self.mainHLayout.addWidget(self.webEngineView)
         self.mainHLayout.setContentsMargins(5, 5, 5, 5)
@@ -814,6 +818,7 @@ class TextShow(QWidget):
         row = 0
         row_full = 0
         column = 0
+        tableIsComplete = False
         while(i < len(text)):
             if text[i] == '|':
                 tableText += '|'
@@ -827,21 +832,18 @@ class TextShow(QWidget):
                     k += 1
                 break
             i += 1
-        print(tableItemList)
-        for tableItem in tableItemList:
-            print(tableItem)
+        for index, tableItem in enumerate(tableItemList):
             if '\n' in tableItem:
                 row_full += 1
             else:
                 if row_full == 0:
                     column += 1
-                if tableItem == tableItemList[-1]:
+                if index == len(tableItemList) - 1:
                     row_full += 1
         if row_full > 1:
             row = row_full - 1
         else:
             row = row_full
-        print('row:', row, 'row_full:', row_full, 'column:', column)
         if row >= 1:
             tableItemList1 = tableItemList1 + tableItemList[0 : column]
         if row_full >= 2:
@@ -849,7 +851,13 @@ class TextShow(QWidget):
         if row >= 2:
             for r in range(1, row):
                 tableItemList1 = tableItemList1 + tableItemList[(r + 1) * (column + 1) : (r + 2) * (column + 1) - 1]
-        return tableText, tableItemList1, tableAlignList, row, column
+            if '\n' in tableItemList[-1]:
+                if len(tableItemList) == row_full * (column + 1):
+                    tableIsComplete = True
+            else:
+                if len(tableItemList) == row_full * (column + 1) - 1:
+                    tableIsComplete = True
+        return tableText, tableItemList1, tableAlignList, row, column, tableIsComplete
 
     def paintEvent(self, event):
         #QPainter create
@@ -887,57 +895,17 @@ class TextShow(QWidget):
             self.webEngineView.resize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 36)) * 21 + 32)
         else:
             self.webEngineView.resize(int(initWidth), 53)
+        markdown_content = ''
         if not self.text == '':
-            tableText, tableItemList, tableAlignList, row, column = self.getTable(self.text)
-            markdown_content = self.text.replace(tableText, '')
-            markdown_content = self.text.replace('\$', '\\\$')
-            markdown_content = markdown_content.replace('\frac', '\\frac')
-            markdown_content = markdown_content.replace('\,', '\\\,')
-            # 使用 mistune 将 Markdown 转换为 HTML
-            markdown = mistune.create_markdown(escape=False, renderer='html')
-            self.html_text = markdown(markdown_content)
-            # 添加 MathJax CDN 链接到 HTML 头部
-            self.mathjax_cdn = """
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Markdown with MathJax</title>
-                    <script type="text/javascript">
-                        MathJax = {
-                            tex: {
-                                inlineMath: [["$", "$"], ["\\(", "\\)"]],
-                                displayMath: [["$$", "$$"], ["\\[", "\\]"]]
-                            },
-                            svg: {
-                                fontCache: 'global'
-                            }
-                        };
-                    </script>
-                    <script type="text/javascript" async
-                        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.1.2/es5/tex-mml-chtml.js">
-                    </script>
-                    <style>
-                        table {
-                            width: 50%;
-                            border-collapse: collapse;
-                            margin: 10px 0;
-                        }  
-                        th, td {
-                            border: 1px solid #ccc;
-                            padding: 8px;
-                        }
-                        th {
-                            background-color: #f2f2f2;
-                        }
-                        .left-align { text-align: left; }
-                        .center-align { text-align: center; }
-                        .right-align { text-align: right; }
-                    </style>
-                </head>
-            """
-            if tableItemList:
+            tableText, tableItemList, tableAlignList, row, column, tableIsComplete= self.getTable(self.text)
+            if tableIsComplete:
+                textList = self.text.split(tableText, 1)
+                markdown_content = textList[0].replace('\$', '\\\$')
+                markdown_content = markdown_content.replace('\frac', '\\frac')
+                markdown_content = markdown_content.replace('\,', '\\\,')
+                # 使用 mistune 将 Markdown 转换为 HTML
+                markdown = mistune.create_markdown(escape=False, renderer='html')
+                self.html_text = markdown(markdown_content)
                 self.html_text += """
                     <table>
                         <thead>
@@ -961,8 +929,23 @@ class TextShow(QWidget):
                         </tbody>
                     </table>
                 """
-            # 将转换后的 HTML 内容添加到 body 中
-            self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
+                markdown_content = textList[1].replace('\$', '\\\$')
+                markdown_content = markdown_content.replace('\frac', '\\frac')
+                markdown_content = markdown_content.replace('\,', '\\\,')
+                # 使用 mistune 将 Markdown 转换为 HTML
+                markdown = mistune.create_markdown(escape=False, renderer='html')
+                self.html_text += markdown(markdown_content)
+                # 将转换后的 HTML 内容添加到 body 中
+                self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
+            else:
+                markdown_content = self.text.replace('\$', '\\\$')
+                markdown_content = markdown_content.replace('\frac', '\\frac')
+                markdown_content = markdown_content.replace('\,', '\\\,')
+                # 使用 mistune 将 Markdown 转换为 HTML
+                markdown = mistune.create_markdown(escape=False, renderer='html')
+                self.html_text = markdown(markdown_content)
+                # 将转换后的 HTML 内容添加到 body 中
+                self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
             self.webEngineView.setHtml(str(self.full_html_text))
         self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
 
@@ -981,8 +964,11 @@ class TextShow(QWidget):
     def getWebEngineView(self):
         return self.webEngineView
 
-    '''def connectTextSelect(self, fun):
-        self.webEngineView.textSelected.connect(fun)'''
+    def hasSelectedText(self):
+        return self.webEngineView.hasSelection()
+
+    def getSelectedText(self):
+        return self.webEngineView.selectedText()
 
 class TextWidget(QWidget):
     def __init__(self, parent=None):
@@ -1059,14 +1045,10 @@ class MessageWidget(QWidget):
         super(MessageWidget, self).__init__(parent)
         self.text = text
         self.isUser = isUser
-        #selectedText
-        '''self.selectedText = ''
-        self.selectedTextIsLatest = False'''
         #ImageLabel
         self.imageLabel = ImageLabel(isUser=self.isUser)
         #TextShow
         self.textShow = TextShow(text, isUser=self.isUser, maxWidth=textMaxWidth)
-        """ self.textShow.connectTextSelect(self.setSelectedText) """
         #loadingWidgetIsRemove
         self.loadingWidgetIsRemove = True
         #textWidget QWidget
@@ -1200,6 +1182,9 @@ class MessageWidget(QWidget):
     def getTextWidget(self):
         return self.textWidget
 
+    def getCopyButton(self):
+        return self.copyButton
+
     def setTextMaxWidth(self, textMaxWidth):
         self.textShow.setMaxWidth(textMaxWidth)
         if self.isUser:
@@ -1253,22 +1238,11 @@ class MessageWidget(QWidget):
             self.renewResponseButtonIsRemove = True
             self.funWidget.setFixedSize(28, 28)
 
-    '''def setSelectedText(self, text):
-        self.selectedText = text
-        self.selectedTextIsLatest = True
-
     def hasSelectedText(self):
-        return self.selectedTextIsLatest
+        return self.textShow.hasSelectedText()
 
     def getSelectedText(self):
-        tempSelectedText = self.selectedText
-        self.selectedText = ''
-        self.selectedTextIsLatest = False
-        return tempSelectedText
-
-    def clearSelectedText(self):
-        self.selectedText = ''
-        self.selectedTextIsLatest = False'''
+        return self.textShow.getSelectedText()
 
     def showColorful(self):
         self.textShow.isColorful = True
@@ -2049,10 +2023,6 @@ class MainWindow(QMainWindow):
             #title region calculate the distance to move
             if self.regionDir == RegionEnum.TITLE:
                 self.pressPosDistanceUiGlobalTL = self.geometry().topLeft() - event.globalPos()
-            #messageWidget clear selectedText
-            '''for i in range(0, len(self.messageWidgetList)):
-                if self.messageWidgetList[i].hasSelectedText():
-                    self.messageWidgetList[i].clearSelectedText()'''
             #judge mouse press position
             if self.settingWidgetIsOpen:
                 notSettingRect = QRect(self.settingWidget.width(), self.titleWidget.height(), self.width() - self.settingWidget.width() - self.padding - 1, self.height() - self.titleWidget.height() - self.padding - 1)
@@ -2077,7 +2047,13 @@ class MainWindow(QMainWindow):
                         self.messageWidgetList[i].showDefaultColor()
                 else:
                     widget = self.childAt(event.pos())
-                    if isinstance(widget.parent(), WebEngineView):
+                    if isinstance(widget, CopyButton):
+                        for i in range(0, len(self.messageWidgetList)):
+                            messageWidget = self.messageWidgetList[i]
+                            messageWidget.showDefaultColor()
+                            if widget == messageWidget.getCopyButton():
+                                messageWidget.showColorful()
+                    elif isinstance(widget.parent(), WebEngineView):
                         for i in range(0, len(self.messageWidgetList)):
                             messageWidget = self.messageWidgetList[i]
                             messageWidget.showDefaultColor()

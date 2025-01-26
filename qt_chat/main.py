@@ -206,9 +206,12 @@ class messageThread(QThread):
     def run(self):
         self.contentOutput = markdown_content
         if self.use_stream:
-            for i in range(0, len(self.contentOutput), 10):
+            for _ in range(0, 100):
+                self.newMessage.emit(self.contentOutput)
+                time.sleep(0.8)
+            """ for i in range(0, len(self.contentOutput), 10):
                 self.newMessage.emit(self.contentOutput[i:i+10])
-                time.sleep(0.1)
+                time.sleep(0.1) """
         else:
             self.newMessage.emit(self.contentOutput)
         return
@@ -691,9 +694,14 @@ class TextShow(QWidget):
         self.font_metrics = QFontMetricsF(self.font)
         initWidth = self.font_metrics.width(self.text) + 16
         if initWidth > self.maxWidth:
-            self.webEngineView.resize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44)
+            """ self.webEngineView.setFixedSize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44) """
+            self.webEngineView.setFixedWidth(self.maxWidth)
         else:
-            self.webEngineView.resize(int(initWidth), 73)
+            if self.text == '':
+                self.webEngineView.setFixedSize(38, 4500)
+            else:
+                """ self.webEngineView.setFixedSize(int(initWidth), 73) """
+                self.webEngineView.setFixedWidth(int(initWidth))
         markdown_content = ''
         self.html_text = ''
         self.full_html_text = ''
@@ -813,15 +821,40 @@ class TextShow(QWidget):
         self.isColorful = False
 
     def onPageLoadFinished(self, success):
+        js = """
+        function getPageHeight() {
+            var body = document.body;
+            var html = document.documentElement;
+            var height = Math.max(body.scrollHeight, body.offsetHeight,
+                                html.clientHeight, html.scrollHeight, html.offsetHeight);
+            return height;
+        }
+        getPageHeight();
+        """
         if success:
+            self.webEngineView.show()
             self.webEngineView.page().runJavaScript("document.body.style.overflow = 'hidden';")
-            QTimer.singleShot(10, self.setSize)
+            """ self.webEngineView.page().runJavaScript(js, self.adjustHeight) """
+            """ QTimer.singleShot(1, self.setSize) """
+            """ self.setSize() """
 
-    def setSize(self):
-        if self.webEngineView.page().contentsSize().toSize().width() != 0 and self.webEngineView.page().contentsSize().toSize().height() != 0:
-            self.webEngineView.resize(self.webEngineView.page().contentsSize().toSize().width(), self.webEngineView.page().contentsSize().toSize().height())
+    def adjustHeight(self, height):
+        print(height)
+        if height:
+            self.webEngineView.setFixedHeight(height)
             self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
             self.setSizeFinished.emit()
+
+    """ def setSize(self):
+        width = self.webEngineView.page().contentsSize().toSize().width()
+        height = self.webEngineView.page().contentsSize().toSize().height()
+        print('width:', width, 'height:', height)
+        if  width != 0 and  height != 0:
+            self.webEngineView.setFixedSize(width, height)
+            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
+            self.setSizeFinished.emit()
+        else:
+            QTimer.singleShot(1, self.setSize) """
 
     def getAlignmentClass(self, format_string):
         # 根据对齐格式返回相应的class名
@@ -915,12 +948,15 @@ class TextShow(QWidget):
         painter.end()
 
     def setText(self, text):
+        
         self.text = text.strip('\n')
         initWidth = self.font_metrics.width(self.text) + 16
         if initWidth > self.maxWidth:
-            self.webEngineView.resize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44)
+            self.webEngineView.setFixedSize(self.maxWidth, 4500)
+            """ self.webEngineView.resize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44) """
         else:
-            self.webEngineView.resize(int(initWidth), 73)
+            self.webEngineView.setFixedSize(int(initWidth), 4500)
+            """ self.webEngineView.resize(int(initWidth), 73) """
         markdown_content = ''
         if not self.text == '':
             tableText, tableItemList, tableAlignList, row, column, tableIsComplete= self.getTable(self.text)
@@ -985,6 +1021,7 @@ class TextShow(QWidget):
                 self.html_text = self.markdown(markdown_content)
             # 将转换后的 HTML 内容添加到 body 中
             self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
+            self.webEngineView.hide()
             self.webEngineView.setHtml(str(self.full_html_text))
         self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
 
@@ -993,9 +1030,11 @@ class TextShow(QWidget):
         self.webEngineView.setMaximumWidth(self.maxWidth)
         initWidth = self.font_metrics.width(self.text) + 16
         if initWidth > self.maxWidth:
-            self.webEngineView.resize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44)
+            self.webEngineView.setFixedWidth(self.maxWidth)
+            """ self.webEngineView.resize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44) """
         else:
-            self.webEngineView.resize(int(initWidth), 73)
+            self.webEngineView.setFixedWidth(int(initWidth))
+            """ self.webEngineView.resize(int(initWidth), 73) """
         if not self.text == '':
             self.webEngineView.setHtml(str(self.full_html_text))
         self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
@@ -1080,9 +1119,10 @@ class CopyButton(QPushButton):
         return QPushButton.event(self, event)
 
 class MessageWidget(QWidget):
-    def __init__(self, text, copyFun, renewResponseFun, isUser=True, textMaxWidth=650, parent=None):
+    def __init__(self, text, copyFun, renewResponseFun, isUser=True, textMaxWidth=780, parent=None):
         super(MessageWidget, self).__init__(parent)
         self.text = text
+        self.textMaxWidth = textMaxWidth
         self.isUser = isUser
         #ImageLabel
         self.imageLabel = ImageLabel(isUser=self.isUser)
@@ -1178,8 +1218,14 @@ class MessageWidget(QWidget):
         #main widget set size
         self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
 
+        """ self.textShow.setSizeFinished.connect(self.setSizeFinishedFlag) """
+        self.sizeFinishedFlag = False
+
     def connectSetSizeFinished(self, fun):
         self.textShow.setSizeFinished.connect(fun)
+
+    def setSizeFinishedFlag(self):
+        self.sizeFinishedFlag = True
 
     def setSize(self):
         if self.isUser:
@@ -1194,6 +1240,30 @@ class MessageWidget(QWidget):
     def setText(self, text):
         self.text = text
         self.textShow.setText(self.text)
+        """ if self.sizeFinishedFlag:
+            self.textLayout.removeWidget(self.textShow)
+            self.textShow.deleteLater()
+            self.textShow = TextShow(self.text, isUser=self.isUser, maxWidth=self.textMaxWidth)
+            if self.isUser:
+                self.textLayout.removeWidget(self.funWidget)
+                self.textLayout.addWidget(self.textShow)
+                self.textLayout.addWidget(self.funWidget)
+                self.textLayout.setSpacing(0)
+                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+            else:
+                if self.loadingWidgetIsRemove:
+                    self.textLayout.removeWidget(self.funWidget)
+                    self.textLayout.addWidget(self.textShow)
+                    self.textLayout.addWidget(self.funWidget)
+                    self.textLayout.setSpacing(0)
+                    self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+                else:
+                    self.textLayout.removeWidget(self.loadingWidget)
+                    self.textLayout.addWidget(self.textShow)
+                    self.textLayout.addWidget(self.loadingWidget)
+                    self.textLayout.setSpacing(0)
+                    self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textShow.height() + self.loadingWidget.height()) """
+
         if self.isUser:
             self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
         else:
@@ -1219,7 +1289,32 @@ class MessageWidget(QWidget):
         return self.copyButton
 
     def setTextMaxWidth(self, textMaxWidth):
+        self.textMaxWidth = textMaxWidth
         self.textShow.setMaxWidth(textMaxWidth)
+        """ if self.sizeFinishedFlag:
+            self.textLayout.removeWidget(self.textShow)
+            self.textShow.deleteLater()
+            self.textShow = TextShow(self.text, isUser=self.isUser, maxWidth=self.textMaxWidth)
+            if self.isUser:
+                self.textLayout.removeWidget(self.funWidget)
+                self.textLayout.addWidget(self.textShow)
+                self.textLayout.addWidget(self.funWidget)
+                self.textLayout.setSpacing(0)
+                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+            else:
+                if self.loadingWidgetIsRemove:
+                    self.textLayout.removeWidget(self.funWidget)
+                    self.textLayout.addWidget(self.textShow)
+                    self.textLayout.addWidget(self.funWidget)
+                    self.textLayout.setSpacing(0)
+                    self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+                else:
+                    self.textLayout.removeWidget(self.loadingWidget)
+                    self.textLayout.addWidget(self.textShow)
+                    self.textLayout.addWidget(self.loadingWidget)
+                    self.textLayout.setSpacing(0)
+                    self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textShow.height() + self.loadingWidget.height()) """
+
         if self.isUser:
             self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
         else:
@@ -2672,7 +2767,8 @@ class MainWindow(QMainWindow):
         if self.first:
             self.first = False
             text = text.strip("\n ")
-        self.Message += text
+        """ self.Message += text """
+        self.Message = text
         #messageWidget set text
         self.messageRecvWidget.setText(self.Message)
         #chatShow itemWidget adjust size

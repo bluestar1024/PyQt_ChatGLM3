@@ -206,12 +206,13 @@ class messageThread(QThread):
     def run(self):
         self.contentOutput = markdown_content
         if self.use_stream:
-            for _ in range(0, 100):
+            """ for _ in range(0, 100):
                 self.newMessage.emit(self.contentOutput)
-                time.sleep(0.8)
+                time.sleep(0.1) """
             """ for i in range(0, len(self.contentOutput), 10):
                 self.newMessage.emit(self.contentOutput[i:i+10])
                 time.sleep(0.1) """
+            self.newMessage.emit('# 一级标题## 二级标题### 三级标题')
         else:
             self.newMessage.emit(self.contentOutput)
         return
@@ -678,145 +679,80 @@ class WebEngineView(QWebEngineView):
     def connectPageLoadFinished(self, fun):
         self.page().loadFinished.connect(fun)
 
+class CustomLabel(QLabel):
+    textSelected = pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        super(CustomLabel, self).__init__(parent)
+
+    def mousePressEvent(self, event):
+        QLabel.mousePressEvent(self, event)
+        event.ignore()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            if self.hasSelectedText():
+                self.textSelected.emit(self.selectedText())
+        QLabel.mouseReleaseEvent(self, event)
+        event.ignore()
+
 class TextShow(QWidget):
     setSizeFinished = pyqtSignal()
 
     def __init__(self, text, isUser=True, maxWidth=650, parent=None):
         super(TextShow, self).__init__(parent)
         self.text = text.strip('\n')
+        self.label = CustomLabel()
+        self.label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.label.setWordWrap(True)
+        self.maxWidth = maxWidth
+        self.label.setMaximumWidth(self.maxWidth)
+        self.font = QFont()
+        self.font.setPixelSize(22)
+        self.label.setFont(self.font)
+        self.font_metrics = QFontMetricsF(self.font)
+
         self.webEngineView = WebEngineView()
         self.webEngineView.connectPageLoadFinished(self.onPageLoadFinished)
         self.mainHLayout = QHBoxLayout()
-        self.maxWidth = maxWidth
         self.webEngineView.setMaximumWidth(self.maxWidth)
-        self.font = QFont()
-        self.font.setPixelSize(22)
-        self.font_metrics = QFontMetricsF(self.font)
-        initWidth = self.font_metrics.width(self.text) + 16
-        if initWidth > self.maxWidth:
-            """ self.webEngineView.setFixedSize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44) """
-            self.webEngineView.setFixedWidth(self.maxWidth)
-        else:
-            if self.text == '':
-                self.webEngineView.setFixedSize(38, 4500)
-            else:
-                """ self.webEngineView.setFixedSize(int(initWidth), 73) """
-                self.webEngineView.setFixedWidth(int(initWidth))
-        markdown_content = ''
-        self.html_text = ''
-        self.full_html_text = ''
-        # 添加 MathJax CDN 链接到 HTML 头部
-        self.mathjax_cdn = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <script type="text/javascript">
-                    MathJax = {
-                        tex: {
-                            inlineMath: [["$", "$"], ["\\(", "\\)"]],
-                            displayMath: [["$$", "$$"], ["\\[", "\\]"]]
-                        },
-                        svg: {
-                            fontCache: 'global'
-                        }
-                    };
-                </script>
-                <script type="text/javascript" async
-                    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.1.2/es5/tex-mml-chtml.js">
-                </script>
-                <style>
-                    table {
-                        width: 50%;
-                        border-collapse: collapse;
-                        margin: 10px 0;
-                    }  
-                    th, td {
-                        border: 1px solid #000;
-                        padding: 8px;
-                    }
-                    th {
-                        background-color: #b0b0b0;
-                    }
-                    .left-align { text-align: left; }
-                    .center-align { text-align: center; }
-                    .right-align { text-align: right; }
-                </style>
-                <style>  
-                    body { font-size: 22px; }
-                </style>
-            </head>
-        """
-        self.markdown = mistune.create_markdown(escape=False, renderer='html')
+
+        self.isLabel = True
         if not self.text == '':
-            tableText, tableItemList, tableAlignList, row, column, tableIsComplete= self.getTable(self.text)
-            if tableIsComplete:
-                textList = self.text.split(tableText, 1)
-                markdown_content = textList[0].replace('\$', '\\\$')
-                markdown_content = markdown_content.replace('\frac', '\\frac')
-                markdown_content = markdown_content.replace('\,', '\\\,')
-                markdown_content = markdown_content.replace('\alpha', '\\alpha')
-                markdown_content = markdown_content.replace('\beta', '\\beta')
-                markdown_content = markdown_content.replace('\theta', '\\theta')
-                markdown_content = markdown_content.replace('\nu', '\\nu')
-                markdown_content = markdown_content.replace('\rho', '\\rho')
-                markdown_content = markdown_content.replace('\tau', '\\tau')
-                # 使用 mistune 将 Markdown 转换为 HTML
-                self.html_text = self.markdown(markdown_content)
-                self.html_text += """
-                    <table>
-                        <thead>
-                            <tr>
-                """
-                # 添加表头  
-                for i in range(column):
-                    self.html_text += f"<th class='{self.getAlignmentClass(tableAlignList[i])}'>{tableItemList[i]}</th>"
-                self.html_text += """
-                            </tr>
-                        </thead>
-                        <tbody>
-                """
-                # 添加数据行
-                for i in range(1, row):
-                    self.html_text += "<tr>"
-                    for j in range(column):
-                        self.html_text += f"<td class='{self.getAlignmentClass(tableAlignList[j])}'>{tableItemList[i * column + j]}</td>"
-                    self.html_text += "</tr>"
-                self.html_text += """
-                        </tbody>
-                    </table>
-                """
-                markdown_content = textList[1].replace('\$', '\\\$')
-                markdown_content = markdown_content.replace('\frac', '\\frac')
-                markdown_content = markdown_content.replace('\,', '\\\,')
-                markdown_content = markdown_content.replace('\alpha', '\\alpha')
-                markdown_content = markdown_content.replace('\beta', '\\beta')
-                markdown_content = markdown_content.replace('\theta', '\\theta')
-                markdown_content = markdown_content.replace('\nu', '\\nu')
-                markdown_content = markdown_content.replace('\rho', '\\rho')
-                markdown_content = markdown_content.replace('\tau', '\\tau')
-                # 使用 mistune 将 Markdown 转换为 HTML
-                self.html_text += self.markdown(markdown_content)
+            print('textShow:', self.text)
+            textWidth = 0
+            textHeight = int(self.font_metrics.height())
+            count = self.text.count('\n')
+            textList = self.text.split('\n', count)
+            maxTempTextWidth = 0
+            for i in range(0, count + 1):
+                if int(self.font_metrics.width(textList[i])) > maxTempTextWidth:
+                    maxTempTextWidth = int(self.font_metrics.width(textList[i]))
+            if (maxTempTextWidth + 4) < self.maxWidth:
+                labelWidth = maxTempTextWidth + 4
+                labelHeight = (count + 1) * (textHeight + 3) - 3
             else:
-                markdown_content = self.text.replace('\$', '\\\$')
-                markdown_content = markdown_content.replace('\frac', '\\frac')
-                markdown_content = markdown_content.replace('\,', '\\\,')
-                markdown_content = markdown_content.replace('\alpha', '\\alpha')
-                markdown_content = markdown_content.replace('\beta', '\\beta')
-                markdown_content = markdown_content.replace('\theta', '\\theta')
-                markdown_content = markdown_content.replace('\nu', '\\nu')
-                markdown_content = markdown_content.replace('\rho', '\\rho')
-                markdown_content = markdown_content.replace('\tau', '\\tau')
-                # 使用 mistune 将 Markdown 转换为 HTML
-                self.html_text = self.markdown(markdown_content)
-            # 将转换后的 HTML 内容添加到 body 中
-            self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
-            self.webEngineView.setHtml(str(self.full_html_text))
-        self.mainHLayout.addWidget(self.webEngineView)
-        self.mainHLayout.setContentsMargins(5, 5, 5, 5)
-        self.setLayout(self.mainHLayout)
-        self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
+                for i in range(0, count + 1):
+                    if i != count:
+                        tempTextWidth = self.font_metrics.width(textList[i] + ' ')
+                        tempTextWidth = math.ceil(tempTextWidth / (self.maxWidth - 24)) * (self.maxWidth - 24)
+                    else:
+                        tempTextWidth = self.font_metrics.width(textList[i])
+                    textWidth += int(tempTextWidth)
+                labelWidth = self.maxWidth
+                labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
+            self.label.setText(self.text)
+            self.label.setFixedSize(labelWidth, labelHeight)
+            self.mainHLayout.addWidget(self.label)
+            self.mainHLayout.setContentsMargins(5, 5, 5, 5)
+            self.setLayout(self.mainHLayout)
+            self.setFixedSize(labelWidth + 10, labelHeight + 10)
+        else:
+            self.label.setFixedSize(22, 22)
+            self.mainHLayout.addWidget(self.label)
+            self.mainHLayout.setContentsMargins(5, 5, 5, 5)
+            self.setLayout(self.mainHLayout)
+            self.setFixedSize(32, 32)
         self.isUser = isUser
         self.isColorful = False
 
@@ -832,18 +768,27 @@ class TextShow(QWidget):
         getPageHeight();
         """
         if success:
-            self.webEngineView.show()
+            """ self.webEngineView.show() """
             self.webEngineView.page().runJavaScript("document.body.style.overflow = 'hidden';")
-            """ self.webEngineView.page().runJavaScript(js, self.adjustHeight) """
+            self.webEngineView.page().runJavaScript(js, self.adjustSize)
             """ QTimer.singleShot(1, self.setSize) """
             """ self.setSize() """
 
-    def adjustHeight(self, height):
-        print(height)
-        if height:
+    def adjustSize(self, height):
+        print('height:', height)
+        if height != 0:
             self.webEngineView.setFixedHeight(height)
+            print(self.label.parent())
+            if self.label:
+                self.mainHLayout.removeWidget(self.label)
+                self.label.deleteLater()
+                self.mainHLayout.addWidget(self.webEngineView)
             self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
             self.setSizeFinished.emit()
+            print('view_size:', self.webEngineView.width(), self.webEngineView.height())
+        for i in range(self.mainHLayout.count()):
+            item = self.mainHLayout.itemAt(i)
+            print(item.widget())
 
     """ def setSize(self):
         width = self.webEngineView.page().contentsSize().toSize().width()
@@ -947,17 +892,67 @@ class TextShow(QWidget):
         #QPainter end
         painter.end()
 
-    def setText(self, text):
-        
-        self.text = text.strip('\n')
+    def toggleWidget(self):
+        self.isLabel = False
+
+        markdown_content = ''
+        self.html_text = ''
+        self.full_html_text = ''
         initWidth = self.font_metrics.width(self.text) + 16
         if initWidth > self.maxWidth:
-            self.webEngineView.setFixedSize(self.maxWidth, 4500)
-            """ self.webEngineView.resize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44) """
+            self.webEngineView.setFixedSize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44)
+            """ self.webEngineView.setFixedWidth(self.maxWidth) """
         else:
-            self.webEngineView.setFixedSize(int(initWidth), 4500)
-            """ self.webEngineView.resize(int(initWidth), 73) """
-        markdown_content = ''
+            if self.text == '':
+                self.webEngineView.setFixedSize(38, 73)
+            else:
+                self.webEngineView.setFixedSize(int(initWidth), 73)
+                """ self.webEngineView.setFixedWidth(int(initWidth)) """
+        # 添加 MathJax CDN 链接到 HTML 头部
+        self.mathjax_cdn = """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <script type="text/javascript">
+                    MathJax = {
+                        tex: {
+                            inlineMath: [["$", "$"], ["\\(", "\\)"]],
+                            displayMath: [["$$", "$$"], ["\\[", "\\]"]]
+                        },
+                        svg: {
+                            fontCache: 'global'
+                        }
+                    };
+                </script>
+                <script type="text/javascript" async
+                    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.1.2/es5/tex-mml-chtml.js">
+                </script>
+                <style>
+                    table {
+                        width: 50%;
+                        border-collapse: collapse;
+                        margin: 10px 0;
+                    }  
+                    th, td {
+                        border: 1px solid #000;
+                        padding: 8px;
+                    }
+                    th {
+                        background-color: #b0b0b0;
+                    }
+                    .left-align { text-align: left; }
+                    .center-align { text-align: center; }
+                    .right-align { text-align: right; }
+                </style>
+                <style>  
+                    body { font-size: 22px; }
+                </style>
+            </head>
+        """
+        self.markdown = mistune.create_markdown(escape=False, renderer='html')
+
         if not self.text == '':
             tableText, tableItemList, tableAlignList, row, column, tableIsComplete= self.getTable(self.text)
             if tableIsComplete:
@@ -1021,23 +1016,88 @@ class TextShow(QWidget):
                 self.html_text = self.markdown(markdown_content)
             # 将转换后的 HTML 内容添加到 body 中
             self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
-            self.webEngineView.hide()
+
+            print(self.text)
+            print('subWidget count:', self.mainHLayout.count())
+
             self.webEngineView.setHtml(str(self.full_html_text))
-        self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
+
+    def setText(self, text):
+        self.text = text.strip('\n')
+        if not self.text == '':
+            textWidth = 0
+            textHeight = int(self.font_metrics.height())
+            count = self.text.count('\n')
+            textList = self.text.split('\n', count)
+            maxTempTextWidth = 0
+            for i in range(0, count + 1):
+                if int(self.font_metrics.width(textList[i])) > maxTempTextWidth:
+                    maxTempTextWidth = int(self.font_metrics.width(textList[i]))
+            if (maxTempTextWidth + 4) < self.maxWidth:
+                labelWidth = maxTempTextWidth + 4
+                labelHeight = (count + 1) * (textHeight + 3) - 3
+            else:
+                for i in range(0, count + 1):
+                    if i != count:
+                        tempTextWidth = self.font_metrics.width(textList[i] + ' ')
+                        tempTextWidth = math.ceil(tempTextWidth / (self.maxWidth - 24)) * (self.maxWidth - 24)
+                    else:
+                        tempTextWidth = self.font_metrics.width(textList[i])
+                    textWidth += int(tempTextWidth)
+                labelWidth = self.maxWidth
+                labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
+            self.label.setText(self.text)
+            self.label.setFixedSize(labelWidth, labelHeight)
+            self.setFixedSize(labelWidth + 10, labelHeight + 10)
+        else:
+            self.label.setFixedSize(22, 22)
+            self.setFixedSize(32, 32)
 
     def setMaxWidth(self, maxWidth):
-        self.maxWidth = maxWidth
-        self.webEngineView.setMaximumWidth(self.maxWidth)
-        initWidth = self.font_metrics.width(self.text) + 16
-        if initWidth > self.maxWidth:
-            self.webEngineView.setFixedWidth(self.maxWidth)
-            """ self.webEngineView.resize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44) """
+        if self.isLabel:
+            self.maxWidth = maxWidth
+            self.label.setMaximumWidth(self.maxWidth)
+            if not self.text == '':
+                textWidth = 0
+                textHeight = int(self.font_metrics.height())
+                count = self.text.count('\n')
+                textList = self.text.split('\n', count)
+                maxTempTextWidth = 0
+                for i in range(0, count + 1):
+                    if int(self.font_metrics.width(textList[i])) > maxTempTextWidth:
+                        maxTempTextWidth = int(self.font_metrics.width(textList[i]))
+                if (maxTempTextWidth + 4) < self.maxWidth:
+                    labelWidth = maxTempTextWidth + 4
+                    labelHeight = (count + 1) * (textHeight + 3) - 3
+                else:
+                    for i in range(0, count + 1):
+                        if i != count:
+                            tempTextWidth = self.font_metrics.width(textList[i] + ' ')
+                            tempTextWidth = math.ceil(tempTextWidth / (self.maxWidth - 24)) * (self.maxWidth - 24)
+                        else:
+                            tempTextWidth = self.font_metrics.width(textList[i])
+                        textWidth += int(tempTextWidth)
+                    labelWidth = self.maxWidth
+                    labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
+                self.label.setText(self.text)
+                self.label.setFixedSize(labelWidth, labelHeight)
+                self.setFixedSize(labelWidth + 10, labelHeight + 10)
+            else:
+                self.label.setFixedSize(22, 22)
+                self.setFixedSize(32, 32)
         else:
-            self.webEngineView.setFixedWidth(int(initWidth))
+            self.maxWidth = maxWidth
+            self.webEngineView.setMaximumWidth(self.maxWidth)
+            """ initWidth = self.font_metrics.width(self.text) + 16 """
+            """ if initWidth > self.maxWidth:
+                self.webEngineView.setFixedWidth(self.maxWidth) """
+            """ self.webEngineView.resize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44) """
+            """ else:
+                self.webEngineView.setFixedWidth(int(initWidth)) """
             """ self.webEngineView.resize(int(initWidth), 73) """
-        if not self.text == '':
-            self.webEngineView.setHtml(str(self.full_html_text))
-        self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
+            if not self.text == '':
+                self.webEngineView.setHtml(str(self.full_html_text))
+            """ self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10) """
 
     def getWebEngineView(self):
         return self.webEngineView
@@ -1218,14 +1278,17 @@ class MessageWidget(QWidget):
         #main widget set size
         self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
 
-        """ self.textShow.setSizeFinished.connect(self.setSizeFinishedFlag) """
-        self.sizeFinishedFlag = False
+        """ self.textShow.setSizeFinished.connect(self.toggleWidget) """
+        """ self.sizeFinishedFlag = False """
+
+    def toggleWidget(self):
+        self.textShow.toggleWidget()
 
     def connectSetSizeFinished(self, fun):
         self.textShow.setSizeFinished.connect(fun)
 
-    def setSizeFinishedFlag(self):
-        self.sizeFinishedFlag = True
+    """ def setSizeFinishedFlag(self):
+        self.sizeFinishedFlag = True """
 
     def setSize(self):
         if self.isUser:
@@ -2707,6 +2770,7 @@ class MainWindow(QMainWindow):
             #MessageWidget
             self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, isUser=True, textMaxWidth=int(self.chatShow.width() * 2 / 3))
             self.messageSendWidget.connectSetSizeFinished(self.messageWidgetResize)
+            self.messageSendWidget.toggleWidget()
             self.messageWidgetList.append(self.messageSendWidget)
             #itemSendWidget QWidget
             self.itemSendWidget = ItemWidget(self)
@@ -2767,8 +2831,7 @@ class MainWindow(QMainWindow):
         if self.first:
             self.first = False
             text = text.strip("\n ")
-        """ self.Message += text """
-        self.Message = text
+        self.Message += text
         #messageWidget set text
         self.messageRecvWidget.setText(self.Message)
         #chatShow itemWidget adjust size
@@ -2780,6 +2843,7 @@ class MainWindow(QMainWindow):
     def messageFinish(self):
         #messageRecvWidget
         self.messageRecvWidget.removeLoadingWidget()
+        self.messageRecvWidget.toggleWidget()
         #chatShow itemWidget adjust size
         self.itemRecvWidget.setFixedSize(self.chatShow.width(), self.messageRecvWidget.height() + 10)
         self.itemRecvHLayout.setContentsMargins(0, 5, self.itemRecvWidget.width() - self.messageRecvWidget.width(), 5)
@@ -2942,6 +3006,7 @@ class MainWindow(QMainWindow):
                 #MessageWidget
                 self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, isUser=isUser, textMaxWidth=self.chatShow.width() * 2 // 3)
                 self.messageWidget.connectSetSizeFinished(self.messageWidgetResize)
+                self.messageWidget.toggleWidget()
                 if not isUser:
                     self.messageWidget.removeLoadingWidget()
                 self.messageWidgetList.append(self.messageWidget)

@@ -335,7 +335,9 @@ class FunWidget(QWidget):
 class ListWidget(QListWidget):
     def __init__(self, parent=None):
         super(ListWidget, self).__init__(parent)
+        self.ScrollChangeUplimit = 200
         self.ScrollAutoChang=True
+        self.ScrollUserChanged = False
         self.resize(1171, 492)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -370,7 +372,7 @@ class ListWidget(QListWidget):
         #FirstRangeChanged
         self.FirstRangeChanged = True
         self.verticalScrollBar().rangeChanged.connect(self.onScrollBarRangeChanged)
-        self.verticalScrollBar().sliderMoved.connect(self.onScrollBarMoved)
+        self.verticalScrollBar().valueChanged.connect(self.onScrollBarValueChanged)
 
     def onScrollBarRangeChanged(self, min, max):
         """ if self.FirstRangeChanged:
@@ -384,8 +386,11 @@ class ListWidget(QListWidget):
             verticalScrollBar = self.verticalScrollBar()
             verticalScrollBar.setValue(verticalScrollBar.maximum())
 
-    def onScrollBarMoved(self, value):
-        self.ScrollAutoChang = False
+    def onScrollBarValueChanged(self, value):
+        if(self.verticalScrollBar().maximum() - self.verticalScrollBar().value() >= self.ScrollChangeUplimit):
+            self.ScrollAutoChang = False
+        else:
+            self.ScrollAutoChang = True
         """ if self.FirstRangeChanged:
             self.verticalScrollBar().setValue(self.verticalScrollBar().maximum())
             print('range_value:', self.verticalScrollBar().value())

@@ -57,9 +57,7 @@ ___粗斜体文本___
 [^RUNOOB]: 菜鸟教程 -- 学的不仅是技术，更是梦想！！！  
 
 ******************
-$\alpha$ $\beta$ $\gamma$ $\delta$ $\epsilon$ $\zeta$ $\eta$ $\theta$ $\iota$ $\kappa$ $\lambda$  
-$\mu$ $\nu$ $\omicron$ $\pi$ $\rho$ $\sigma$ $\tau$ $\phi$ $\chi$ $\psi$ $\omega$ $\Gamma$ $\Delta$  
-$\Theta$ $\Lambda$ $\Xi$ $\Pi$ $\Sigma$ $\Phi$ $\Psi$ $\Omega$  
+$\alpha$ $\beta$ $\gamma$ $\delta$ $\epsilon$ $\zeta$ $\eta$ $\theta$ $\iota$ $\kappa$ $\lambda$ $\mu$ $\nu$ $\omicron$ $\pi$ $\rho$ $\sigma$ $\tau$ $\phi$ $\chi$ $\psi$ $\omega$ $\Gamma$ $\Delta$ $\Theta$ $\Lambda$ $\Xi$ $\Pi$ $\Sigma$ $\Phi$ $\Psi$ $\Omega$  
 ******************
 ### 无序列表
 * 第一项
@@ -209,10 +207,10 @@ class messageThread(QThread):
             """ for _ in range(0, 100):
                 self.newMessage.emit(self.contentOutput)
                 time.sleep(0.1) """
-            """ for i in range(0, len(self.contentOutput), 10):
+            for i in range(0, len(self.contentOutput), 10):
                 self.newMessage.emit(self.contentOutput[i:i+10])
-                time.sleep(0.1) """
-            self.newMessage.emit('# 一级标题## 二级标题### 三级标题')
+                time.sleep(0.1)
+            """ self.newMessage.emit('# 一级标题## 二级标题### 三级标题') """
         else:
             self.newMessage.emit(self.contentOutput)
         return
@@ -337,6 +335,7 @@ class FunWidget(QWidget):
 class ListWidget(QListWidget):
     def __init__(self, parent=None):
         super(ListWidget, self).__init__(parent)
+        self.ScrollAutoChang=True
         self.resize(1171, 492)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -365,6 +364,42 @@ class ListWidget(QListWidget):
         ''')
         #setMouseTracking
         self.setMouseTracking(True)
+
+        #self.lastWasBottom
+        self.lastWasBottom = False
+        #FirstRangeChanged
+        self.FirstRangeChanged = True
+        self.verticalScrollBar().rangeChanged.connect(self.onScrollBarRangeChanged)
+        self.verticalScrollBar().sliderMoved.connect(self.onScrollBarMoved)
+
+    def onScrollBarRangeChanged(self, min, max):
+        """ if self.FirstRangeChanged:
+            self.verticalScrollBar().setValue(self.verticalScrollBar().maximum())
+            print('range_value:', self.verticalScrollBar().value())
+            print('range_min:', min)
+            print('range_max:', max)
+            self.lastWasBottom = True
+            self.FirstRangeChanged = False """
+        if(self.ScrollAutoChang == True):
+            verticalScrollBar = self.verticalScrollBar()
+            verticalScrollBar.setValue(verticalScrollBar.maximum())
+
+    def onScrollBarMoved(self, value):
+        self.ScrollAutoChang = False
+        """ if self.FirstRangeChanged:
+            self.verticalScrollBar().setValue(self.verticalScrollBar().maximum())
+            print('range_value:', self.verticalScrollBar().value())
+            self.lastWasBottom = True
+            self.FirstRangeChanged = False
+        
+        verticalScrollBar = self.verticalScrollBar()
+        print(self.lastWasBottom)
+        print('vlaue_value:', self.verticalScrollBar().value())
+        print('vlaue_max:', verticalScrollBar.maximum())
+        if verticalScrollBar.value() == self.lastWasBottom:
+            print('bottom_max:', verticalScrollBar.maximum())
+            verticalScrollBar.setValue(verticalScrollBar.maximum())
+        self.lastWasBottom = value == self.verticalScrollBar().maximum() """
 
     def mouseMoveEvent(self, event):
         QListWidget.mouseMoveEvent(self, event)
@@ -698,6 +733,8 @@ class CustomLabel(QLabel):
 
 class TextShow(QWidget):
     setSizeFinished = pyqtSignal()
+    setTexting = pyqtSignal(bool)
+    
 
     def __init__(self, text, isUser=True, maxWidth=650, parent=None):
         super(TextShow, self).__init__(parent)
@@ -715,11 +752,10 @@ class TextShow(QWidget):
         self.webEngineView = WebEngineView()
         self.webEngineView.connectPageLoadFinished(self.onPageLoadFinished)
         self.mainHLayout = QHBoxLayout()
-        self.webEngineView.setMaximumWidth(self.maxWidth)
+        """ self.webEngineView.setMaximumWidth(self.maxWidth) """
 
         self.isLabel = True
         if not self.text == '':
-            print('textShow:', self.text)
             textWidth = 0
             textHeight = int(self.font_metrics.height())
             count = self.text.count('\n')
@@ -761,34 +797,30 @@ class TextShow(QWidget):
         function getPageHeight() {
             var body = document.body;
             var html = document.documentElement;
+            var width = Math.max(body.scrollWidth, body.offsetWidth,
+                                html.clientWidth, html.scrollWidth, html.offsetWidth);
             var height = Math.max(body.scrollHeight, body.offsetHeight,
                                 html.clientHeight, html.scrollHeight, html.offsetHeight);
-            return height;
+            return [width, height];
         }
         getPageHeight();
         """
         if success:
             """ self.webEngineView.show() """
+            """ self.webEngineView.page().runJavaScript("window.scrollTo(0, document.body.scrollHeight);") """
             self.webEngineView.page().runJavaScript("document.body.style.overflow = 'hidden';")
             self.webEngineView.page().runJavaScript(js, self.adjustSize)
-            """ QTimer.singleShot(1, self.setSize) """
+            """ QTimer.singleShot(10, self.setSize) """
             """ self.setSize() """
 
-    def adjustSize(self, height):
-        print('height:', height)
-        if height != 0:
-            self.webEngineView.setFixedHeight(height)
-            print(self.label.parent())
-            if self.label:
-                self.mainHLayout.removeWidget(self.label)
-                self.label.deleteLater()
-                self.mainHLayout.addWidget(self.webEngineView)
+    def adjustSize(self, result):
+        width, height = result
+        if width != 0 and height != 0:
+            self.webEngineView.setFixedSize(width, height)
             self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
             self.setSizeFinished.emit()
-            print('view_size:', self.webEngineView.width(), self.webEngineView.height())
-        for i in range(self.mainHLayout.count()):
-            item = self.mainHLayout.itemAt(i)
-            print(item.widget())
+
+        self.setTexting.emit(False)
 
     """ def setSize(self):
         width = self.webEngineView.page().contentsSize().toSize().width()
@@ -798,8 +830,9 @@ class TextShow(QWidget):
             self.webEngineView.setFixedSize(width, height)
             self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
             self.setSizeFinished.emit()
+            print('view_size:', self.webEngineView.width(), self.webEngineView.height())
         else:
-            QTimer.singleShot(1, self.setSize) """
+            QTimer.singleShot(10, self.setSize) """
 
     def getAlignmentClass(self, format_string):
         # 根据对齐格式返回相应的class名
@@ -893,21 +926,22 @@ class TextShow(QWidget):
         painter.end()
 
     def toggleWidget(self):
-        self.isLabel = False
-
         markdown_content = ''
         self.html_text = ''
         self.full_html_text = ''
         initWidth = self.font_metrics.width(self.text) + 16
+
+        self.setTexting.emit(True)
+
         if initWidth > self.maxWidth:
-            self.webEngineView.setFixedSize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44)
-            """ self.webEngineView.setFixedWidth(self.maxWidth) """
+            """ self.webEngineView.setFixedSize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44) """
+            self.webEngineView.setFixedWidth(self.maxWidth)
         else:
             if self.text == '':
                 self.webEngineView.setFixedSize(38, 73)
             else:
-                self.webEngineView.setFixedSize(int(initWidth), 73)
-                """ self.webEngineView.setFixedWidth(int(initWidth)) """
+                """ self.webEngineView.setFixedSize(int(initWidth), 73) """
+                self.webEngineView.setFixedWidth(int(initWidth))
         # 添加 MathJax CDN 链接到 HTML 头部
         self.mathjax_cdn = """
             <!DOCTYPE html>
@@ -1017,12 +1051,18 @@ class TextShow(QWidget):
             # 将转换后的 HTML 内容添加到 body 中
             self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
 
-            print(self.text)
-            print('subWidget count:', self.mainHLayout.count())
-
+            if self.isLabel:
+                self.mainHLayout.removeWidget(self.label)
+                self.label.deleteLater()
+                self.mainHLayout.addWidget(self.webEngineView)
             self.webEngineView.setHtml(str(self.full_html_text))
 
+            self.isLabel = False
+
     def setText(self, text):
+        self.setTexting.emit(True)
+        
+
         self.text = text.strip('\n')
         if not self.text == '':
             textWidth = 0
@@ -1052,6 +1092,11 @@ class TextShow(QWidget):
         else:
             self.label.setFixedSize(22, 22)
             self.setFixedSize(32, 32)
+        print(f"ScrollAutoChang:{self.parent().parent().listWidget.ScrollAutoChang},value:{self.parent().parent().listWidget.verticalScrollBar().value()}")
+        self.setTexting.emit(False)
+
+    def connectSetTexting(self, fun):
+        self.setTexting.connect(fun)
 
     def setMaxWidth(self, maxWidth):
         if self.isLabel:
@@ -1088,6 +1133,13 @@ class TextShow(QWidget):
         else:
             self.maxWidth = maxWidth
             self.webEngineView.setMaximumWidth(self.maxWidth)
+            initWidth = self.font_metrics.width(self.text) + 16
+            if initWidth > self.maxWidth:
+                """ self.webEngineView.setFixedSize(self.maxWidth, math.ceil(self.font_metrics.width(self.text) / (self.maxWidth - 16)) * 29 + 44) """
+                self.webEngineView.setFixedWidth(self.maxWidth)
+            else:
+                """ self.webEngineView.setFixedSize(int(initWidth), 73) """
+                self.webEngineView.setFixedWidth(int(initWidth))
             """ initWidth = self.font_metrics.width(self.text) + 16 """
             """ if initWidth > self.maxWidth:
                 self.webEngineView.setFixedWidth(self.maxWidth) """
@@ -1179,8 +1231,10 @@ class CopyButton(QPushButton):
         return QPushButton.event(self, event)
 
 class MessageWidget(QWidget):
-    def __init__(self, text, copyFun, renewResponseFun, isUser=True, textMaxWidth=780, parent=None):
+    def __init__(self, text, copyFun, renewResponseFun, listWidget, isUser=True, textMaxWidth=780, parent=None):
         super(MessageWidget, self).__init__(parent)
+        self.listWidget = listWidget
+
         self.text = text
         self.textMaxWidth = textMaxWidth
         self.isUser = isUser
@@ -1278,8 +1332,33 @@ class MessageWidget(QWidget):
         #main widget set size
         self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
 
+        
+
         """ self.textShow.setSizeFinished.connect(self.toggleWidget) """
         """ self.sizeFinishedFlag = False """
+
+        """ self.textShow.connectSetTexting(self.setScrollPos)
+        #atBottom
+        self.atBottom = True """
+
+    """ def setScrollPos(self, isStart):
+        #chatShow verticalScrollBar
+        
+        if isStart:
+            self.atBottom = verticalScrollBar.value() == verticalScrollBar.maximum()
+            print('start')
+            print('value', verticalScrollBar.value())
+            print('maximum', verticalScrollBar.maximum())
+        else:
+            if self.atBottom:
+                verticalScrollBar.setValue(verticalScrollBar.maximum())
+            print('end')
+            print('value', verticalScrollBar.value())
+            print('maximum', verticalScrollBar.maximum()) """
+
+    """ def connectSetTexting(self, fun):
+        self.textShow.connectSetTexting(fun) """
+    
 
     def toggleWidget(self):
         self.textShow.toggleWidget()
@@ -1912,6 +1991,8 @@ class RegionEnum(Enum):
     MIDDLE = 10
 
 class MainWindow(QMainWindow):
+    resetScrollSignal = pyqtSignal()
+
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.setMinimumSize(624, 416)
@@ -2045,6 +2126,30 @@ class MainWindow(QMainWindow):
         self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.textCopyLabel.height() - 10)
         self.textCopyLabel.raise_()
         self.textCopyLabel.hide()
+
+        self.resetScrollSignal.connect(self.resetScroll)
+
+        """ #atBottom
+        self.atBottom = True """
+
+        """ #self.lastWasBottom
+        self.lastWasBottom = False
+        #FirstRangeChanged
+        self.FirstRangeChanged = True
+        self.chatShow.verticalScrollBar().rangeChanged().connect(self.onScrollBarRangeChanged)
+        self.chatShow.verticalScrollBar().valueChanged().connect(self.onScrollBarValueChanged)
+
+    def onScrollBarRangeChanged(self, min, max):
+        if self.FirstRangeChanged:
+            self.chatShow.verticalScrollBar().setValue(self.chatShow.verticalScrollBar().maximum())
+            self.lastWasBottom = True
+            self.FirstRangeChanged = False
+
+    def onScrollBarValueChanged(self, value):
+        verticalScrollBar = self.chatShow.verticalScrollBar()
+        if verticalScrollBar.value() == self.lastWasBottom:
+            verticalScrollBar.setValue(verticalScrollBar.maximum())
+        self.lastWasBottom = value == self.chatShow.verticalScrollBar().maximum() """
 
     def mouseMoveEvent(self, event):
         #If the mouse hovers over the list item, it has a pop-up effect
@@ -2760,6 +2865,9 @@ class MainWindow(QMainWindow):
             #chatShow item adjust size
             self.chatShow.item(i).setSizeHint(QSize(self.chatShow.width(), messageWidget.height() + 10))
 
+    def resetScroll(self):
+        self.chatShow.ScrollAutoChang = True
+
     def sendMessage(self):
         #judge status of sendButton
         if not self.chatInput.sendButtonIsEnable():
@@ -2768,10 +2876,15 @@ class MainWindow(QMainWindow):
         text = self.chatInput.toPlainText()
         if not text == '':
             #MessageWidget
-            self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, isUser=True, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+            self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=True, textMaxWidth=int(self.chatShow.width() * 2 / 3))
             self.messageSendWidget.connectSetSizeFinished(self.messageWidgetResize)
+            """ self.messageSendWidget.connectSetTexting(self.setScrollPos) """
             self.messageSendWidget.toggleWidget()
+            self.resetScrollSignal.emit()
             self.messageWidgetList.append(self.messageSendWidget)
+            """ if len(self.messageWidgetList) == 1:
+                print('initMaximum', self.chatShow.verticalScrollBar().maximum())
+                self.chatShow.verticalScrollBar().setValue(self.chatShow.verticalScrollBar().maximum()) #scroll to bottom """
             #itemSendWidget QWidget
             self.itemSendWidget = ItemWidget(self)
             self.itemSendHLayout = QHBoxLayout()
@@ -2784,6 +2897,9 @@ class MainWindow(QMainWindow):
             self.sendItem.setSizeHint(QSize(self.chatShow.width(), self.messageSendWidget.height() + 10))
             self.chatShow.setItemWidget(self.sendItem, self.itemSendWidget)
             self.chatShow.setCurrentItem(self.sendItem)
+            """ #chatShow verticalScrollBar
+            verticalScrollBar = self.chatShow.verticalScrollBar()
+            verticalScrollBar.setValue(verticalScrollBar.maximum()) """
             #create thread
             self.thread = messageThread(text)
             self.thread.started.connect(self.messageStart)
@@ -2809,8 +2925,9 @@ class MainWindow(QMainWindow):
             else:
                 self.messageWidgetList[i].removeRenewResponseButton()
         #MessageWidget
-        self.messageRecvWidget = MessageWidget(self.Message, self.textCopy, self.messageRenewResponse, isUser=False, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+        self.messageRecvWidget = MessageWidget(self.Message, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=False, textMaxWidth=int(self.chatShow.width() * 2 / 3))
         self.messageRecvWidget.connectSetSizeFinished(self.messageWidgetResize)
+        """ self.messageRecvWidget.connectSetTexting(self.setScrollPos) """
         self.messageWidgetList.append(self.messageRecvWidget)
         #itemRecvWidget QWidget
         self.itemRecvWidget = ItemWidget(self)
@@ -2824,6 +2941,9 @@ class MainWindow(QMainWindow):
         self.recvItem.setSizeHint(QSize(self.chatShow.width(), self.messageRecvWidget.height() + 10))
         self.chatShow.setItemWidget(self.recvItem, self.itemRecvWidget)
         self.chatShow.setCurrentItem(self.recvItem)
+        """ #chatShow verticalScrollBar
+        verticalScrollBar = self.chatShow.verticalScrollBar()
+        verticalScrollBar.setValue(verticalScrollBar.maximum()) """
         #first
         self.first = True
 
@@ -3004,12 +3124,16 @@ class MainWindow(QMainWindow):
                         self.messageWidgetList[j].removeRenewResponseButton()
                 text = text.strip('\n')
                 #MessageWidget
-                self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, isUser=isUser, textMaxWidth=self.chatShow.width() * 2 // 3)
+                self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, textMaxWidth=self.chatShow.width() * 2 // 3)
                 self.messageWidget.connectSetSizeFinished(self.messageWidgetResize)
+                """ self.messageWidget.connectSetTexting(self.setScrollPos) """
                 self.messageWidget.toggleWidget()
                 if not isUser:
                     self.messageWidget.removeLoadingWidget()
                 self.messageWidgetList.append(self.messageWidget)
+                """ if len(self.messageWidgetList) == 1:
+                    print('initMaximum', self.chatShow.verticalScrollBar().maximum())
+                    self.chatShow.verticalScrollBar().setValue(self.chatShow.verticalScrollBar().maximum()) #scroll to bottom """
                 #itemWidget QWidget
                 self.itemWidget = ItemWidget(self)
                 self.itemHLayout = QHBoxLayout()
@@ -3025,6 +3149,9 @@ class MainWindow(QMainWindow):
                 self.item.setSizeHint(QSize(self.chatShow.width(), self.messageWidget.height() + 10))
                 self.chatShow.setItemWidget(self.item, self.itemWidget)
                 self.chatShow.setCurrentItem(self.item)
+                """ #chatShow verticalScrollBar
+                verticalScrollBar = self.chatShow.verticalScrollBar()
+                verticalScrollBar.setValue(verticalScrollBar.maximum()) """
                 #clear text
                 text = ''
             else:

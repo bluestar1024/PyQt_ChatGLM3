@@ -7,15 +7,14 @@ Created on Tue Feb 13 18:31:44 2024
 
 '''
 TODO:
-1, 鼠标停留在气泡部件上下滑动时要实现气泡部件列表上下滑动的效果
-2, 当界面拉伸时要实现滚动栏留在原位置不回到最上面
+1, 当界面拉伸时要实现滚动栏留在原位置不回到最上面
 '''
 
 import sys, os
 from enum import Enum
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QAbstractSpinBox, QGridLayout, QLineEdit, QSplitter, QToolTip, QTextEdit
 from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QWheelEvent
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from openai import OpenAI
 import math
@@ -698,6 +697,24 @@ class WebEngineView(QWebEngineView):
     def connectPageLoadFinished(self, fun):
         self.page().loadFinished.connect(fun)
 
+    def wheelEvent(self, event):
+        # 获取滚动的像素值
+        delta_y = event.angleDelta().y()
+        # 获取当前的垂直滚动位置
+        current_scroll_value = self.parent().parent().parent().listWidget.verticalScrollBar().value()
+        min_scroll_value = self.parent().parent().parent().listWidget.verticalScrollBar().minimum()
+        max_scroll_value = self.parent().parent().parent().listWidget.verticalScrollBar().maximum()
+        # 计算新的滚动位置
+        new_scroll_value = current_scroll_value - delta_y  # 每次以 15 像素为单位滚动
+        if new_scroll_value < min_scroll_value:
+            new_scroll_value = min_scroll_value
+        elif new_scroll_value > max_scroll_value:
+            new_scroll_value = max_scroll_value
+        # 设置新的滚动位置
+        self.parent().parent().parent().listWidget.verticalScrollBar().setValue(new_scroll_value)
+        # 需要调用 accept() 来防止事件传递
+        event.accept()
+
 class CustomLabel(QLabel):
     textSelected = pyqtSignal(str)
 
@@ -709,16 +726,12 @@ class CustomLabel(QLabel):
         event.ignore()
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            if self.hasSelectedText():
-                self.textSelected.emit(self.selectedText())
         QLabel.mouseReleaseEvent(self, event)
         event.ignore()
 
 class TextShow(QWidget):
     setSizeFinished = pyqtSignal()
     setTexting = pyqtSignal(bool)
-    
 
     def __init__(self, text, isUser=True, maxWidth=650, parent=None):
         super(TextShow, self).__init__(parent)
@@ -1153,10 +1166,16 @@ class TextShow(QWidget):
         return self.webEngineView
 
     def hasSelectedText(self):
-        return self.webEngineView.hasSelection()
+        if self.isLabel:
+            return self.label.hasSelectedText()
+        else:
+            return self.webEngineView.hasSelection()
 
     def getSelectedText(self):
-        return self.webEngineView.selectedText()
+        if self.isLabel:
+            return self.label.selectedText()
+        else:
+            return self.webEngineView.selectedText()
 
 class TextWidget(QWidget):
     def __init__(self, parent=None):

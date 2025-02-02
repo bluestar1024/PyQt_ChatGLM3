@@ -5,16 +5,11 @@ Created on Tue Feb 13 18:31:44 2024
 @author: YXD
 """
 
-'''
-TODO:
-1, 当界面拉伸时要实现滚动栏留在原位置不回到最上面
-'''
-
 import sys, os
 from enum import Enum
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QAbstractSpinBox, QGridLayout, QLineEdit, QSplitter, QToolTip, QTextEdit
 from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QWheelEvent
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from openai import OpenAI
 import math
@@ -384,6 +379,10 @@ class ListWidget(QListWidget):
         else:
             self.scrollAutoChange = True
 
+    def scrollTo(self, index, hint=QListWidget.EnsureVisible):
+        # 重写方法，不执行任何滚动操作
+        pass
+
     def mouseMoveEvent(self, event):
         QListWidget.mouseMoveEvent(self, event)
         event.ignore()
@@ -697,6 +696,10 @@ class WebEngineView(QWebEngineView):
     def connectPageLoadFinished(self, fun):
         self.page().loadFinished.connect(fun)
 
+    def contextMenuEvent(self, event):
+        # 忽略右键上下文菜单事件
+        event.ignore()
+
     def wheelEvent(self, event):
         # 获取滚动的像素值
         delta_y = event.angleDelta().y()
@@ -705,7 +708,7 @@ class WebEngineView(QWebEngineView):
         min_scroll_value = self.parent().parent().parent().listWidget.verticalScrollBar().minimum()
         max_scroll_value = self.parent().parent().parent().listWidget.verticalScrollBar().maximum()
         # 计算新的滚动位置
-        new_scroll_value = current_scroll_value - delta_y  # 每次以 15 像素为单位滚动
+        new_scroll_value = current_scroll_value - delta_y
         if new_scroll_value < min_scroll_value:
             new_scroll_value = min_scroll_value
         elif new_scroll_value > max_scroll_value:
@@ -942,6 +945,9 @@ class TextShow(QWidget):
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <script type="text/javascript">
                     MathJax = {
+                        options: {
+                            enableMenu: false
+                        },
                         tex: {
                             inlineMath: [["$", "$"], ["\\(", "\\)"]],
                             displayMath: [["$$", "$$"], ["\\[", "\\]"]]
@@ -2420,7 +2426,7 @@ class MainWindow(QMainWindow):
                 self.item = QListWidgetItem(self.chatShow)
                 self.item.setSizeHint(QSize(self.chatShow.width(), self.messageWidget.height() + 10))
                 self.chatShow.setItemWidget(self.item, self.itemWidget)
-                self.chatShow.setCurrentItem(self.item)
+                """ self.chatShow.setCurrentItem(self.item) """
                 #clear text
                 text = ''
             else:
@@ -2468,7 +2474,7 @@ class MainWindow(QMainWindow):
                 self.item = QListWidgetItem(self.chatShow)
                 self.item.setSizeHint(QSize(self.chatShow.width(), self.messageWidget.height() + 10))
                 self.chatShow.setItemWidget(self.item, self.itemWidget)
-                self.chatShow.setCurrentItem(self.item)
+                """ self.chatShow.setCurrentItem(self.item) """
                 #clear text
                 text = ''
             else:
@@ -2480,6 +2486,9 @@ class MainWindow(QMainWindow):
 
     def onResizeTimeout(self):
         if len(self.messageWidgetList) != 0:
+            if not self.isSetTexting:
+                self.current_scroll_value = self.chatShow.verticalScrollBar().value()
+                self.max_scroll_value = self.chatShow.verticalScrollBar().maximum()
             self.saveCurChatRecord()
             self.messageWidgetList.clear()
             self.chatShow.clear()
@@ -2489,6 +2498,7 @@ class MainWindow(QMainWindow):
             self.chatShow.clear()
             if not self.isSetTexting:
                 self.generateCurChatRecord()
+                QTimer.singleShot(1, self.set_scroll_value)
             else:
                 self.withoutToggleGenerateCurChatRecord()
                 for i in range(0, self.chatShow.count() - 1):
@@ -2497,6 +2507,10 @@ class MainWindow(QMainWindow):
                 self.itemRecvHLayout = self.itemHLayout
                 self.itemRecvWidget = self.itemWidget
                 self.recvItem = self.item
+
+    def set_scroll_value(self):
+        new_max_scroll_value = self.chatShow.verticalScrollBar().maximum()
+        self.chatShow.verticalScrollBar().setValue(int(self.current_scroll_value / self.max_scroll_value * new_max_scroll_value))
 
     def resizeEvent(self, event):
         #mask adjust size
@@ -2557,6 +2571,20 @@ class MainWindow(QMainWindow):
         for i in range(0, len(self.messageWidgetList)):
             self.messageWidgetList[i].showDefaultColor()
         self.messageWidgetList[self.chatShow.row(item)].showColorful()
+
+        """ # 在点击项前先获取当前的滚动位置
+        current_scroll_value = self.chatShow.verticalScrollBar().value()
+        print(current_scroll_value)
+        max_scroll_value = self.chatShow.verticalScrollBar().maximum()
+        print(max_scroll_value) """
+        """ print(current_scroll_value)
+        # 计算选中项的上边缘位置
+        item_rect = self.chatShow.visualItemRect(item).top()
+        print(self.chatShow.visualItemRect(item))
+        print(item_rect)
+        # 保持当前位置不变，调整滚动条
+        new_scroll_value = current_scroll_value + item_rect """
+        """ self.chatShow.verticalScrollBar().setValue(current_scroll_value) """
 
     def titleWidgetInit(self):
         #titleIconLabel QLabel
@@ -3039,7 +3067,7 @@ class MainWindow(QMainWindow):
             self.sendItem = QListWidgetItem(self.chatShow)
             self.sendItem.setSizeHint(QSize(self.chatShow.width(), self.messageSendWidget.height() + 10))
             self.chatShow.setItemWidget(self.sendItem, self.itemSendWidget)
-            self.chatShow.setCurrentItem(self.sendItem)
+            """ self.chatShow.setCurrentItem(self.sendItem) """
             #create thread
             self.thread = messageThread(text)
             self.thread.started.connect(self.messageStart)
@@ -3080,7 +3108,7 @@ class MainWindow(QMainWindow):
         self.recvItem = QListWidgetItem(self.chatShow)
         self.recvItem.setSizeHint(QSize(self.chatShow.width(), self.messageRecvWidget.height() + 10))
         self.chatShow.setItemWidget(self.recvItem, self.itemRecvWidget)
-        self.chatShow.setCurrentItem(self.recvItem)
+        """ self.chatShow.setCurrentItem(self.recvItem) """
         #first
         self.first = True
 
@@ -3282,7 +3310,7 @@ class MainWindow(QMainWindow):
                 self.item = QListWidgetItem(self.chatShow)
                 self.item.setSizeHint(QSize(self.chatShow.width(), self.messageWidget.height() + 10))
                 self.chatShow.setItemWidget(self.item, self.itemWidget)
-                self.chatShow.setCurrentItem(self.item)
+                """ self.chatShow.setCurrentItem(self.item) """
                 #clear text
                 text = ''
             else:

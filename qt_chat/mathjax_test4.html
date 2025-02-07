@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>离线MathJax示例</title>
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [["$", "$"], ['\\(', '\\)']],
+            displayMath: [["$$", "$$"], ['\\[', '\\]']],
+            processEscapes: true
+        },
+        messageStyle: "none",
+        "HTML-CSS": { scale: 100 }
+    });
+    </script>
+    <script src="./resources/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+<body>
+    <h1>离线MathJax测试</h1>
+    <p>行内公式：\(E = mc^2\)</p>
+    <p>行内公式：$E = mc^2$</p>
+    <p>行内公式：$f(x) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^\infty e^{-x^2/2} dx$</p>
+    <p>块级公式：
+    \[
+        \sum_{n=1}^\infty \frac{1}{n^2} = \frac{\pi^2}{6}
+    \]</p>
+    <p>微分公式：
+    $$\frac{d}{dx} e^x = e^x$$</p>
+</body>
+</html>

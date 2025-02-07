@@ -8,7 +8,7 @@ Created on Tue Feb 13 18:31:44 2024
 import sys, os
 from enum import Enum
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QAbstractSpinBox, QGridLayout, QLineEdit, QSplitter, QToolTip, QTextEdit
-from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl
+from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QDir
 from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from openai import OpenAI
@@ -803,8 +803,6 @@ class TextShow(QWidget):
         getPageHeight();
         """
         if success:
-            """ self.webEngineView.show() """
-            """ self.webEngineView.page().runJavaScript("window.scrollTo(0, document.body.scrollHeight);") """
             self.webEngineView.page().runJavaScript("document.body.style.overflow = 'hidden';")
             self.webEngineView.page().runJavaScript(js, self.updateSize)
             """ QTimer.singleShot(10, self.setSize) """
@@ -957,8 +955,8 @@ class TextShow(QWidget):
                         }
                     };
                 </script>
-                <script type="text/javascript" async
-                    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.1.2/es5/tex-mml-chtml.js">
+                <script type="text/javascript"
+                    src="./resources/mathjax/es5/tex-mml-chtml.js">
                 </script>
                 <style>
                     table {
@@ -1047,12 +1045,13 @@ class TextShow(QWidget):
                 self.html_text = self.markdown(markdown_content)
             # 将转换后的 HTML 内容添加到 body 中
             self.full_html_text = f"{self.mathjax_cdn}<body>\n{self.html_text}\n</body>\n</html>\n"
+            baseUrl = QUrl.fromLocalFile(os.path.dirname(os.path.abspath(__file__)) + '/')
 
             if self.isLabel:
                 self.mainHLayout.removeWidget(self.label)
                 self.label.deleteLater()
                 self.mainHLayout.addWidget(self.webEngineView)
-            self.webEngineView.setHtml(str(self.full_html_text))
+            self.webEngineView.setHtml(str(self.full_html_text), baseUrl)
 
             self.isLabel = False
             self.setTexting.emit(self.isLabel)
@@ -2498,7 +2497,7 @@ class MainWindow(QMainWindow):
             self.chatShow.clear()
             if not self.isSetTexting:
                 self.generateCurChatRecord()
-                QTimer.singleShot(1, self.set_scroll_value)
+                QTimer.singleShot(5, self.set_scroll_value)
             else:
                 self.withoutToggleGenerateCurChatRecord()
                 for i in range(0, self.chatShow.count() - 1):

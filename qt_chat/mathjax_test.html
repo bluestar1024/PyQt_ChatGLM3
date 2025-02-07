@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script type="text/javascript">
+    MathJax = {
+        options: {
+            enableMenu: false
+        },
+        tex: {
+            inlineMath: [["$", "$"], ["\\(", "\\)"]],
+            displayMath: [["$$", "$$"], ["\\[", "\\]"]]
+        },
+        svg: {
+            fontCache: 'global'
+        }
+    };
+</script>
+<script type="text/javascript" async
+    src="./resources/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<style>
+    table {
+        width: 50%;
+        border-collapse: collapse;
+        margin: 10px 0;
+    }
+    th, td {
+        border: 1px solid #000;
+        padding: 8px;
+    }
+    th {
+        background-color: #b0b0b0;
+    }
+    .left-align { text-align: left; }
+    .center-align { text-align: center; }
+    .right-align { text-align: right; }
+</style>
+<style>
+    body { font-size: 22px; }
+</style>
+</head>
+<body>
+<h1>一级标题</h1>
+<h2>二级标题</h2>
+<hr />
+<h1>一级标题</h1>
+<h2>二级标题</h2>
+<h3>三级标题</h3>
+<p>这是一个段落，包含一些 <em>Markdown</em> 语法。<br />
+<em>斜体文本</em><br />
+<em>斜体文本</em><br />
+<strong>粗体文本</strong><br />
+<strong>粗体文本</strong><br />
+*<strong>粗斜体文本</strong>*<br />
+___粗斜体文本___<br />
+~~删除线文本~~<br />
+<u>带下划线文本</u><br />
+苹果10$，梨子20$，香蕉30$，橘子40$。<br />
+苹果10\$，梨子20\$，香蕉30\$，橘子40\$。</p>
+<p>创建脚注格式类似这样 [^RUNOOB]。<br />
+[^RUNOOB]: 菜鸟教程 -- 学的不仅是技术，更是梦想！！！</p>
+<hr />
+<p>$\alpha$ $\beta$ $\gamma$ $\delta$ $\epsilon$ $\zeta$ $\eta$ $\theta$ $\iota$ $\kappa$ $\lambda$ $\mu$ $\nu$ $\omicron$ $\pi$ $
+ho$ $\sigma$ $\tau$ $\phi$ $\chi$ $\psi$ $\omega$ $\Gamma$ $\Delta$ $\Theta$ $\Lambda$ $\Xi$ $\Pi$ $\Sigma$ $\Phi$ $\Psi$ $\Omega$</p>
+<hr />
+<h3>无序列表</h3>
+<ul>
+<li>第一项</li>
+<li>第二项</li>
+<li>第三项</li>
+</ul>
+<ul>
+<li>第一项</li>
+<li>第二项</li>
+<li>第三项</li>
+</ul>
+<ul>
+<li>第一项</li>
+<li>第二项</li>
+<li>第三项</li>
+</ul>
+<h3>有序列表</h3>
+<ol>
+<li>第一项</li>
+<li>第二项</li>
+<li>第三项</li>
+</ol>
+<h3>列表嵌套</h3>
+<ol>
+<li>第一项<ul>
+<li>第一项嵌套的第一个元素</li>
+<li>第一项嵌套的第二个元素</li>
+</ul>
+</li>
+<li>第二项<ol>
+<li>第二项嵌套的第一个元素</li>
+<li>第二项嵌套的第二个元素</li>
+</ol>
+</li>
+</ol>
+<hr />
+<h3>区块</h3>
+<blockquote>
+<p>菜鸟教程
+学的不仅是技术更是梦想</p>
+</blockquote>
+<blockquote>
+<p>最外层</p>
+<blockquote>
+<p>第一层嵌套</p>
+<blockquote>
+<p>第二层嵌套</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>区块中使用列表</p>
+<ol>
+<li>第一项</li>
+<li>第二项</li>
+</ol>
+<ul>
+<li>第一项</li>
+<li>第二项</li>
+<li>第三项</li>
+</ul>
+</blockquote>
+<p>列表中使用区块</p>
+<ul>
+<li>第一项<blockquote>
+菜鸟教程
+学的不仅是技术更是梦想</blockquote>
+</li>
+<li>第二项</li>
+</ul>
+<hr />
+<h3>代码</h3>
+<p><code>printf()</code>函数</p>
+<pre><code>def printHelloWorld():
+    print('hello world')
+
+</code></pre>
+<pre><code class="language-python:">def printHelloWorld():
+    print('hello world')
+</code></pre>
+<hr />
+<h3>链接</h3>
+<p>这是一个链接 <a href="https://www.runoob.com">菜鸟教程</a><br />
+这个链接用 1 作为网址变量 <a href="http://www.baidu.com/">Baidu</a><br />
+这个链接用 runoob 作为网址变量 <a href="http://www.runoob.com/">Runoob</a><br />
+然后在文档的结尾为变量赋值（网址）</p>
+<hr />
+<h3>图片</h3>
+<p><img src="https://static.jyshare.com/images/runoob-logo.png" alt="RUNOOB 图标" title="RUNOOB" /></p>
+<p>这个链接用 2 作为网址变量 <a href="https://static.jyshare.com/images/runoob-logo.png">RUNOOB</a><br />
+然后在文档的结尾为变量赋值（网址）</p>
+<img src="https://static.jyshare.com/images/runoob-logo.png" width="25%">
+<hr />
+<h3>表格</h3>
+
+                    <table>
+                        <thead>
+                            <tr>
+                <th class='left-align'>表头</th><th class='right-align'>表头</th><th class='center-align'>表头</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                <tr><td class='left-align'>单元格</td><td class='right-align'>单元格</td><td class='center-align'>单元格</td></tr><tr><td class='left-align'>单元格</td><td class='right-align'>单元格</td><td class='center-align'>单元格</td></tr>
+                        </tbody>
+                    </table>
+                <hr />
+<h3>LaTeX公式：</h3>
+<p>这是一个行内公式 $E=mc^2$ 的示例。<br />
+行间公式：
+$$\sum_{i=1}^n a_i$$
+$$\frac{a}{b} = c$$
+积分公式：
+$$\int_{a}^{b} {f(x)} \, \mathrm{d}x = F(b) - F(a)$$
+微分公式：
+$$\frac{d}{dx} e^x = e^x$$</p>
+
+</body>
+</html>

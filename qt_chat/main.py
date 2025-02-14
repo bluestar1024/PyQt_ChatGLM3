@@ -154,10 +154,10 @@ $$\int_{a}^{b} {f(x)} \, \mathrm{d}x = F(b) - F(a)$$
 $$\frac{d}{dx} e^x = e^x$$
 """
 
-'''class messageThread(QThread):
+class messageThread(QThread):
     newMessage = pyqtSignal(str)
 
-    def __init__(self, contentInput, use_stream=True, parent=None):
+    def __init__(self, contentInput, context=None, use_stream=True, parent=None):
         super(messageThread, self).__init__(parent)
         self.text = [
             {
@@ -165,6 +165,8 @@ $$\frac{d}{dx} e^x = e^x$$
                 "content": contentInput
             }
         ]
+        if context:  
+            self.text = context + self.text
         self.use_stream = use_stream
 
     def run(self):
@@ -187,8 +189,8 @@ $$\frac{d}{dx} e^x = e^x$$
                 self.newMessage.emit(self.contentOutput)
         else:
             print("Error:", response.status_code)
-        return'''
-class messageThread(QThread):
+        return
+'''class messageThread(QThread):
     newMessage = pyqtSignal(str)
 
     def __init__(self, contentInput, use_stream=True, parent=None):
@@ -204,16 +206,12 @@ class messageThread(QThread):
     def run(self):
         self.contentOutput = markdown_content
         if self.use_stream:
-            """ for _ in range(0, 100):
-                self.newMessage.emit(self.contentOutput)
-                time.sleep(0.1) """
             for i in range(0, len(self.contentOutput), 10):
                 self.newMessage.emit(self.contentOutput[i:i+10])
                 time.sleep(0.1)
-            """ self.newMessage.emit('# 一级标题## 二级标题### 三级标题') """
         else:
             self.newMessage.emit(self.contentOutput)
-        return
+        return'''
 
 class PushButton(QPushButton):
     def __init__(self, tipText='', tipOffsetX=10, tipOffsetY=40, parent=None):
@@ -688,7 +686,7 @@ class WebEngineView(QWebEngineView):
         self.focusProxy().installEventFilter(self)
 
     def eventFilter(self, obj, event):
-        if obj == self.focusProxy() and  event.type() == QEvent.MouseButtonPress:
+        if obj == self.focusProxy() and  event.type() == QEvent.MouseButtonRelease:
             newMouseEvent = QMouseEvent(event.type(), event.pos(), event.button(), event.buttons(), event.modifiers())
             QCoreApplication.postEvent(obj.parent(), newMouseEvent)
         return QWebEngineView.eventFilter(self, obj, event)
@@ -2107,7 +2105,12 @@ class MainWindow(QMainWindow):
         self.chatRecordsAnimationMove.setEasingCurve(QEasingCurve.OutQuad)
         self.chatRecordsAnimationMove.valueChanged.connect(self.chatRecordsUiAnimationMove)
         self.chatRecordsAnimationMove.finished.connect(self.chatRecordsMoveFinished)
-        #settingWidgetIsOpen
+        #chatRecordsAnimationMove2 QPropertyAnimation
+        self.chatRecordsAnimationMove2 = QPropertyAnimation(self.chatRecordsWidget, b'geometry')
+        self.chatRecordsAnimationMove2.setDuration(1000)
+        self.chatRecordsAnimationMove2.setEasingCurve(QEasingCurve.OutQuad)
+        self.chatRecordsAnimationMove2.finished.connect(self.chatRecordsMove2Finished)
+        #chatRecordsWidgetIsOpen
         self.chatRecordsWidgetIsOpen = False
         #emptyTextLabel PrintLabel
         self.emptyTextLabel = PrintLabel('文本不能为空', self)
@@ -2130,6 +2133,11 @@ class MainWindow(QMainWindow):
         self.resizeTimer.timeout.connect(self.onResizeTimeout)
 
         self.isSetTexting = False
+
+        self.pushButtonIsPress = False
+        """ self.openAndNoButton = False """
+        self.messageWidgetIsSelect = False
+        self.selectMessageWidgetNumber = -1
 
     def mouseMoveEvent(self, event):
         #If the mouse hovers over the list item, it has a pop-up effect
@@ -2289,53 +2297,117 @@ class MainWindow(QMainWindow):
             #title region calculate the distance to move
             if self.regionDir == RegionEnum.TITLE:
                 self.pressPosDistanceUiGlobalTL = self.geometry().topLeft() - event.globalPos()
-            #judge mouse press position
-            if self.settingWidgetIsOpen:
-                notSettingRect = QRect(self.settingWidget.width(), self.titleWidget.height(), self.width() - self.settingWidget.width() - self.padding - 1, self.height() - self.titleWidget.height() - self.padding - 1)
-                if notSettingRect.contains(event.pos()):
-                    self.mask.hide()
-                    self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
-                    self.settingAnimationMove.setEndValue(QRect(-self.settingWidget.width(), self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
-                    self.settingAnimationMove.start()
-                    self.settingWidgetIsOpen = False
-            elif self.chatRecordsWidgetIsOpen:
-                notChatRecordsRect = QRect(self.chatRecordsWidget.width(), self.titleWidget.height(), self.width() - self.chatRecordsWidget.width() - self.padding - 1, self.height() - self.titleWidget.height() - self.padding - 1)
-                if notChatRecordsRect.contains(event.pos()):
-                    self.mask.hide()
-                    self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
-                    self.chatRecordsAnimationMove.setEndValue(QRect(-self.chatRecordsWidget.width(), self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
-                    self.chatRecordsAnimationMove.start()
-                    self.chatRecordsWidgetIsOpen = False
-            else:
-                chatShowRect = QRect(self.chatShow.geometry().x(), self.chatShow.geometry().y() + self.titleWidget.height() + self.chatFun.height(), self.chatShow.geometry().width(), self.chatShow.geometry().height())
-                if not chatShowRect.contains(event.pos()):
-                    for i in range(0, len(self.messageWidgetList)):
-                        self.messageWidgetList[i].showDefaultColor()
-                else:
-                    widget = self.childAt(event.pos())
-                    if isinstance(widget, CopyButton):
-                        for i in range(0, len(self.messageWidgetList)):
-                            messageWidget = self.messageWidgetList[i]
-                            messageWidget.showDefaultColor()
-                            if widget == messageWidget.getCopyButton():
-                                messageWidget.showColorful()
-                    elif isinstance(widget.parent(), WebEngineView):
-                        for i in range(0, len(self.messageWidgetList)):
-                            messageWidget = self.messageWidgetList[i]
-                            messageWidget.showDefaultColor()
-                            if widget.parent() == messageWidget.getTextShow().getWebEngineView():
-                                messageWidget.showColorful()
-                chatInputRect = QRect(self.chatInput.geometry().x(), self.chatInput.geometry().y() + self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height(), self.chatInput.geometry().width(), self.chatInput.geometry().height())
-                if chatInputRect.contains(event.pos()):
-                    self.chatInput.backgroundColorShowLight()
-                else:
-                    self.chatInput.backgroundColorShowDark()
-                    self.chatInput.clearFocus()
         QMainWindow.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.mouseLeftButtonIsPress = False
+
+        #judge mouse press position
+            if self.settingWidgetIsOpen:
+                if self.pushButtonIsPress:
+                    self.pushButtonIsPress = False
+                else:
+                    notSettingRect = QRect(self.settingWidget.width(), self.titleWidget.height(), self.width() - self.settingWidget.width() - self.padding - 1, self.height() - self.titleWidget.height() - self.padding - 1)
+                    if notSettingRect.contains(event.pos()):
+                        self.mask.hide()
+                        self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
+                        self.settingAnimationMove.setEndValue(QRect(-self.settingWidget.width(), self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
+                        self.settingAnimationMove.start()
+                        self.settingWidgetIsOpen = False
+                        """ self.openAndNoButton = True """
+
+                    chatShowRect = QRect(self.chatShow.geometry().x() + self.settingWidget.width(), self.chatShow.geometry().y() + self.titleWidget.height() + self.chatFun.height(), self.chatShow.geometry().width(), self.chatShow.geometry().height())
+                    if not chatShowRect.contains(event.pos()):
+                        print('nochat', chatShowRect)
+                        self.messageWidgetIsSelect = False
+                        self.selectMessageWidgetNumber = -1
+                        for i in range(0, len(self.messageWidgetList)):
+                            self.messageWidgetList[i].showDefaultColor()
+                    else:
+                        print('chat', chatShowRect)
+                        widget = self.childAt(event.pos())
+                        if isinstance(widget.parent(), WebEngineView):
+                            for i in range(0, len(self.messageWidgetList)):
+                                messageWidget = self.messageWidgetList[i]
+                                messageWidget.showDefaultColor()
+                                if widget.parent() == messageWidget.getTextShow().getWebEngineView():
+                                    self.messageWidgetIsSelect = True
+                                    self.selectMessageWidgetNumber = i
+                                    messageWidget.showColorful()
+                    chatInputRect = QRect(self.chatInput.geometry().x() + self.settingWidget.width(), self.chatInput.geometry().y() + self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height(), self.chatInput.geometry().width(), self.chatInput.geometry().height())
+                    if chatInputRect.contains(event.pos()):
+                        self.chatInput.backgroundColorShowLight()
+                    else:
+                        self.chatInput.backgroundColorShowDark()
+                        self.chatInput.clearFocus()
+
+            elif self.chatRecordsWidgetIsOpen:
+                if self.pushButtonIsPress:
+                    self.pushButtonIsPress = False
+                else:
+                    notChatRecordsRect = QRect(self.chatRecordsWidget.width(), self.titleWidget.height(), self.width() - self.chatRecordsWidget.width() - self.padding - 1, self.height() - self.titleWidget.height() - self.padding - 1)
+                    if notChatRecordsRect.contains(event.pos()):
+                        self.mask.hide()
+                        self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
+                        self.chatRecordsAnimationMove.setEndValue(QRect(-self.chatRecordsWidget.width(), self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
+                        self.chatRecordsAnimationMove.start()
+                        self.chatRecordsWidgetIsOpen = False
+                        """ self.openAndNoButton = True """
+
+                    chatShowRect = QRect(self.chatShow.geometry().x() + self.chatRecordsWidget.width(), self.chatShow.geometry().y() + self.titleWidget.height() + self.chatFun.height(), self.chatShow.geometry().width(), self.chatShow.geometry().height())
+                    if not chatShowRect.contains(event.pos()):
+                        print('nochat', chatShowRect)
+                        self.messageWidgetIsSelect = False
+                        self.selectMessageWidgetNumber = -1
+                        for i in range(0, len(self.messageWidgetList)):
+                            self.messageWidgetList[i].showDefaultColor()
+                    else:
+                        print('chat', chatShowRect)
+                        widget = self.childAt(event.pos())
+                        if isinstance(widget.parent(), WebEngineView):
+                            for i in range(0, len(self.messageWidgetList)):
+                                messageWidget = self.messageWidgetList[i]
+                                messageWidget.showDefaultColor()
+                                if widget.parent() == messageWidget.getTextShow().getWebEngineView():
+                                    self.messageWidgetIsSelect = True
+                                    self.selectMessageWidgetNumber = i
+                                    messageWidget.showColorful()
+                    chatInputRect = QRect(self.chatInput.geometry().x() + self.chatRecordsWidget.width(), self.chatInput.geometry().y() + self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height(), self.chatInput.geometry().width(), self.chatInput.geometry().height())
+                    if chatInputRect.contains(event.pos()):
+                        self.chatInput.backgroundColorShowLight()
+                    else:
+                        self.chatInput.backgroundColorShowDark()
+                        self.chatInput.clearFocus()
+
+            else:
+                if self.pushButtonIsPress:
+                    self.pushButtonIsPress = False
+                else:
+                    chatShowRect = QRect(self.chatShow.geometry().x(), self.chatShow.geometry().y() + self.titleWidget.height() + self.chatFun.height(), self.chatShow.geometry().width(), self.chatShow.geometry().height())
+                    if not chatShowRect.contains(event.pos()):
+                        print('nochat', chatShowRect)
+                        self.messageWidgetIsSelect = False
+                        self.selectMessageWidgetNumber = -1
+                        for i in range(0, len(self.messageWidgetList)):
+                            self.messageWidgetList[i].showDefaultColor()
+                    else:
+                        print('chat', chatShowRect)
+                        widget = self.childAt(event.pos())
+                        if isinstance(widget.parent(), WebEngineView):
+                            for i in range(0, len(self.messageWidgetList)):
+                                messageWidget = self.messageWidgetList[i]
+                                messageWidget.showDefaultColor()
+                                if widget.parent() == messageWidget.getTextShow().getWebEngineView():
+                                    self.messageWidgetIsSelect = True
+                                    self.selectMessageWidgetNumber = i
+                                    messageWidget.showColorful()
+                    chatInputRect = QRect(self.chatInput.geometry().x(), self.chatInput.geometry().y() + self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height(), self.chatInput.geometry().width(), self.chatInput.geometry().height())
+                    if chatInputRect.contains(event.pos()):
+                        self.chatInput.backgroundColorShowLight()
+                    else:
+                        self.chatInput.backgroundColorShowDark()
+                        self.chatInput.clearFocus()
         QMainWindow.mouseReleaseEvent(self, event)
 
     def saveCurChatRecord(self):
@@ -2497,7 +2569,7 @@ class MainWindow(QMainWindow):
             self.chatShow.clear()
             if not self.isSetTexting:
                 self.generateCurChatRecord()
-                QTimer.singleShot(5, self.set_scroll_value)
+                QTimer.singleShot(5, self.setScrollValue)
             else:
                 self.withoutToggleGenerateCurChatRecord()
                 for i in range(0, self.chatShow.count() - 1):
@@ -2506,8 +2578,10 @@ class MainWindow(QMainWindow):
                 self.itemRecvHLayout = self.itemHLayout
                 self.itemRecvWidget = self.itemWidget
                 self.recvItem = self.item
+            if self.messageWidgetIsSelect:
+                self.messageWidgetList[self.selectMessageWidgetNumber].showColorful()
 
-    def set_scroll_value(self):
+    def setScrollValue(self):
         new_max_scroll_value = self.chatShow.verticalScrollBar().maximum()
         self.chatShow.verticalScrollBar().setValue(int(self.current_scroll_value / self.max_scroll_value * new_max_scroll_value))
 
@@ -2569,7 +2643,12 @@ class MainWindow(QMainWindow):
     def itemShowColorful(self, item):
         for i in range(0, len(self.messageWidgetList)):
             self.messageWidgetList[i].showDefaultColor()
+        """ if self.openAndNoButton:
+            self.openAndNoButton = False
+        else: """
         self.messageWidgetList[self.chatShow.row(item)].showColorful()
+        self.messageWidgetIsSelect = True
+        self.selectMessageWidgetNumber = self.chatShow.row(item)
 
         """ # 在点击项前先获取当前的滚动位置
         current_scroll_value = self.chatShow.verticalScrollBar().value()
@@ -2928,16 +3007,38 @@ class MainWindow(QMainWindow):
         self.settingAnimationMove.setDuration(1000)
         self.settingAnimationMove.setEasingCurve(QEasingCurve.OutQuad)
         self.settingAnimationMove.valueChanged.connect(self.settingUiAnimationMove)
+        #settingAnimationMove2 QPropertyAnimation
+        self.settingAnimationMove2 = QPropertyAnimation(self.settingWidget, b'geometry')
+        self.settingAnimationMove2.setDuration(1000)
+        self.settingAnimationMove2.setEasingCurve(QEasingCurve.OutQuad)
+        self.settingAnimationMove2.finished.connect(self.settingMove2Finished)
         #settingWidgetIsOpen
         self.settingWidgetIsOpen = False
 
     def settingButtonClicked(self):
-        self.mask.show()
-        self.settingWidget.raise_()
-        self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
-        self.settingAnimationMove.setEndValue(QRect(0, self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
-        self.settingAnimationMove.start()
-        self.settingWidgetIsOpen = True
+        if not self.settingWidgetIsOpen:
+            if not self.chatRecordsWidgetIsOpen:
+                self.mask.show()
+                self.settingWidget.raise_()
+                self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
+                self.settingAnimationMove.setEndValue(QRect(0, self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
+                self.settingAnimationMove.start()
+                self.settingWidgetIsOpen = True
+            else:
+                self.mask.show()
+                self.settingWidget.raise_()
+                self.settingAnimationMove2.setStartValue(self.settingWidget.geometry())
+                self.settingAnimationMove2.setEndValue(QRect(0, self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
+                self.settingAnimationMove2.start()
+                self.settingWidgetIsOpen = True
+        else:
+            self.mask.hide()
+            self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
+            self.settingAnimationMove.setEndValue(QRect(-self.settingWidget.width(), self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
+            self.settingAnimationMove.start()
+            self.settingWidgetIsOpen = False
+
+        self.pushButtonIsPress = True
 
     def settingUiAnimationMove(self, rect):
         self.chatShow.resize(self.width() - rect.x() - self.settingWidget.width() - 29, self.chatShow.height())
@@ -2993,10 +3094,19 @@ class MainWindow(QMainWindow):
             #chatShow item adjust size
             self.chatShow.item(i).setSizeHint(QSize(self.chatShow.width(), messageWidget.height() + 10)) """
 
+    def settingMove2Finished(self):
+        self.chatRecordsWidget.move(-self.chatRecordsWidget.width(), self.titleWidget.height())
+        self.chatRecordsWidgetIsOpen = False
+
     def chatRecordsMoveFinished(self):
         if not self.chatRecordsWidgetIsOpen:
             #delete all item
             self.chatRecordsWidget.delAllListItems()
+
+    def chatRecordsMove2Finished(self):
+        self.chatRecordsMoveFinished()
+        self.settingWidget.move(-self.settingWidget.width(), self.titleWidget.height())
+        self.settingWidgetIsOpen = False
 
     def maxTokensBoxValueChanged(self, i):
         global maxTokens_currentVal
@@ -3046,9 +3156,26 @@ class MainWindow(QMainWindow):
         #judge status of sendButton
         if not self.chatInput.sendButtonIsEnable():
             return
+        context = []
         #get text from TextEditFull
         text = self.chatInput.toPlainText()
         if not text == '':
+            for i in range(0, len(self.messageWidgetList)):
+                messageWidget = self.messageWidgetList[i]
+                if messageWidget.getIsUser():
+                    context += [
+                        {
+                            "role": "user",
+                            "content": messageWidget.getText()
+                        }
+                    ]
+                else:
+                    context += [
+                        {
+                            "role": "assistant",
+                            "content": messageWidget.getText()
+                        }
+                    ]
             #MessageWidget
             self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=True, textMaxWidth=int(self.chatShow.width() * 2 / 3))
             self.messageSendWidget.connectSetSizeFinished(self.messageWidgetResize)
@@ -3068,7 +3195,7 @@ class MainWindow(QMainWindow):
             self.chatShow.setItemWidget(self.sendItem, self.itemSendWidget)
             """ self.chatShow.setCurrentItem(self.sendItem) """
             #create thread
-            self.thread = messageThread(text)
+            self.thread = messageThread(text, context=context)
             self.thread.started.connect(self.messageStart)
             self.thread.newMessage.connect(self.recvMessage)
             self.thread.finished.connect(self.messageFinish)
@@ -3140,6 +3267,8 @@ class MainWindow(QMainWindow):
         #print textCopyLabel
         self.textCopyLabel.printStart()
 
+        self.pushButtonIsPress = True
+
     def messageRenewResponse(self):
         i = len(self.messageWidgetList) - 1
         j = 1
@@ -3156,6 +3285,8 @@ class MainWindow(QMainWindow):
                 break
             else:
                 j += 1
+
+        self.pushButtonIsPress = True
 
     def saveImage(self):
         #chatPixmap QPixmap
@@ -3174,57 +3305,120 @@ class MainWindow(QMainWindow):
             self.saveImageLabel.move((self.width() - self.saveImageLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.saveImageLabel.height() - 10)
             self.saveImageLabel.printStart()
 
+        self.pushButtonIsPress = True
+
     def showChatRecords(self):
-        #init
-        chatRecordStr = ''
-        chatStrCount = 0
-        #judge whether messageWidgetList is empty
-        if len(self.messageWidgetList) != 0:
-            #judge whether curChatFile is empty
-            if self.curChatFile == '':
-                #chatRecordFileName QString
-                self.chatRecordFileName = "chat_"
-                self.chatRecordFileName += QDateTime.currentDateTime().toString("yyyy_MM_dd_HH_mm_ss")
-                self.chatRecordFileName += ".txt"
-                #write to chatRecord file
-                with open(self.chatRecordFileName, 'a') as f:
-                    for i in range(0, self.chatShow.count()):
-                        chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
-                        f.write(chatRecordStr)
-                #assign chatRecord fileName to curChatFile
-                self.curChatFile = self.chatRecordFileName
+        if not self.chatRecordsWidgetIsOpen:
+            if not self.settingWidgetIsOpen:
+                #init
+                chatRecordStr = ''
+                chatStrCount = 0
+                #judge whether messageWidgetList is empty
+                if len(self.messageWidgetList) != 0:
+                    #judge whether curChatFile is empty
+                    if self.curChatFile == '':
+                        #chatRecordFileName QString
+                        self.chatRecordFileName = "chat_"
+                        self.chatRecordFileName += QDateTime.currentDateTime().toString("yyyy_MM_dd_HH_mm_ss")
+                        self.chatRecordFileName += ".txt"
+                        #write to chatRecord file
+                        with open(self.chatRecordFileName, 'a') as f:
+                            for i in range(0, self.chatShow.count()):
+                                chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                                f.write(chatRecordStr)
+                        #assign chatRecord fileName to curChatFile
+                        self.curChatFile = self.chatRecordFileName
+                    else:
+                        for i in range(0, len(self.messageWidgetList)):
+                            chatStrCount += self.messageWidgetList[i].getText().count('\n') + 2
+                        #read curChat file
+                        with open(self.curChatFile, 'r') as f:
+                            lines = f.readlines()
+                        if chatStrCount > len(lines):
+                            #clear curChat file
+                            with open(self.curChatFile, 'w') as f:
+                                f.truncate()
+                            #write to curChat file
+                            with open(self.curChatFile, 'a') as f:
+                                for i in range(0, self.chatShow.count()):
+                                    chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                                    f.write(chatRecordStr)
+                #generate item
+                for fileName in os.listdir(os.curdir):
+                    if fileName.endswith(".txt"):
+                        with open(fileName, 'r') as f:
+                            lines = f.readlines()
+                        #create item
+                        chatRecordStr = lines[0] + lines[len(lines) - 2].strip('\n')
+                        item = self.chatRecordsWidget.addListItem(chatRecordStr)
+                        #item set data
+                        self.chatRecordsWidget.listItemSetData(item, fileName)
+                #show chatRecordsWidget
+                self.mask.show()
+                self.chatRecordsWidget.raise_()
+                self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
+                self.chatRecordsAnimationMove.setEndValue(QRect(0, self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
+                self.chatRecordsAnimationMove.start()
+                self.chatRecordsWidgetIsOpen = True
             else:
-                for i in range(0, len(self.messageWidgetList)):
-                    chatStrCount += self.messageWidgetList[i].getText().count('\n') + 2
-                #read curChat file
-                with open(self.curChatFile, 'r') as f:
-                    lines = f.readlines()
-                if chatStrCount > len(lines):
-                    #clear curChat file
-                    with open(self.curChatFile, 'w') as f:
-                        f.truncate()
-                    #write to curChat file
-                    with open(self.curChatFile, 'a') as f:
-                        for i in range(0, self.chatShow.count()):
-                            chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
-                            f.write(chatRecordStr)
-        #generate item
-        for fileName in os.listdir(os.curdir):
-            if fileName.endswith(".txt"):
-                with open(fileName, 'r') as f:
-                    lines = f.readlines()
-                #create item
-                chatRecordStr = lines[0] + lines[len(lines) - 2].strip('\n')
-                item = self.chatRecordsWidget.addListItem(chatRecordStr)
-                #item set data
-                self.chatRecordsWidget.listItemSetData(item, fileName)
-        #show chatRecordsWidget
-        self.mask.show()
-        self.chatRecordsWidget.raise_()
-        self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
-        self.chatRecordsAnimationMove.setEndValue(QRect(0, self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
-        self.chatRecordsAnimationMove.start()
-        self.chatRecordsWidgetIsOpen = True
+                #init
+                chatRecordStr = ''
+                chatStrCount = 0
+                #judge whether messageWidgetList is empty
+                if len(self.messageWidgetList) != 0:
+                    #judge whether curChatFile is empty
+                    if self.curChatFile == '':
+                        #chatRecordFileName QString
+                        self.chatRecordFileName = "chat_"
+                        self.chatRecordFileName += QDateTime.currentDateTime().toString("yyyy_MM_dd_HH_mm_ss")
+                        self.chatRecordFileName += ".txt"
+                        #write to chatRecord file
+                        with open(self.chatRecordFileName, 'a') as f:
+                            for i in range(0, self.chatShow.count()):
+                                chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                                f.write(chatRecordStr)
+                        #assign chatRecord fileName to curChatFile
+                        self.curChatFile = self.chatRecordFileName
+                    else:
+                        for i in range(0, len(self.messageWidgetList)):
+                            chatStrCount += self.messageWidgetList[i].getText().count('\n') + 2
+                        #read curChat file
+                        with open(self.curChatFile, 'r') as f:
+                            lines = f.readlines()
+                        if chatStrCount > len(lines):
+                            #clear curChat file
+                            with open(self.curChatFile, 'w') as f:
+                                f.truncate()
+                            #write to curChat file
+                            with open(self.curChatFile, 'a') as f:
+                                for i in range(0, self.chatShow.count()):
+                                    chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                                    f.write(chatRecordStr)
+                #generate item
+                for fileName in os.listdir(os.curdir):
+                    if fileName.endswith(".txt"):
+                        with open(fileName, 'r') as f:
+                            lines = f.readlines()
+                        #create item
+                        chatRecordStr = lines[0] + lines[len(lines) - 2].strip('\n')
+                        item = self.chatRecordsWidget.addListItem(chatRecordStr)
+                        #item set data
+                        self.chatRecordsWidget.listItemSetData(item, fileName)
+                #show chatRecordsWidget
+                self.mask.show()
+                self.chatRecordsWidget.raise_()
+                self.chatRecordsAnimationMove2.setStartValue(self.chatRecordsWidget.geometry())
+                self.chatRecordsAnimationMove2.setEndValue(QRect(0, self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
+                self.chatRecordsAnimationMove2.start()
+                self.chatRecordsWidgetIsOpen = True
+        else:
+            self.mask.hide()
+            self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
+            self.chatRecordsAnimationMove.setEndValue(QRect(-self.chatRecordsWidget.width(), self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
+            self.chatRecordsAnimationMove.start()
+            self.chatRecordsWidgetIsOpen = False
+
+        self.pushButtonIsPress = True
 
     def showSearchRecords(self):
         text = self.chatRecordsWidget.getLineEditText()
@@ -3353,6 +3547,8 @@ class MainWindow(QMainWindow):
         self.messageWidgetList.clear()
         self.chatShow.clear()
         self.curChatFile = ''
+
+        self.pushButtonIsPress = True
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

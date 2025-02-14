@@ -17,8 +17,8 @@ import mistune
 import time
 
 base_url = "http://7613907zg6.vicp.fun:45861/v1"
-client = OpenAI(api_key="EMPTY", base_url=base_url)
-
+api_key="EMPTY"
+model="deepseek-r1:14b"
 maxTokens_minimum = 0
 maxTokens_maximum = 32768
 maxTokens_currentVal = 256
@@ -159,6 +159,7 @@ class messageThread(QThread):
 
     def __init__(self, contentInput, context=None, use_stream=True, parent=None):
         super(messageThread, self).__init__(parent)
+        self.client = OpenAI(api_key=api_key, base_url=base_url)
         self.text = [
             {
                 "role": "user",
@@ -170,8 +171,8 @@ class messageThread(QThread):
         self.use_stream = use_stream
 
     def run(self):
-        response = client.chat.completions.create(
-            model="qwen2.5:14b",
+        response = self.client.chat.completions.create(
+            model=model,
             messages=self.text,
             stream=self.use_stream,
             max_tokens=maxTokens_currentVal,
@@ -1597,6 +1598,19 @@ class Label(QLabel):
         self.palette.setColor(QPalette.WindowText, QColor(23, 171, 227))
         self.setPalette(self.palette)
 
+class SettingEdit(QLineEdit):
+    def __init__(self, parent=None):
+        super(SettingEdit, self).__init__(parent)
+        self.setFixedHeight(32)
+        font_file_path = 'msyhl.ttc'
+        font_id = QFontDatabase.addApplicationFont(font_file_path)
+        if font_id != -1:
+            font_families = QFontDatabase.applicationFontFamilies(font_id)
+            if font_families:
+                font_family = font_families[0]
+                self.font = QFont(font_family, 10)
+                self.setFont(self.font)
+
 class SpinBox(QSpinBox):
     def __init__(self, parent=None):
         super(SpinBox, self).__init__(parent)
@@ -2806,12 +2820,25 @@ class MainWindow(QMainWindow):
 
     def settingWidgetInit(self):
         #setting QLabel
+        self.baseUrlLabel = Label()
+        self.apiKeyLabel = Label()
+        self.modelNameLabel = Label()
         self.maxTokensLabel = Label()
         self.topPLabel = Label()
         self.temperatureLabel = Label()
+        self.baseUrlLabel.setText('Base Url')
+        self.apiKeyLabel.setText('Api Key')
+        self.modelNameLabel.setText('Model')
         self.maxTokensLabel.setText("Max Tokens")
         self.topPLabel.setText("Top P")
         self.temperatureLabel.setText("Temperature")
+        #setting QLineEdit
+        self.baseUrlEdit = SettingEdit()
+        self.apiKeyEdit = SettingEdit()
+        self.modelNameEdit = SettingEdit()
+        self.baseUrlEdit.textChanged.connect(self.baseUrlTextChanged)
+        self.apiKeyEdit.textChanged.connect(self.apiKeyTextChanged)
+        self.modelNameEdit.textChanged.connect(self.modelNameTextChanged)
         #setting QSpinBox
         self.maxTokensBox = SpinBox()
         self.topPBox = DoubleSpinBox()
@@ -2843,9 +2870,76 @@ class MainWindow(QMainWindow):
         self.maxTokensSlider.valueChanged.connect(self.maxTokensSliderValueChanged)
         self.topPSlider.valueChanged.connect(self.topPSliderValueChanged)
         self.temperatureSlider.valueChanged.connect(self.temperatureSliderValueChanged)
+        #setting ModelSelect QWidget
+        self.modelSelectWidget = QWidget()
+        self.modelSelectWidget.resize(370, 190)
+        self.modelSelectWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.modelSelectWidget.setObjectName("modelSelectWidget")
+        self.modelSelectWidget.setStyleSheet('''
+        QWidget#modelSelectWidget{
+            border-radius: 15px;
+            background: white;
+        }
+        ''')
+        #setting base url QWidget
+        self.baseUrlWidget = QWidget()
+        self.baseUrlWidget.resize(340, 32)
+        self.baseUrlWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.baseUrlWidget.setObjectName("baseUrlWidget")
+        self.baseUrlWidget.setStyleSheet('''
+        QWidget#baseUrlWidget{
+            background: transparent;
+        }
+        ''')
+        #setting base url QHBoxLayout
+        self.baseUrlHLayout = QHBoxLayout()
+        self.baseUrlWidget.setLayout(self.baseUrlHLayout)
+        self.baseUrlHLayout.addWidget(self.baseUrlLabel)
+        self.baseUrlHLayout.addWidget(self.baseUrlEdit)
+        self.baseUrlHLayout.setContentsMargins(0, 0, 0, 0)
+        #setting api key QWidget
+        self.apiKeyWidget = QWidget()
+        self.apiKeyWidget.resize(340, 32)
+        self.apiKeyWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.apiKeyWidget.setObjectName("apiKeyWidget")
+        self.apiKeyWidget.setStyleSheet('''
+        QWidget#apiKeyWidget{
+            background: transparent;
+        }
+        ''')
+        #setting api key QHBoxLayout
+        self.apiKeyHLayout = QHBoxLayout()
+        self.apiKeyWidget.setLayout(self.apiKeyHLayout)
+        self.apiKeyHLayout.addWidget(self.apiKeyLabel)
+        self.apiKeyHLayout.addWidget(self.apiKeyEdit)
+        self.apiKeyHLayout.setContentsMargins(0, 0, 0, 0)
+        #setting model name QWidget
+        self.modelNameWidget = QWidget()
+        self.modelNameWidget.resize(340, 32)
+        self.modelNameWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.modelNameWidget.setObjectName("modelNameWidget")
+        self.modelNameWidget.setStyleSheet('''
+        QWidget#modelNameWidget{
+            background: transparent;
+        }
+        ''')
+        #setting model name QHBoxLayout
+        self.modelNameHLayout = QHBoxLayout()
+        self.modelNameWidget.setLayout(self.modelNameHLayout)
+        self.modelNameHLayout.addWidget(self.modelNameLabel)
+        self.modelNameHLayout.addWidget(self.modelNameEdit)
+        self.modelNameHLayout.setContentsMargins(0, 0, 0, 0)
+        #setting model select QVBoxLayout
+        self.modelSelectVLayout = QVBoxLayout()
+        self.modelSelectWidget.setLayout(self.modelSelectVLayout)
+        self.modelSelectVLayout.addWidget(self.baseUrlWidget)
+        self.modelSelectVLayout.addWidget(self.apiKeyWidget)
+        self.modelSelectVLayout.addWidget(self.modelNameWidget)
+        self.modelSelectVLayout.setContentsMargins(15, 27, 15, 27)
+        self.modelSelectVLayout.setSpacing(20)
         #setting maxTokens QWidget
         self.maxTokensWidget = QWidget()
-        self.maxTokensWidget.resize(370, 160)
+        self.maxTokensWidget.resize(370, 130)
         self.maxTokensWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.maxTokensWidget.setObjectName("maxTokensWidget")
         self.maxTokensWidget.setStyleSheet('''
@@ -2890,11 +2984,11 @@ class MainWindow(QMainWindow):
         self.maxTokensWidget.setLayout(self.maxTokensVLayout)
         self.maxTokensVLayout.addWidget(self.maxTokensTopSubWidget)
         self.maxTokensVLayout.addWidget(self.maxTokensBottomSubWidget)
-        self.maxTokensVLayout.setContentsMargins(15, 40, 15, 40)
+        self.maxTokensVLayout.setContentsMargins(15, 25, 15, 25)
         self.maxTokensVLayout.setSpacing(0)
         #setting topP QWidget
         self.topPWidget = QWidget()
-        self.topPWidget.resize(370, 160)
+        self.topPWidget.resize(370, 130)
         self.topPWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.topPWidget.setObjectName("topPWidget")
         self.topPWidget.setStyleSheet('''
@@ -2939,11 +3033,11 @@ class MainWindow(QMainWindow):
         self.topPWidget.setLayout(self.topPVLayout)
         self.topPVLayout.addWidget(self.topPTopSubWidget)
         self.topPVLayout.addWidget(self.topPBottomSubWidget)
-        self.topPVLayout.setContentsMargins(15, 40, 15, 40)
+        self.topPVLayout.setContentsMargins(15, 25, 15, 25)
         self.topPVLayout.setSpacing(0)
         #setting temperature QWidget
         self.temperatureWidget = QWidget()
-        self.temperatureWidget.resize(370, 160)
+        self.temperatureWidget.resize(370, 130)
         self.temperatureWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.temperatureWidget.setObjectName("temperatureWidget")
         self.temperatureWidget.setStyleSheet('''
@@ -2988,7 +3082,7 @@ class MainWindow(QMainWindow):
         self.temperatureWidget.setLayout(self.temperatureVLayout)
         self.temperatureVLayout.addWidget(self.temperatureTopSubWidget)
         self.temperatureVLayout.addWidget(self.temperatureBottomSubWidget)
-        self.temperatureVLayout.setContentsMargins(15, 40, 15, 40)
+        self.temperatureVLayout.setContentsMargins(15, 25, 15, 25)
         self.temperatureVLayout.setSpacing(0)
         #setting QWidget
         self.settingWidget = SettingWidget(self)
@@ -2997,11 +3091,12 @@ class MainWindow(QMainWindow):
         #setting QVBoxLayout
         self.settingVLayout = QVBoxLayout()
         self.settingWidget.setLayout(self.settingVLayout)
+        self.settingVLayout.addWidget(self.modelSelectWidget)
         self.settingVLayout.addWidget(self.maxTokensWidget)
         self.settingVLayout.addWidget(self.topPWidget)
         self.settingVLayout.addWidget(self.temperatureWidget)
-        self.settingVLayout.setContentsMargins(15, 97, 15, 97)
-        self.settingVLayout.setSpacing(45)
+        self.settingVLayout.setContentsMargins(15, 47, 15, 47)
+        self.settingVLayout.setSpacing(30)
         #settingAnimationMove QPropertyAnimation
         self.settingAnimationMove = QPropertyAnimation(self.settingWidget, b'geometry')
         self.settingAnimationMove.setDuration(1000)
@@ -3107,6 +3202,27 @@ class MainWindow(QMainWindow):
         self.chatRecordsMoveFinished()
         self.settingWidget.move(-self.settingWidget.width(), self.titleWidget.height())
         self.settingWidgetIsOpen = False
+
+    def baseUrlTextChanged(self, text):
+        global base_url
+        if text == '':
+            base_url = "http://7613907zg6.vicp.fun:45861/v1"
+        else:
+            base_url = text
+
+    def apiKeyTextChanged(self, text):
+        global api_key
+        if text == '':
+            api_key = "EMPTY"
+        else:
+            api_key = text
+
+    def modelNameTextChanged(self, text):
+        global model
+        if text == '':
+            model = "deepseek-r1:14b"
+        else:
+            model = text
 
     def maxTokensBoxValueChanged(self, i):
         global maxTokens_currentVal

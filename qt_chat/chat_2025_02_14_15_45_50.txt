@@ -1,0 +1,29 @@
+学习前端有那些内容
+True
+
+False
+学习前端有那些内容
+True
+学习前端开发主要包括以下几个方面的内容：
+
+1. **HTML**：超文本标记语言（HyperText Markup Language）是网页的基础，用于定义文档的结构和内容。
+
+2. **CSS**：层叠样式表（Cascading Style Sheets）用来描述HTML文档的表现形式，控制页面布局、颜色等视觉效果。
+
+3. **JavaScript**：一种脚本编程语言，能够使网页具有动态交互性。它与DOM（Document Object Model）、BOM（Browser Object Model）等浏览器对象模型结合使用可以实现丰富的用户体验。
+
+4. **前端框架和库**：
+    - Vue.js: 一个渐进式 JavaScript 框架。
+    - React.js：由 Facebook 开发的用于构建用户界面的开源 JavaScript 库。
+    - Angular.js: Google 推出的一个基于 TypeScript 的前端开发框架，适合大型企业级应用。
+
+5. **响应式设计**：确保网站在不同设备上（手机、平板电脑、桌面等）都能良好显示的技术和方法。
+
+6. **前端工具与构建系统**：
+    - Webpack 和 Gulp: 用于优化和自动化前端项目的构建过程。
+    - Babel: 将ES6+代码转换为向后
+False
+1+1=？
+True
+1 + 1 等于 2。这是一个基本的算术运算。
+False

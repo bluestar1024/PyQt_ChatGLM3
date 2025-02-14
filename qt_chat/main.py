@@ -903,9 +903,9 @@ class TextShow(QWidget):
             brush.setColor(QColor(119, 221, 255))
         else:
             if self.isUser:
-                brush.setColor(QColor(255, 238, 153))
+                brush.setColor(QColor(16, 149, 222))
             else:
-                brush.setColor(QColor(209, 187, 255))
+                brush.setColor(QColor(17, 173, 222))
         #add rect and set brush
         if self.isUser:
             path.addRect(self.rect().width() - 15, self.rect().y(), 15, 15)
@@ -1052,6 +1052,16 @@ class TextShow(QWidget):
                 self.mainHLayout.addWidget(self.webEngineView)
             self.webEngineView.setHtml(str(self.full_html_text), baseUrl)
 
+            self.isLabel = False
+            self.setTexting.emit(self.isLabel)
+
+        else:
+            if self.isLabel:
+                self.mainHLayout.removeWidget(self.label)
+                self.label.deleteLater()
+                self.mainHLayout.addWidget(self.webEngineView)
+            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
+            self.setSizeFinished.emit()
             self.isLabel = False
             self.setTexting.emit(self.isLabel)
 

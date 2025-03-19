@@ -147,60 +147,84 @@ class FunWidget(QWidget):
         super(FunWidget, self).__init__(parent)
         #chatRecordsButton PushButton
         self.chatRecordsButton = PushButton(tipText='聊天历史', tipOffsetX=30, tipOffsetY=40)
-        self.chatRecordsButton.setFixedSize(30, 30)
-        self.chatRecordsButton.setIconSize(QSize(30, 30))
+        self.chatRecordsButton.setFixedSize(44, 44)
         self.chat_records_images_path = os.path.join(images_dir, 'chat_records.png').replace('\\', '/')
-        self.chat_records_hover_images_path = os.path.join(images_dir, 'chat_records_hover.png').replace('\\', '/')
-        self.chatRecordsButton.setStyleSheet(f'''
-        QPushButton{{
-            border-image: url('{self.chat_records_images_path}');
-        }}
-        QPushButton:hover{{
-            border-image: url('{self.chat_records_hover_images_path}');
-        }}
+        """ self.chat_records_hover_images_path = os.path.join(images_dir, 'chat_records_hover.png').replace('\\', '/') """
+        self.chatRecordsButton.setIcon(QIcon(f"{self.chat_records_images_path}"))
+        self.chatRecordsButton.setIconSize(QSize(30, 30))
+        self.chatRecordsButton.setStyleSheet('''
+        QPushButton{
+            border: none;
+            border-radius: 22px;
+        }
+        QPushButton:hover{
+            background: #d0d0d0;
+        }
         ''')
         #funLeftSubWidget QWidget
         self.funLeftSubWidget = Widget()
-        self.funLeftSubWidget.resize(self.chatRecordsButton.width() + 15, self.chatRecordsButton.height() + 6)
+        self.funLeftSubWidget.resize(self.chatRecordsButton.width() + 15, self.chatRecordsButton.height() + 16)
         self.funLeftSubWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         #funLeftSubHLayout QHBoxLayout
         self.funLeftSubHLayout = QHBoxLayout()
         self.funLeftSubWidget.setLayout(self.funLeftSubHLayout)
         self.funLeftSubHLayout.addWidget(self.chatRecordsButton)
         self.funLeftSubHLayout.setAlignment(Qt.AlignLeft)
-        self.funLeftSubHLayout.setContentsMargins(10, 3, 5, 3)
+        self.funLeftSubHLayout.setContentsMargins(10, 10, 5, 6)
+        #titleLabel QLabel
+        self.titleLabel = QLabel()
+        self.titleLabel.setFixedHeight(60)
+        self.titleFont = QFont()
+        self.titleFont.setPixelSize(24)
+        self.titleFont.setBold(True)
+        self.titleLabel.setFont(self.titleFont)
+        self.titleLabel.setText('AI助理')
+        self.titleLabel.adjustSize()
+        #funMidSubWidget QWidget
+        self.funMidSubWidget = Widget()
+        self.funMidSubWidget.resize(self.titleLabel.width(), self.titleLabel.height())
+        self.funMidSubWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        #funMidSubHLayout QHBoxLayout
+        self.funMidSubHLayout = QHBoxLayout()
+        self.funMidSubWidget.setLayout(self.funMidSubHLayout)
+        self.funMidSubHLayout.addWidget(self.titleLabel)
+        self.funMidSubHLayout.setAlignment(Qt.AlignCenter)
+        self.funMidSubHLayout.setContentsMargins(0, 0, 0, 0)
         #newChatButton PushButton
         self.newChatButton = PushButton(tipText='新聊天', tipOffsetX=20, tipOffsetY=40)
-        self.newChatButton.setFixedSize(30, 30)
-        self.newChatButton.setIconSize(QSize(30, 30))
+        self.newChatButton.setFixedSize(44, 44)
         self.new_chat_images_path = os.path.join(images_dir, 'new_chat.png').replace('\\', '/')
-        self.new_chat_hover_images_path = os.path.join(images_dir, 'new_chat_hover.png').replace('\\', '/')
-        self.newChatButton.setStyleSheet(f'''
-        QPushButton{{
-            border-image: url("{self.new_chat_images_path}");
-        }}
-        QPushButton:hover{{
-            border-image: url("{self.new_chat_hover_images_path}");
-        }}
+        """ self.new_chat_hover_images_path = os.path.join(images_dir, 'new_chat_hover.png').replace('\\', '/') """
+        self.newChatButton.setIcon(QIcon(f"{self.new_chat_images_path}"))
+        self.newChatButton.setIconSize(QSize(30, 30))
+        self.newChatButton.setStyleSheet('''
+        QPushButton{
+            border: none;
+            border-radius: 22px;
+        }
+        QPushButton:hover{
+            background: #d0d0d0;
+        }
         ''')
         #funRightSubWidget QWidget
         self.funRightSubWidget = Widget()
-        self.funRightSubWidget.resize(self.newChatButton.width() + 15, self.newChatButton.height() + 6)
+        self.funRightSubWidget.resize(self.newChatButton.width() + 15, self.newChatButton.height() + 16)
         self.funRightSubWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         #funRightSubHLayout QHBoxLayout
         self.funRightSubHLayout = QHBoxLayout()
         self.funRightSubWidget.setLayout(self.funRightSubHLayout)
         self.funRightSubHLayout.addWidget(self.newChatButton)
         self.funRightSubHLayout.setAlignment(Qt.AlignRight)
-        self.funRightSubHLayout.setContentsMargins(5, 3, 10, 3)
+        self.funRightSubHLayout.setContentsMargins(5, 10, 10, 6)
         #mainHLayout QHBoxLayout
         self.mainHLayout = QHBoxLayout()
         self.setLayout(self.mainHLayout)
         self.mainHLayout.addWidget(self.funLeftSubWidget)
+        self.mainHLayout.addWidget(self.funMidSubWidget)
         self.mainHLayout.addWidget(self.funRightSubWidget)
         self.mainHLayout.setContentsMargins(0, 0, 0, 0)
         #FunWidget adjust size
-        self.resize(1200, 36)
+        self.resize(1200, 60)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
 
     def connectChatRecordsButtonClick(self, fun):
@@ -212,7 +236,7 @@ class FunWidget(QWidget):
 class ListWidget(QListWidget):
     def __init__(self, parent=None):
         super(ListWidget, self).__init__(parent)
-        self.resize(1171, 492)
+        self.resize(1171, 480)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
@@ -296,7 +320,7 @@ class CustomMenu(QMenu):
 class TextEdit(QTextEdit):
     def __init__(self, parent=None):
         super(TextEdit, self).__init__(parent)
-        self.resize(1130, 158)
+        self.resize(1130, 150)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.setPlaceholderText("按Shift+Enter换行、按Enter提交")
         self.sendButton = SendButton(tipText='发送', tipOffsetX=10, tipOffsetY=40)
@@ -1544,9 +1568,35 @@ class ChatRecordsWidget(QWidget):
             if font_families:
                 font_family = font_families[0]
                 self.font = QFont(font_family, 10)
+        #settingButton PushButton
+        self.settingButton = PushButton(tipText='设置', tipOffsetX=10, tipOffsetY=40)
+        self.settingButton.setFixedSize(44, 44)
+        self.setting_images_path = os.path.join(images_dir, 'setting.png').replace('\\', '/')
+        """ self.setting_hover_images_path = os.path.join(images_dir, 'setting_hover.png').replace('\\', '/') """
+        self.settingButton.setIcon(QIcon(f"{self.setting_images_path}"))
+        self.settingButton.setIconSize(QSize(30, 30))
+        self.settingButton.setStyleSheet('''
+        QPushButton{
+            border: none;
+            border-radius: 22px;
+        }
+        QPushButton:hover{
+            background: #b0b0b0;
+        }
+        ''')
+        #buttonWidget QWidget
+        self.buttonWidget = Widget()
+        self.buttonWidget.resize(44, 50)
+        self.buttonWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        #buttonVLayout QVBoxLayout
+        self.buttonVLayout = QVBoxLayout()
+        self.buttonWidget.setLayout(self.buttonVLayout)
+        self.buttonVLayout.addWidget(self.settingButton)
+        self.buttonVLayout.setAlignment(Qt.AlignTop)
+        self.buttonVLayout.setContentsMargins(0, 0, 0, 6)
         #QLabel
         self.label = QLabel()
-        self.label.resize(self.width() - 70, 50)
+        self.label.resize(self.width() - self.buttonWidget.width() - 40, 50)
         self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         font = QFont()
         font.setPixelSize(30)
@@ -1554,30 +1604,6 @@ class ChatRecordsWidget(QWidget):
         self.label.setFont(font)
         self.label.setText("聊天历史")
         self.label.setAlignment(Qt.AlignLeft)
-        #settingButton PushButton
-        self.settingButton = PushButton(tipText='设置', tipOffsetX=10, tipOffsetY=40)
-        self.settingButton.setFixedSize(30, 30)
-        self.settingButton.setIconSize(QSize(30, 30))
-        self.setting_images_path = os.path.join(images_dir, 'setting.png').replace('\\', '/')
-        self.setting_hover_images_path = os.path.join(images_dir, 'setting_hover.png').replace('\\', '/')
-        self.settingButton.setStyleSheet(f'''
-        QPushButton{{
-            border-image: url("{self.setting_images_path}");
-        }}
-        QPushButton:hover{{
-            border-image: url("{self.setting_hover_images_path}");
-        }}
-        ''')
-        #buttonWidget QWidget
-        self.buttonWidget = Widget()
-        self.buttonWidget.resize(30, 50)
-        self.buttonWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        #buttonVLayout QVBoxLayout
-        self.buttonVLayout = QVBoxLayout()
-        self.buttonWidget.setLayout(self.buttonVLayout)
-        self.buttonVLayout.addWidget(self.settingButton)
-        self.buttonVLayout.setAlignment(Qt.AlignTop)
-        self.buttonVLayout.setContentsMargins(0, 0, 0, 20)
         #headWidget QWidget
         self.headWidget = Widget()
         self.headWidget.resize(self.width() - 40, 50)
@@ -1838,20 +1864,20 @@ class MainWindow(QMainWindow):
         #chatShowWidget QWidget
         self.chatShowWidget = Widget()
         self.chatShowWidget.setMinimumHeight(244)
-        self.chatShowWidget.resize(1200, 520)
+        self.chatShowWidget.resize(1200, 500)
         self.chatShowWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         #chatShowVLayout QVBoxLayout
         self.chatShowVLayout = QVBoxLayout()
         self.chatShowWidget.setLayout(self.chatShowVLayout)
         self.chatShowVLayout.addWidget(self.chatShow)
-        self.chatShowVLayout.setContentsMargins(27, 12, 2, 16)
+        self.chatShowVLayout.setContentsMargins(27, 4, 2, 16)
         #TextEditFull
         self.chatInput = TextEditFull()
         self.chatInput.connectSendButtonClick(self.sendMessage)
         #chatInputWidget QWidget
         self.chatInputWidget = Widget()
         self.chatInputWidget.setMinimumHeight(100)
-        self.chatInputWidget.resize(1200, 208)
+        self.chatInputWidget.resize(1200, 200)
         self.chatInputWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         #chatInputVLayout QVBoxLayout
         self.chatInputVLayout = QVBoxLayout()
@@ -1860,7 +1886,7 @@ class MainWindow(QMainWindow):
         self.chatInputVLayout.setContentsMargins(20, 0, 20, 20)
         #QSplitter
         self.splitter = Splitter(Qt.Vertical)
-        self.splitter.resize(1200, 728)
+        self.splitter.resize(1200, 700)
         self.splitter.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.addWidget(self.chatShowWidget)
@@ -2245,32 +2271,21 @@ class MainWindow(QMainWindow):
         self.titleIconLabel.setScaledContents(True)
         self.ai_assistant_images_path = os.path.join(images_dir, 'ai_assistant.png').replace('\\', '/')
         self.titleIconLabel.setPixmap(QPixmap(f'{self.ai_assistant_images_path}'))
-        #titleTextLabel QLabel
-        self.titleTextLabel = QLabel()
-        self.titleTextLabel.setFixedHeight(30)
-        self.titleTextFont = QFont()
-        self.titleTextFont.setPixelSize(windowFontSize)
-        self.titleTextLabel.setFont(self.titleTextFont)
-        self.titleTextPalette = self.titleTextLabel.palette()
-        self.titleTextPalette.setColor(QPalette.WindowText, QColor(23, 171, 227))
-        self.titleTextLabel.setPalette(self.titleTextPalette)
-        self.titleTextLabel.setText('AI助理')
-        self.titleTextLabel.adjustSize()
         #titleLeftSubWidget QWidget
         self.titleLeftSubWidget = Widget()
-        self.titleLeftSubWidget.resize(self.titleIconLabel.width() + self.titleTextLabel.width() + 20, 36)
+        self.titleLeftSubWidget.resize(self.titleIconLabel.width() + 15, self.titleIconLabel.height() + 10)
         self.titleLeftSubWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         #titleLeftSubHLayout QHBoxLayout
         self.titleLeftSubHLayout = QHBoxLayout()
         self.titleLeftSubWidget.setLayout(self.titleLeftSubHLayout)
         self.titleLeftSubHLayout.addWidget(self.titleIconLabel)
-        self.titleLeftSubHLayout.addWidget(self.titleTextLabel)
+        """ self.titleLeftSubHLayout.addWidget(self.titleTextLabel) """
         self.titleLeftSubHLayout.setAlignment(Qt.AlignLeft)
-        self.titleLeftSubHLayout.setContentsMargins(10, 3, 5, 3)
-        self.titleLeftSubHLayout.setSpacing(5)
+        self.titleLeftSubHLayout.setContentsMargins(10, 5, 5, 5)
+        """ self.titleLeftSubHLayout.setSpacing(5) """
         #minButton PushButton
         self.minButton = PushButton(tipText='', tipOffsetX=20, tipOffsetY=40)
-        self.minButton.setFixedSize(50, 36)
+        self.minButton.setFixedSize(50, 40)
         self.min_images_path = os.path.join(images_dir, 'min.png').replace('\\', '/')
         self.minButton.setIcon(QIcon(f"{self.min_images_path}"))
         self.minButton.setIconSize(QSize(20, 20))
@@ -2285,7 +2300,7 @@ class MainWindow(QMainWindow):
         self.minButton.clicked.connect(self.UiMinimize)
         #maxButton PushButton
         self.maxButton = PushButton(tipText='', tipOffsetX=20, tipOffsetY=40)
-        self.maxButton.setFixedSize(50, 36)
+        self.maxButton.setFixedSize(50, 40)
         self.max_images_path = os.path.join(images_dir, 'max.png').replace('\\', '/')
         self.normal_images_path = os.path.join(images_dir, 'normal.png').replace('\\', '/')
         self.maxButton.setIcon(QIcon(f"{self.max_images_path}"))
@@ -2301,7 +2316,7 @@ class MainWindow(QMainWindow):
         self.maxButton.clicked.connect(self.UiMaximize)
         #closeButton PushButton
         self.closeButton = PushButton(tipText='', tipOffsetX=10, tipOffsetY=40)
-        self.closeButton.setFixedSize(50, 36)
+        self.closeButton.setFixedSize(50, 40)
         self.close_images_path = os.path.join(images_dir, 'close.png').replace('\\', '/')
         self.closeButton.setIcon(QIcon(f"{self.close_images_path}"))
         self.closeButton.setIconSize(QSize(20, 20))
@@ -2317,7 +2332,7 @@ class MainWindow(QMainWindow):
         self.closeButton.clicked.connect(self.UiClose)
         #titleRightSubWidget QWidget
         self.titleRightSubWidget = Widget()
-        self.titleRightSubWidget.resize(150, 36)
+        self.titleRightSubWidget.resize(150, 40)
         self.titleRightSubWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         #titleRightSubHLayout QHBoxLayout
         self.titleRightSubHLayout = QHBoxLayout()
@@ -2330,7 +2345,7 @@ class MainWindow(QMainWindow):
         self.titleRightSubHLayout.setSpacing(0)
         #titleWidget QWidget
         self.titleWidget = TitleWidget()
-        self.titleWidget.resize(1200, 36)
+        self.titleWidget.resize(1200, 40)
         self.titleWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         #titleHLayout QHBoxLayout
         self.titleHLayout = QHBoxLayout()

@@ -1560,7 +1560,7 @@ class LineEdit(QLineEdit):
 class ChatRecordsWidget(QWidget):
     def __init__(self, parent=None):
         super(ChatRecordsWidget, self).__init__(parent)
-        self.resize(1200 // 3, 764)
+        self.resize(1200 // 3, 760)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         font_id = QFontDatabase.addApplicationFont(font_file_path)
         if font_id != -1:
@@ -1665,7 +1665,7 @@ class ChatRecordsWidget(QWidget):
         ''')
         #mainWidget QWidget
         self.mainWidget = Widget(self)
-        self.mainWidget.resize(1200 // 3, 764)
+        self.mainWidget.resize(1200 // 3, 760)
         self.mainWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         #mainVLayout QVBoxLayout
         self.mainVLayout = QVBoxLayout()
@@ -1687,7 +1687,11 @@ class ChatRecordsWidget(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
         #QPainterPath
         path = QPainterPath()
-        path.addRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height())
+        path.setFillRule(Qt.WindingFill)
+        path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 16, 16)
+        path.addRect(self.rect().x(), self.rect().y(), 16, 16)
+        path.addRect(self.rect().width() - 16, self.rect().y(), 16, 16)
+        path.addRect(self.rect().width() - 16, self.rect().height() - 16, 16, 16)
         #QBrush
         brush = QBrush(Qt.SolidPattern)
         brush.setColor(QColor(208, 208, 208))
@@ -1753,7 +1757,11 @@ class SettingWidget(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
         #QPainterPath
         path = QPainterPath()
-        path.addRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height())
+        path.setFillRule(Qt.WindingFill)
+        path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 16, 16)
+        path.addRect(self.rect().x(), self.rect().y(), 16, 16)
+        path.addRect(self.rect().width() - 16, self.rect().y(), 16, 16)
+        path.addRect(self.rect().width() - 16, self.rect().height() - 16, 16, 16)
         #QBrush
         brush = QBrush(Qt.SolidPattern)
         brush.setColor(QColor(208, 208, 208))

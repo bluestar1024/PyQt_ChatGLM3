@@ -40,7 +40,11 @@ temperature_maximum = 1
 init_temperature_currentVal = 0.8
 temperature_singleStep = 0.01
 
-windowFontSize = 22
+windowFontPointSize = 10
+bubbleFontPointSize = 10
+bubbleFontPixelSize = 20
+buttonFontPointSize = 9
+titleFontPointSize = 14
 textEditFullBGColor = QColor(224, 224, 224)
 textEditFullBGTColor = QColor(224, 224, 224, 0)
 textEditFullBColor = QColor(100, 100, 100)
@@ -137,7 +141,7 @@ class PushButton(QPushButton):
     def event(self, event):
         if event.type() == QEvent.ToolTip:
             font = QFont()
-            font.setPixelSize(18)
+            font.setPointSize(buttonFontPointSize)
             QToolTip.setFont(font)
             QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
         return QPushButton.event(self, event)
@@ -146,7 +150,7 @@ class FunWidget(QWidget):
     def __init__(self, parent=None):
         super(FunWidget, self).__init__(parent)
         #chatRecordsButton PushButton
-        self.chatRecordsButton = PushButton(tipText='聊天历史', tipOffsetX=30, tipOffsetY=40)
+        self.chatRecordsButton = PushButton(tipText='聊天历史', tipOffsetX=15, tipOffsetY=35)
         self.chatRecordsButton.setFixedSize(44, 44)
         self.chat_records_images_path = os.path.join(images_dir, 'chat_records.png').replace('\\', '/')
         """ self.chat_records_hover_images_path = os.path.join(images_dir, 'chat_records_hover.png').replace('\\', '/') """
@@ -175,7 +179,7 @@ class FunWidget(QWidget):
         self.titleLabel = QLabel()
         self.titleLabel.setFixedHeight(60)
         self.titleFont = QFont()
-        self.titleFont.setPixelSize(24)
+        self.titleFont.setPointSize(titleFontPointSize)
         self.titleFont.setBold(True)
         self.titleLabel.setFont(self.titleFont)
         self.titleLabel.setText('AI助理')
@@ -191,7 +195,7 @@ class FunWidget(QWidget):
         self.funMidSubHLayout.setAlignment(Qt.AlignCenter)
         self.funMidSubHLayout.setContentsMargins(0, 0, 0, 0)
         #newChatButton PushButton
-        self.newChatButton = PushButton(tipText='新聊天', tipOffsetX=20, tipOffsetY=40)
+        self.newChatButton = PushButton(tipText='新聊天', tipOffsetX=10, tipOffsetY=35)
         self.newChatButton.setFixedSize(44, 44)
         self.new_chat_images_path = os.path.join(images_dir, 'new_chat.png').replace('\\', '/')
         """ self.new_chat_hover_images_path = os.path.join(images_dir, 'new_chat_hover.png').replace('\\', '/') """
@@ -306,7 +310,7 @@ class SendButton(QPushButton):
     def event(self, event):
         if event.type() == QEvent.ToolTip:
             font = QFont()
-            font.setPixelSize(18)
+            font.setPointSize(buttonFontPointSize)
             QToolTip.setFont(font)
             QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
         return QPushButton.event(self, event)
@@ -347,16 +351,16 @@ class TextEdit(QTextEdit):
             image: url("{self.send_disable_images_path}");
         }}
         ''')
-        self.setStyleSheet('''
-        QTextEdit{
+        self.setStyleSheet(f'''
+        QTextEdit{{
             border: none;
             background :transparent;
-            font-size: 22px;
+            font-size: {windowFontPointSize}pt;
             selection-background-color: rgb(23, 171, 227);
-        }
-        QScrollBar{
+        }}
+        QScrollBar{{
             width: 25px;
-        }
+        }}
         ''')
         #setMouseTracking
         self.setMouseTracking(True)
@@ -680,7 +684,7 @@ class TextShow(QWidget):
         self.maxWidth = maxWidth
         self.label.setMaximumWidth(self.maxWidth)
         self.font = QFont()
-        self.font.setPixelSize(windowFontSize)
+        self.font.setPointSize(windowFontPointSize)
         self.label.setFont(self.font)
         self.font_metrics = QFontMetricsF(self.font)
         self.mainHLayout = QHBoxLayout()
@@ -716,17 +720,78 @@ class TextShow(QWidget):
             self.setLayout(self.mainHLayout)
             self.setFixedSize(labelWidth + 10, labelHeight + 10)
         else:
-            self.label.setFixedSize(windowFontSize, windowFontSize)
+            self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
             self.mainHLayout.addWidget(self.label)
             self.mainHLayout.setContentsMargins(5, 5, 5, 5)
             self.setLayout(self.mainHLayout)
-            self.setFixedSize(windowFontSize + 10, windowFontSize + 10)
+            self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
         self.isUser = isUser
         self.isColorful = False
 
+    def paintEvent(self, event):
+        #QPainter create
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        #QPainterPath
+        path = QPainterPath()
+        path.setFillRule(Qt.WindingFill)
+        path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 13, 13)
+        #QBrush
+        brush = QBrush(Qt.SolidPattern)
+        if self.isColorful:
+            brush.setColor(fulBubbleColor)
+        else:
+            if self.isUser:
+                brush.setColor(userBubbleColor)
+            else:
+                brush.setColor(aiBubbleColor)
+        #add rect and set brush
+        if self.isUser:
+            path.addRect(self.rect().width() - 15, self.rect().y(), 15, 15)
+        else:
+            path.addRect(self.rect().x(), self.rect().y(), 15, 15)
+        #QPainter setting
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(brush)
+        painter.drawPath(path.simplified())
+        #QPainter end
+        painter.end()
+
+    def setText(self, text):
+        self.setTexting.emit(self.isLabel)
+        self.text = text.strip('\n')
+        if not self.text == '':
+            textWidth = 0
+            textHeight = int(self.font_metrics.height())
+            count = self.text.count('\n')
+            textList = self.text.split('\n', count)
+            maxTempTextWidth = 0
+            for i in range(0, count + 1):
+                if int(self.font_metrics.width(textList[i])) > maxTempTextWidth:
+                    maxTempTextWidth = int(self.font_metrics.width(textList[i]))
+            if (maxTempTextWidth + 4) < self.maxWidth:
+                labelWidth = maxTempTextWidth + 4
+                labelHeight = (count + 1) * (textHeight + 3) - 3
+            else:
+                for i in range(0, count + 1):
+                    if i != count:
+                        tempTextWidth = self.font_metrics.width(textList[i] + ' ')
+                        tempTextWidth = math.ceil(tempTextWidth / (self.maxWidth - 24)) * (self.maxWidth - 24)
+                    else:
+                        tempTextWidth = self.font_metrics.width(textList[i])
+                    textWidth += int(tempTextWidth)
+                labelWidth = self.maxWidth
+                labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
+            self.label.setText(self.text)
+            self.label.setFixedSize(labelWidth, labelHeight)
+            self.setFixedSize(labelWidth + 10, labelHeight + 10)
+        else:
+            self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
+            self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
+
     def onPageLoadFinished(self, success):
         js = """
-        function getPageHeight() {
+        function getPageSize() {
             var body = document.body;
             var html = document.documentElement;
             var width = Math.max(body.scrollWidth, body.offsetWidth,
@@ -740,7 +805,7 @@ class TextShow(QWidget):
             }
             return [width, height];
         }
-        getPageHeight();
+        getPageSize();
         """
         if success:
             self.webEngineView.page().runJavaScript("document.body.style.overflow = 'hidden';")
@@ -749,6 +814,7 @@ class TextShow(QWidget):
     def updateSize(self, result):
         width, height = result
         if width != 0 and height != 0:
+            print(width, height)
             self.webEngineView.setFixedSize(width, height)
             self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
             self.setSizeFinished.emit()
@@ -815,35 +881,6 @@ class TextShow(QWidget):
                     tableIsComplete = True
         return tableText, tableItemList1, tableAlignList, row, column, tableIsComplete
 
-    def paintEvent(self, event):
-        #QPainter create
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        #QPainterPath
-        path = QPainterPath()
-        path.setFillRule(Qt.WindingFill)
-        path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 13, 13)
-        #QBrush
-        brush = QBrush(Qt.SolidPattern)
-        if self.isColorful:
-            brush.setColor(fulBubbleColor)
-        else:
-            if self.isUser:
-                brush.setColor(userBubbleColor)
-            else:
-                brush.setColor(aiBubbleColor)
-        #add rect and set brush
-        if self.isUser:
-            path.addRect(self.rect().width() - 15, self.rect().y(), 15, 15)
-        else:
-            path.addRect(self.rect().x(), self.rect().y(), 15, 15)
-        #QPainter setting
-        painter.setPen(Qt.NoPen)
-        painter.setBrush(brush)
-        painter.drawPath(path.simplified())
-        #QPainter end
-        painter.end()
-
     def htmlReplaceText(self, text):
         markdown_content = text.replace('\$', '\\\$')
         markdown_content = markdown_content.replace('\frac', '\\frac')
@@ -860,12 +897,12 @@ class TextShow(QWidget):
         markdown_content = ''
         self.html_text = ''
         self.full_html_text = ''
-        initWidth = self.font_metrics.width(self.text) + 16
+        initWidth = self.font_metrics.width(self.text)
         if initWidth > self.maxWidth:
             self.webEngineView.setFixedWidth(self.maxWidth)
         else:
             if self.text == '':
-                self.webEngineView.setFixedSize(38, 73)
+                self.webEngineView.setFixedSize(20, 66)
             else:
                 self.webEngineView.setFixedWidth(int(initWidth))
         # 添加 MathJax CDN 链接到 HTML 头部
@@ -916,7 +953,7 @@ class TextShow(QWidget):
                         width: 100%;
                         height: 100%;
                         box-sizing: border-box;
-                        font-size: 22px;
+                        font-size: {bubbleFontPixelSize}px;
                     }}
                     .content {{
                         width: auto;
@@ -985,38 +1022,6 @@ class TextShow(QWidget):
             self.setSizeFinished.emit()
             self.isLabel = False
             self.setTexting.emit(self.isLabel)
-
-    def setText(self, text):
-        self.setTexting.emit(self.isLabel)
-        self.text = text.strip('\n')
-        if not self.text == '':
-            textWidth = 0
-            textHeight = int(self.font_metrics.height())
-            count = self.text.count('\n')
-            textList = self.text.split('\n', count)
-            maxTempTextWidth = 0
-            for i in range(0, count + 1):
-                if int(self.font_metrics.width(textList[i])) > maxTempTextWidth:
-                    maxTempTextWidth = int(self.font_metrics.width(textList[i]))
-            if (maxTempTextWidth + 4) < self.maxWidth:
-                labelWidth = maxTempTextWidth + 4
-                labelHeight = (count + 1) * (textHeight + 3) - 3
-            else:
-                for i in range(0, count + 1):
-                    if i != count:
-                        tempTextWidth = self.font_metrics.width(textList[i] + ' ')
-                        tempTextWidth = math.ceil(tempTextWidth / (self.maxWidth - 24)) * (self.maxWidth - 24)
-                    else:
-                        tempTextWidth = self.font_metrics.width(textList[i])
-                    textWidth += int(tempTextWidth)
-                labelWidth = self.maxWidth
-                labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
-            self.label.setText(self.text)
-            self.label.setFixedSize(labelWidth, labelHeight)
-            self.setFixedSize(labelWidth + 10, labelHeight + 10)
-        else:
-            self.label.setFixedSize(windowFontSize, windowFontSize)
-            self.setFixedSize(windowFontSize + 10, windowFontSize + 10)
 
     def connectSetTexting(self, fun):
         self.setTexting.connect(fun)
@@ -1101,7 +1106,7 @@ class CopyButton(QPushButton):
     def event(self, event):
         if event.type() == QEvent.ToolTip:
             font = QFont()
-            font.setPixelSize(18)
+            font.setPointSize(buttonFontPointSize)
             QToolTip.setFont(font)
             QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
         return QPushButton.event(self, event)
@@ -1139,7 +1144,7 @@ class MessageWidget(QWidget):
         self.subVLayout2.setAlignment(Qt.AlignTop)
         self.subVLayout2.setContentsMargins(0, 0, 0, 0)
         #CopyButton
-        self.copyButton = CopyButton(tipText='复制', tipOffsetX=15, tipOffsetY=40, parent=self)
+        self.copyButton = CopyButton(tipText='复制', tipOffsetX=15, tipOffsetY=35, parent=self)
         self.copyButton.setFixedSize(16, 16)
         self.copy_images_path = os.path.join(images_dir, 'copy.png').replace('\\', '/')
         self.copy_hover_images_path = os.path.join(images_dir, 'copy_hover.png').replace('\\', '/')
@@ -1153,7 +1158,7 @@ class MessageWidget(QWidget):
         ''')
         self.copyButton.clicked.connect(copyFun)
         #renewResponseButton PushButton
-        self.renewResponseButton = PushButton(tipText='重新生成响应', tipOffsetX=50, tipOffsetY=40)
+        self.renewResponseButton = PushButton(tipText='重新生成响应', tipOffsetX=25, tipOffsetY=35)
         self.renewResponseButton.setFixedSize(16, 16)
         self.renew_response_images_path = os.path.join(images_dir, 'renewResponse.png').replace('\\', '/')
         self.renew_response_hover_images_path = os.path.join(images_dir, 'renewResponse_hover.png').replace('\\', '/')
@@ -1314,9 +1319,10 @@ class PrintLabel(QWidget):
         self.text = text.strip('\n')
         self.label = QLabel()
         self.font = QFont()
-        self.font.setPixelSize(windowFontSize)
+        self.font.setPointSize(windowFontPointSize)
         self.font.setBold(True)
         self.label.setFont(self.font)
+        self.font_metrics = QFontMetricsF(self.font)
         self.palette = self.label.palette()
         self.palette.setColor(QPalette.WindowText, QColor(23, 171, 227))
         self.label.setPalette(self.palette)
@@ -1330,11 +1336,11 @@ class PrintLabel(QWidget):
             self.setLayout(self.mainHLayout)
             self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
         else:
-            self.label.resize(windowFontSize, windowFontSize)
+            self.label.resize(int(self.font_metrics.height()), int(self.font_metrics.height()))
             self.mainHLayout.addWidget(self.label)
             self.mainHLayout.setContentsMargins(5, 5, 5, 5)
             self.setLayout(self.mainHLayout)
-            self.setFixedSize(windowFontSize + 10, windowFontSize + 10)
+            self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
         #printTimer QTimer
         self.printTimer = QTimer(self)
         self.printTimer.timeout.connect(self.printEnd)
@@ -1363,8 +1369,8 @@ class PrintLabel(QWidget):
             self.label.adjustSize()
             self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
         else:
-            self.label.resize(windowFontSize, windowFontSize)
-            self.setFixedSize(windowFontSize + 10, windowFontSize + 10)
+            self.label.resize(int(self.font_metrics.height()), int(self.font_metrics.height()))
+            self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
 
     def printStart(self):
         #show PrintLabel
@@ -1383,7 +1389,7 @@ class Label(QLabel):
         super(Label, self).__init__(parent)
         self.setFixedHeight(32)
         self.font = QFont()
-        self.font.setPixelSize(windowFontSize)
+        self.font.setPointSize(windowFontPointSize)
         self.font.setBold(True)
         self.setFont(self.font)
         self.palette = self.palette()
@@ -1399,7 +1405,7 @@ class SettingEdit(QLineEdit):
             font_families = QFontDatabase.applicationFontFamilies(font_id)
             if font_families:
                 font_family = font_families[0]
-                self.font = QFont(font_family, 10)
+                self.font = QFont(font_family, windowFontPointSize)
                 self.setFont(self.font)
 
 class SpinBox(QSpinBox):
@@ -1415,7 +1421,7 @@ class SpinBox(QSpinBox):
             border: 2px solid rgb(23, 171, 227);
             border-radius: 8px;
             background: transparent;
-            font: 22px, bold;
+            font: {windowFontPointSize}pt, bold;
             color: rgb(23, 171, 227);
             selection-background-color: rgb(23, 171, 227);
         }}
@@ -1458,7 +1464,7 @@ class DoubleSpinBox(QDoubleSpinBox):
             border: 2px solid rgb(23, 171, 227);
             border-radius: 8px;
             background: transparent;
-            font: 22px, bold;
+            font: {windowFontPointSize}pt, bold;
             color: rgb(23, 171, 227);
             selection-background-color: rgb(23, 171, 227);
         }}
@@ -1532,10 +1538,10 @@ class LineEdit(QLineEdit):
             font_families = QFontDatabase.applicationFontFamilies(font_id)
             if font_families:
                 font_family = font_families[0]
-                self.font = QFont(font_family, 10)
+                self.font = QFont(font_family, windowFontPointSize)
                 self.setFont(self.font)
         #searchButton QPushButton
-        self.searchButton = PushButton(tipText='搜索', tipOffsetX=10, tipOffsetY=40, parent=self)
+        self.searchButton = PushButton(tipText='搜索', tipOffsetX=5, tipOffsetY=35, parent=self)
         self.searchButton.setFixedSize(30, 30)
         self.search_images_path = os.path.join(images_dir, 'search.png').replace('\\', '/')
         self.searchButton.setIcon(QIcon(f"{self.search_images_path}"))
@@ -1567,9 +1573,9 @@ class ChatRecordsWidget(QWidget):
             font_families = QFontDatabase.applicationFontFamilies(font_id)
             if font_families:
                 font_family = font_families[0]
-                self.font = QFont(font_family, 10)
+                self.font = QFont(font_family, windowFontPointSize)
         #settingButton PushButton
-        self.settingButton = PushButton(tipText='设置', tipOffsetX=10, tipOffsetY=40)
+        self.settingButton = PushButton(tipText='设置', tipOffsetX=5, tipOffsetY=35)
         self.settingButton.setFixedSize(44, 44)
         self.setting_images_path = os.path.join(images_dir, 'setting.png').replace('\\', '/')
         """ self.setting_hover_images_path = os.path.join(images_dir, 'setting_hover.png').replace('\\', '/') """
@@ -1599,7 +1605,7 @@ class ChatRecordsWidget(QWidget):
         self.label.resize(self.width() - self.buttonWidget.width() - 40, 50)
         self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         font = QFont()
-        font.setPixelSize(30)
+        font.setPointSize(titleFontPointSize)
         font.setBold(True)
         self.label.setFont(font)
         self.label.setText("聊天历史")
@@ -1619,7 +1625,7 @@ class ChatRecordsWidget(QWidget):
         #LineEdit
         self.lineEdit = LineEdit()
         #clearAllButton QPushButton
-        self.clearAllButton = PushButton(tipText='删除所有记录', tipOffsetX=50, tipOffsetY=40)
+        self.clearAllButton = PushButton(tipText='删除所有记录', tipOffsetX=25, tipOffsetY=35)
         self.clearAllButton.setFixedSize(30, 30)
         self.clearAllButton.setIconSize(QSize(30, 30))
         self.clear_all_images_path = os.path.join(images_dir, 'clearAll.png').replace('\\', '/')
@@ -1974,7 +1980,7 @@ class MainWindow(QMainWindow):
         #chatRecordsWidgetIsOpen
         self.chatRecordsWidgetIsOpen = False
         #chatRecordsFoldButton PushButton
-        self.chatRecordsFoldButton = PushButton(tipText='折叠', tipOffsetX=10, tipOffsetY=40, parent=self.mainWidget)
+        self.chatRecordsFoldButton = PushButton(tipText='折叠', tipOffsetX=5, tipOffsetY=35, parent=self.mainWidget)
         self.chatRecordsFoldButton.setFixedSize(30, 50)
         self.chatRecordsFoldButton.setIconSize(QSize(30, 50))
         self.chatRecordsFoldButton.setStyleSheet(f'''
@@ -1998,10 +2004,13 @@ class MainWindow(QMainWindow):
         self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.textCopyLabel.height() - 10)
         self.textCopyLabel.raise_()
         self.textCopyLabel.hide()
-        #resizeTimer
+        """ #resizeTimer
         self.resizeTimer = QTimer()
         self.resizeTimer.setSingleShot(True)
-        self.resizeTimer.timeout.connect(self.onResizeTimeout)
+        self.resizeTimer.timeout.connect(self.messageWidgetRegenerate) """
+        #isRegenerate
+        self.isRegenerate = False
+        self.isRegenerateFirst = True
         #isSetTexting
         self.isSetTexting = False
         #pushButtonIsPress
@@ -2014,6 +2023,18 @@ class MainWindow(QMainWindow):
         self.settingIsTop = False
         #chatRecordsIsTop
         self.chatRecordsIsTop = False
+        #screen
+        self.lastScreen = self.curScreen = self.screen()
+        self.dpi = 0.0
+        self.screenChanged = False
+
+    def moveEvent(self, event):
+        #screen
+        self.curScreen = self.screen()
+        if self.lastScreen != self.curScreen:
+            self.lastScreen = self.curScreen
+            self.screenChanged = True
+        QMainWindow.moveEvent(self, event)
 
     def mouseMoveEvent(self, event):
         #If the mouse hovers over the list item, it has a pop-up effect
@@ -2226,6 +2247,14 @@ class MainWindow(QMainWindow):
                 else:
                     self.chatInput.backgroundColorShowDark()
                     self.chatInput.clearFocus()
+            if self.screenChanged:
+                self.dpi = self.curScreen.logicalDotsPerInch()
+                global bubbleFontPixelSize
+                bubbleFontPixelSize = math.ceil(bubbleFontPointSize * (self.dpi / 72))
+                self.screenChanged = False
+            if self.isRegenerate:
+                self.isRegenerate = False
+                self.messageWidgetRegenerate()
         QMainWindow.mouseReleaseEvent(self, event)
 
     def itemShowColorful(self, item):
@@ -2263,14 +2292,19 @@ class MainWindow(QMainWindow):
             self.contentVLayout.setContentsMargins(self.mainWidget.width() // 3, 0, 0, 0)
         else:
             self.chatRecordsWidget.move(-self.chatRecordsWidget.width(), self.titleWidget.height())
-        #resizeTimer
-        self.resizeTimer.start(150)
         #TextEditFull adjust size
         self.chatInput.resetWidgetSize()
         #move emptyTextLabel
         self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.emptyTextLabel.height() - 10)
         #move textCopyLabel
         self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.textCopyLabel.height() - 10)
+        """ #resizeTimer
+        self.resizeTimer.start(150) """
+        #isRegenerate
+        self.isRegenerate = True
+        if self.isRegenerateFirst:
+            self.isRegenerateFirst = False
+            self.isRegenerate = False
 
     def titleWidgetInit(self):
         #titleIconLabel QLabel
@@ -2292,7 +2326,7 @@ class MainWindow(QMainWindow):
         self.titleLeftSubHLayout.setContentsMargins(10, 5, 5, 5)
         """ self.titleLeftSubHLayout.setSpacing(5) """
         #minButton PushButton
-        self.minButton = PushButton(tipText='', tipOffsetX=20, tipOffsetY=40)
+        self.minButton = PushButton(tipText='', tipOffsetX=10, tipOffsetY=35)
         self.minButton.setFixedSize(50, 40)
         self.min_images_path = os.path.join(images_dir, 'min.png').replace('\\', '/')
         self.minButton.setIcon(QIcon(f"{self.min_images_path}"))
@@ -2307,7 +2341,7 @@ class MainWindow(QMainWindow):
         ''')
         self.minButton.clicked.connect(self.UiMinimize)
         #maxButton PushButton
-        self.maxButton = PushButton(tipText='', tipOffsetX=20, tipOffsetY=40)
+        self.maxButton = PushButton(tipText='', tipOffsetX=10, tipOffsetY=35)
         self.maxButton.setFixedSize(50, 40)
         self.max_images_path = os.path.join(images_dir, 'max.png').replace('\\', '/')
         self.normal_images_path = os.path.join(images_dir, 'normal.png').replace('\\', '/')
@@ -2323,7 +2357,7 @@ class MainWindow(QMainWindow):
         ''')
         self.maxButton.clicked.connect(self.UiMaximize)
         #closeButton PushButton
-        self.closeButton = PushButton(tipText='', tipOffsetX=10, tipOffsetY=40)
+        self.closeButton = PushButton(tipText='', tipOffsetX=5, tipOffsetY=35)
         self.closeButton.setFixedSize(50, 40)
         self.close_images_path = os.path.join(images_dir, 'close.png').replace('\\', '/')
         self.closeButton.setIcon(QIcon(f"{self.close_images_path}"))
@@ -2687,7 +2721,7 @@ class MainWindow(QMainWindow):
         #settingWidgetIsOpen
         self.settingWidgetIsOpen = False
         #settingFoldButton PushButton
-        self.settingFoldButton = PushButton(tipText='折叠', tipOffsetX=10, tipOffsetY=40, parent=self.mainWidget)
+        self.settingFoldButton = PushButton(tipText='折叠', tipOffsetX=5, tipOffsetY=35, parent=self.mainWidget)
         self.settingFoldButton.setFixedSize(30, 50)
         self.settingFoldButton.setIconSize(QSize(30, 50))
         self.fold_images_path = os.path.join(images_dir, 'fold.png').replace('\\', '/')
@@ -2755,12 +2789,14 @@ class MainWindow(QMainWindow):
         self.chatInputWidget.resize(self.mainWidget.width() - rect.x() - self.settingWidget.width(), self.chatInputWidget.height())
         self.splitter.resize(self.mainWidget.width() - rect.x() - self.settingWidget.width(), self.splitter.height())
         self.contentVLayout.setContentsMargins(rect.x() + self.settingWidget.width(), 0, 0, 0)
-        #resizeTimer
-        self.resizeTimer.start(150)
+        """ #resizeTimer
+        self.resizeTimer.start(150) """
 
     def settingUiMoveFinished(self):
         if not self.settingWidgetIsOpen:
             self.settingFoldButton.hide()
+        if self.sender() == self.settingAnimationMove:
+            self.messageWidgetRegenerate()
 
     def settingUiAnimationMove2(self, rect):
         self.settingFoldButton.move(rect.x() + self.settingWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.settingFoldButton.height()) // 2)
@@ -2791,14 +2827,16 @@ class MainWindow(QMainWindow):
         self.chatInputWidget.resize(self.mainWidget.width() - rect.x() - self.chatRecordsWidget.width(), self.chatInputWidget.height())
         self.splitter.resize(self.mainWidget.width() - rect.x() - self.chatRecordsWidget.width(), self.splitter.height())
         self.contentVLayout.setContentsMargins(rect.x() + self.chatRecordsWidget.width(), 0, 0, 0)
-        #resizeTimer
-        self.resizeTimer.start(150)
+        """ #resizeTimer
+        self.resizeTimer.start(150) """
 
     def chatRecordsUiMoveFinished(self):
         if not self.chatRecordsWidgetIsOpen:
             self.chatRecordsFoldButton.hide()
             #delete all item
             self.chatRecordsWidget.delAllListItems()
+        if self.sender() == self.chatRecordsAnimationMove:
+            self.messageWidgetRegenerate()
 
     def chatRecordsUiAnimationMove2(self, rect):
         self.chatRecordsFoldButton.move(rect.x() + self.chatRecordsWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.chatRecordsFoldButton.height()) // 2)
@@ -3163,7 +3201,7 @@ class MainWindow(QMainWindow):
         self.isSetTexting = state
         return self.isSetTexting
 
-    def onResizeTimeout(self):
+    def messageWidgetRegenerate(self):
         if len(self.messageWidgetList) != 0:
             if not self.isSetTexting:
                 self.current_scroll_value = self.chatShow.verticalScrollBar().value()
@@ -3280,7 +3318,7 @@ if __name__ == '__main__':
         font_families = QFontDatabase.applicationFontFamilies(font_id)
         if font_families:
             font_family = font_families[0]
-            font = QFont(font_family, windowFontSize)
+            font = QFont(font_family, windowFontPointSize)
             QApplication.setFont(font)
     app.setStyleSheet('''
     QToolTip{

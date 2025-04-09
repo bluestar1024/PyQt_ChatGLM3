@@ -9,7 +9,7 @@ import sys, os
 from enum import Enum
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QTextEdit, QMenu, QFrame, QGraphicsDropShadowEffect
 from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from openai import OpenAI
 import math
@@ -59,8 +59,13 @@ class messageThread(QThread):
     def __init__(self, contentInput, context=None, use_stream=True, parent=None):
         super(messageThread, self).__init__(parent)
         #read setting config file
-        with open(config_file_path, "r") as f:
-            content = f.readlines()
+        try:
+            with open(config_file_path, "r", encoding='utf-8') as f:
+                content = f.readlines()
+        except FileNotFoundError:
+            print(f"错误：文件 {config_file_path} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
         self.base_url = content[0].strip('\n')
         self.api_key = content[1].strip('\n')
         self.model = content[2].strip('\n')
@@ -116,9 +121,9 @@ class messageThread(QThread):
     def run(self):
         self.contentOutput = '锄禾日当午，汗滴禾下土，谁知盘中餐，粒粒皆辛苦。\n'
         if self.use_stream:
-            for i in range(0, 4):
+            for i in range(0, 8):
                 self.newMessage.emit(self.contentOutput)
-                time.sleep(0.5)
+                time.sleep(1.5)
         else:
             self.newMessage.emit(self.contentOutput)
         return """
@@ -356,7 +361,6 @@ class TextEdit(QTextEdit):
             border: none;
             background :transparent;
             font-size: {windowFontPointSize}pt;
-            selection-background-color: rgb(23, 171, 227);
         }}
         QScrollBar{{
             width: 25px;
@@ -369,10 +373,14 @@ class TextEdit(QTextEdit):
         menu = CustomMenu(self)
         menu.setStyleSheet('''
         QMenu {
-            background-color: lightblue;
+            background-color: white;
             border: none;
             border-radius: 15px;
             padding: 5px;  /* 菜单内边距 */
+        }
+        QMenu::item:selected {
+            color: black;
+            background-color: #e0e0e0;
         }
         ''')
         action1 = menu.addAction("剪切")
@@ -641,9 +649,9 @@ class WebEngineView(QWebEngineView):
         # 获取滚动的像素值
         delta_y = event.angleDelta().y()
         # 获取当前的垂直滚动位置
-        current_scroll_value = self.parent().parent().parent().listWidget.verticalScrollBar().value()
-        min_scroll_value = self.parent().parent().parent().listWidget.verticalScrollBar().minimum()
-        max_scroll_value = self.parent().parent().parent().listWidget.verticalScrollBar().maximum()
+        current_scroll_value = self.parent().parent().parent().parent().listWidget.verticalScrollBar().value()
+        min_scroll_value = self.parent().parent().parent().parent().listWidget.verticalScrollBar().minimum()
+        max_scroll_value = self.parent().parent().parent().parent().listWidget.verticalScrollBar().maximum()
         # 计算新的滚动位置
         new_scroll_value = current_scroll_value - delta_y * 3
         if new_scroll_value < min_scroll_value:
@@ -651,7 +659,7 @@ class WebEngineView(QWebEngineView):
         elif new_scroll_value > max_scroll_value:
             new_scroll_value = max_scroll_value
         # 设置新的滚动位置
-        self.parent().parent().parent().listWidget.verticalScrollBar().setValue(new_scroll_value)
+        self.parent().parent().parent().parent().listWidget.verticalScrollBar().setValue(new_scroll_value)
         # 需要调用 accept() 来防止事件传递
         event.accept()
 
@@ -689,6 +697,7 @@ class TextShow(QWidget):
         self.font_metrics = QFontMetricsF(self.font)
         self.mainHLayout = QHBoxLayout()
         self.webEngineView = WebEngineView()
+        self.webEngineView.setMaximumWidth(self.maxWidth)
         self.webEngineView.connectPageLoadFinished(self.onPageLoadFinished)
         self.isLabel = True
         if not self.text == '':
@@ -728,7 +737,7 @@ class TextShow(QWidget):
         self.isUser = isUser
         self.isColorful = False
 
-    def paintEvent(self, event):
+    """ def paintEvent(self, event):
         #QPainter create
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
@@ -755,7 +764,7 @@ class TextShow(QWidget):
         painter.setBrush(brush)
         painter.drawPath(path.simplified())
         #QPainter end
-        painter.end()
+        painter.end() """
 
     def setText(self, text):
         self.setTexting.emit(self.isLabel)
@@ -808,7 +817,7 @@ class TextShow(QWidget):
         getPageSize();
         """
         if success:
-            self.webEngineView.page().runJavaScript("document.body.style.overflow = 'hidden';")
+            self.webEngineView.page().runJavaScript("document.body.style.overflowY = 'hidden';")
             self.webEngineView.page().runJavaScript(js, self.updateSize)
 
     def updateSize(self, result):
@@ -1042,43 +1051,64 @@ class TextShow(QWidget):
             return self.webEngineView.selectedText()
 
 class TextWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, isUser=True, parent=None):
         super(TextWidget, self).__init__(parent)
+        self.isUser = isUser
+        self.setMouseTracking(True)
+
+    def paintEvent(self, event):
+        #QPainter create
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        #QPainterPath
+        path = QPainterPath()
+        path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 13, 13)
+        #QBrush
+        brush = QBrush(Qt.SolidPattern)
+        if self.isUser:
+            brush.setColor(QColor(235, 243, 251))
+        else:
+            brush.setColor(Qt.white)
+        #QPainter setting
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(brush)
+        painter.drawPath(path.simplified())
+        #QPainter end
+        painter.end()
+
+class TextBoxWidget(QWidget):
+    def __init__(self, parent=None):
+        super(TextBoxWidget, self).__init__(parent)
         self.setMouseTracking(True)
 
 class LoadingWidget(QWidget):
     def __init__(self, parent=None):
         super(LoadingWidget, self).__init__(parent)
-        self.setFixedSize(68, 26)
-        self.mainHLayout = QHBoxLayout()
-        self.setLayout(self.mainHLayout)
-        self.subWidgetList = []
-        for _ in range(3):
-            subWidget = QWidget()
-            subWidget.setFixedSize(16, 16)
-            self.mainHLayout.addWidget(subWidget)
-            self.subWidgetList.append(subWidget)
-        self.mainHLayout.setContentsMargins(5, 5, 5, 5)
-        self.mainHLayout.setSpacing(5)
-        #QTimer
-        self.loadingTimer = QTimer(self)
-        self.loadingTimer.timeout.connect(self.loadingShow)
-        self.loadingTimer.start(400)
-        self.loadingNum = 0
+        self.setFixedSize(35, 35)
+        self.angle = 0
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_animation)
+        self.timer.start(1)
 
-    def loadingShow(self):
-        for subWidget in self.subWidgetList:
-            subWidget.setStyleSheet('''
-                border: none;
-                border-radius: 8px;
-                background-color: rgb(150, 150, 150);
-            ''')
-        self.subWidgetList[self.loadingNum].setStyleSheet('''
-            border: none;
-            border-radius: 8px;
-            background-color: rgb(80, 80, 80);
-        ''')
-        self.loadingNum = (self.loadingNum + 1) % 3
+    def update_animation(self):
+        self.angle = (self.angle + 9) % 360
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        x1 = self.width() / 2 + math.cos(math.radians(self.angle)) * ((self.width() - 10) / 2)
+        y1 = self.width() / 2 + math.sin(math.radians(self.angle)) * ((self.width() - 10) / 2)
+        x2 = self.width() / 2 - math.cos(math.radians(self.angle)) * ((self.width() - 10) / 2)
+        y2 = self.width() / 2 - math.sin(math.radians(self.angle)) * ((self.width() - 10) / 2)
+        gradient = QLinearGradient(x1, y1, x2, y2)
+        gradient.setColorAt(0, QColor(224, 224, 224))
+        gradient.setColorAt(1, QColor(100, 100, 100))
+        pen = QPen(gradient, 3)
+        pen.setCapStyle(Qt.RoundCap)
+        painter.setPen(pen)
+        rect = self.rect().adjusted(5, 5, -5, -5)
+        painter.drawArc(rect, -self.angle * 16, -180 * 16)
 
 class CopyButton(QPushButton):
     def __init__(self, tipText='', tipOffsetX=10, tipOffsetY=40, parent=None):
@@ -1111,8 +1141,536 @@ class CopyButton(QPushButton):
             QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
         return QPushButton.event(self, event)
 
+class ThinkingButton(QWidget):
+    clicked = pyqtSignal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(250, 30)
+        self.isThinking = False
+        self.backgroundColor = QColor(224, 224, 224)
+        #leftIconLabel QLabel
+        self.leftIconLabel = QLabel()
+        self.thinking_icon_images_path = os.path.join(images_dir, 'thinking_icon.png').replace('\\', '/')
+        self.leftIconLabel.setPixmap(QPixmap(f'{self.thinking_icon_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
+        #textLabel QLabel
+        self.textLabel = QLabel('思考中')
+        self.textLabel.adjustSize()
+        #rightIconLabel QLabel
+        self.rightIconLabel = QLabel()
+        self.arrow_up_images_path = os.path.join(images_dir, 'arrow_up.png').replace('\\', '/')
+        self.arrow_down_images_path = os.path.join(images_dir, 'arrow_down.png').replace('\\', '/')
+        self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_up_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
+        #QHBoxLayout
+        mainHLayout = QHBoxLayout()
+        self.setLayout(mainHLayout)
+        mainHLayout.addWidget(self.leftIconLabel)
+        mainHLayout.addWidget(self.textLabel)
+        mainHLayout.addWidget(self.rightIconLabel)
+        mainHLayout.setContentsMargins(5, 5, 5, 5)
+        mainHLayout.setSpacing(0)
+
+    def enterEvent(self, event):
+        self.backgroundColor = QColor(208, 208, 208)
+        self.repaint()
+
+    def leaveEvent(self, event):
+        self.backgroundColor = QColor(224, 224, 224)
+        self.repaint()
+
+    """ def paintEvent(self, event):
+        #QPainter create
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        #QPainterPath
+        path = QPainterPath()
+        path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 5, 5)
+        #QBrush
+        brush = QBrush(Qt.SolidPattern)
+        brush.setColor(self.backgroundColor)
+        #QPainter setting
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(brush)
+        painter.drawPath(path.simplified())
+        #QPainter end
+        painter.end() """
+
+    def mousePressEvent(self, event):
+        self.isThinking = not self.isThinking
+        if self.isThinking:
+            self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_up_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
+            self.textLabel.setText("思考中")
+        else:
+            self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_down_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
+            self.textLabel.setText("已深度思考(用时21秒)")
+        self.clicked.emit()
+        QWidget.mousePressEvent(self, event)
+
+    def connectButtonClick(self, fun):
+        self.clicked.connect(fun)
+
+""" class ThinkLabel(QLabel):
+    def __init__(self, text, maxWidth=650, parent=None):
+        super().__init__(parent)
+        self.text = text.strip('\n')
+        self.label = CustomLabel()
+        self.label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.label.setWordWrap(True)
+        self.maxWidth = maxWidth
+        self.label.setMaximumWidth(self.maxWidth)
+        self.font = QFont()
+        self.font.setPointSize(windowFontPointSize)
+        self.label.setFont(self.font)
+        self.font_metrics = QFontMetricsF(self.font)
+        self.mainHLayout = QHBoxLayout()
+        if not self.text == '':
+            textWidth = 0
+            textHeight = int(self.font_metrics.height())
+            count = self.text.count('\n')
+            textList = self.text.split('\n', count)
+            maxTempTextWidth = 0
+            for i in range(0, count + 1):
+                if int(self.font_metrics.width(textList[i])) > maxTempTextWidth:
+                    maxTempTextWidth = int(self.font_metrics.width(textList[i]))
+            if (maxTempTextWidth + 4) < self.maxWidth:
+                labelWidth = maxTempTextWidth + 4
+                labelHeight = (count + 1) * (textHeight + 3) - 3
+            else:
+                for i in range(0, count + 1):
+                    if i != count:
+                        tempTextWidth = self.font_metrics.width(textList[i] + ' ')
+                        tempTextWidth = math.ceil(tempTextWidth / (self.maxWidth - 24)) * (self.maxWidth - 24)
+                    else:
+                        tempTextWidth = self.font_metrics.width(textList[i])
+                    textWidth += int(tempTextWidth)
+                labelWidth = self.maxWidth
+                labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
+            self.label.setText(self.text)
+            self.label.setFixedSize(labelWidth, labelHeight)
+            self.mainHLayout.addWidget(self.label)
+            self.mainHLayout.setContentsMargins(10, 5, 5, 5)
+            self.setLayout(self.mainHLayout)
+            self.setFixedSize(labelWidth + 15, labelHeight + 10)
+        else:
+            self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
+            self.mainHLayout.addWidget(self.label)
+            self.mainHLayout.setContentsMargins(10, 5, 5, 5)
+            self.setLayout(self.mainHLayout)
+            self.setFixedSize(self.label.width() + 15, self.label.height() + 10)
+
+    def paintEvent(self, event):
+        #QPainter create
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        #QPainterPath
+        path = QPainterPath()
+        path.addRect(self.rect().x() + 4, self.rect().y() + 4, 2, self.rect().height() - 8)
+        #QBrush
+        brush = QBrush(Qt.SolidPattern)
+        brush.setColor(Qt.lightGray)
+        #QPainter setting
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(brush)
+        painter.drawPath(path.simplified())
+        #QPainter end
+        painter.end()
+
+    def setText(self, text):
+        self.text = text.strip('\n')
+        if not self.text == '':
+            textWidth = 0
+            textHeight = int(self.font_metrics.height())
+            count = self.text.count('\n')
+            textList = self.text.split('\n', count)
+            maxTempTextWidth = 0
+            for i in range(0, count + 1):
+                if int(self.font_metrics.width(textList[i])) > maxTempTextWidth:
+                    maxTempTextWidth = int(self.font_metrics.width(textList[i]))
+            if (maxTempTextWidth + 4) < self.maxWidth:
+                labelWidth = maxTempTextWidth + 4
+                labelHeight = (count + 1) * (textHeight + 3) - 3
+            else:
+                for i in range(0, count + 1):
+                    if i != count:
+                        tempTextWidth = self.font_metrics.width(textList[i] + ' ')
+                        tempTextWidth = math.ceil(tempTextWidth / (self.maxWidth - 24)) * (self.maxWidth - 24)
+                    else:
+                        tempTextWidth = self.font_metrics.width(textList[i])
+                    textWidth += int(tempTextWidth)
+                labelWidth = self.maxWidth
+                labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
+            self.label.setText(self.text)
+            self.label.setFixedSize(labelWidth, labelHeight)
+            self.setFixedSize(labelWidth + 15, labelHeight + 10)
+        else:
+            self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
+            self.setFixedSize(self.label.width() + 15, self.label.height() + 10) """
+
+class ThinkWidget(QWidget):
+    setSizeFinished = pyqtSignal()
+
+    def __init__(self, text, maxWidth=650, parent=None):
+        super(ThinkWidget, self).__init__(parent)
+        self.text = text.strip('\n')
+        self.label = CustomLabel()
+        self.label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.label.setWordWrap(True)
+        self.maxWidth = maxWidth
+        self.label.setMaximumWidth(self.maxWidth)
+        self.font = QFont()
+        self.font.setPointSize(windowFontPointSize)
+        self.label.setFont(self.font)
+        self.font_metrics = QFontMetricsF(self.font)
+        self.mainHLayout = QHBoxLayout()
+        self.webEngineView = WebEngineView()
+        self.webEngineView.setMaximumWidth(self.maxWidth)
+        self.webEngineView.connectPageLoadFinished(self.onPageLoadFinished)
+        self.isLabel = True
+        if not self.text == '':
+            textWidth = 0
+            textHeight = int(self.font_metrics.height())
+            count = self.text.count('\n')
+            textList = self.text.split('\n', count)
+            maxTempTextWidth = 0
+            for i in range(0, count + 1):
+                if int(self.font_metrics.width(textList[i])) > maxTempTextWidth:
+                    maxTempTextWidth = int(self.font_metrics.width(textList[i]))
+            if (maxTempTextWidth + 4) < self.maxWidth:
+                labelWidth = maxTempTextWidth + 4
+                labelHeight = (count + 1) * (textHeight + 3) - 3
+            else:
+                for i in range(0, count + 1):
+                    if i != count:
+                        tempTextWidth = self.font_metrics.width(textList[i] + ' ')
+                        tempTextWidth = math.ceil(tempTextWidth / (self.maxWidth - 24)) * (self.maxWidth - 24)
+                    else:
+                        tempTextWidth = self.font_metrics.width(textList[i])
+                    textWidth += int(tempTextWidth)
+                labelWidth = self.maxWidth
+                labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
+            self.label.setText(self.text)
+            self.label.setFixedSize(labelWidth, labelHeight)
+            self.mainHLayout.addWidget(self.label)
+            self.mainHLayout.setContentsMargins(15, 5, 5, 5)
+            self.setLayout(self.mainHLayout)
+            self.setFixedSize(labelWidth + 20, labelHeight + 10)
+        else:
+            self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
+            self.mainHLayout.addWidget(self.label)
+            self.mainHLayout.setContentsMargins(15, 5, 5, 5)
+            self.setLayout(self.mainHLayout)
+            self.setFixedSize(self.label.width() + 20, self.label.height() + 10)
+
+    def paintEvent(self, event):
+        #QPainter create
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        #backgroundPath QPainterPath
+        backgroundPath = QPainterPath()
+        backgroundPath.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 13, 13)
+        #backgroundBrush QBrush
+        backgroundBrush = QBrush(Qt.SolidPattern)
+        backgroundBrush.setColor(QColor(240, 240, 240))
+        #QPainter setting
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(backgroundBrush)
+        painter.drawPath(backgroundPath.simplified())
+        #QPainterPath
+        path = QPainterPath()
+        path.addRect(self.rect().x() + 9, self.rect().y() + 8, 2, self.rect().height() - 16)
+        #QBrush
+        brush = QBrush(Qt.SolidPattern)
+        brush.setColor(QColor(200, 200, 200))
+        #QPainter setting
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(brush)
+        painter.drawPath(path.simplified())
+        #QPainter end
+        painter.end()
+
+    def setText(self, text):
+        self.text = text.strip('\n')
+        if not self.text == '':
+            textWidth = 0
+            textHeight = int(self.font_metrics.height())
+            count = self.text.count('\n')
+            textList = self.text.split('\n', count)
+            maxTempTextWidth = 0
+            for i in range(0, count + 1):
+                if int(self.font_metrics.width(textList[i])) > maxTempTextWidth:
+                    maxTempTextWidth = int(self.font_metrics.width(textList[i]))
+            if (maxTempTextWidth + 4) < self.maxWidth:
+                labelWidth = maxTempTextWidth + 4
+                labelHeight = (count + 1) * (textHeight + 3) - 3
+            else:
+                for i in range(0, count + 1):
+                    if i != count:
+                        tempTextWidth = self.font_metrics.width(textList[i] + ' ')
+                        tempTextWidth = math.ceil(tempTextWidth / (self.maxWidth - 24)) * (self.maxWidth - 24)
+                    else:
+                        tempTextWidth = self.font_metrics.width(textList[i])
+                    textWidth += int(tempTextWidth)
+                labelWidth = self.maxWidth
+                labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
+            self.label.setText(self.text)
+            self.label.setFixedSize(labelWidth, labelHeight)
+            self.setFixedSize(labelWidth + 20, labelHeight + 10)
+        else:
+            self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
+            self.setFixedSize(self.label.width() + 20, self.label.height() + 10)
+
+    def onPageLoadFinished(self, success):
+        js = """
+        function getPageSize() {
+            var body = document.body;
+            var html = document.documentElement;
+            var width = Math.max(body.scrollWidth, body.offsetWidth,
+                                html.clientWidth, html.scrollWidth, html.offsetWidth);
+            var height = Math.max(body.scrollHeight, body.offsetHeight,
+                                html.clientHeight, html.scrollHeight, html.offsetHeight);
+            var content = document.querySelector('.content');
+            if (content) {
+                width = content.offsetWidth;
+                height = content.offsetHeight;
+            }
+            return [width, height];
+        }
+        getPageSize();
+        """
+        if success:
+            self.webEngineView.page().runJavaScript("document.body.style.overflowY = 'hidden';")
+            self.webEngineView.page().runJavaScript(js, self.updateSize)
+
+    def updateSize(self, result):
+        width, height = result
+        if width != 0 and height != 0:
+            print('thinkWidget webEngineView size:', width, height)
+            self.webEngineView.setFixedSize(width, height)
+            self.setFixedSize(self.webEngineView.width() + 15, self.webEngineView.height() + 10)
+            self.setSizeFinished.emit()
+
+    def getAlignmentClass(self, format_string):
+        # 根据对齐格式返回相应的class名
+        if ':-' in format_string and '-:' in format_string:
+            return 'center-align'  # 居中对齐
+        elif ':-' in format_string:
+            return 'left-align'   # 左对齐
+        elif '-:' in format_string:  
+            return 'right-align'  # 右对齐
+        else:  
+            return ''
+
+    def getTable(self, text):
+        tableText = ''
+        tableItemList = []
+        tableItemList1 = []
+        tableAlignList = []
+        i = 0
+        r = 0
+        row = 0
+        row_full = 0
+        column = 0
+        tableIsComplete = False
+        while(i < len(text)):
+            if text[i] == '|':
+                tableText += '|'
+                j = i
+                k = j + 1
+                while(k < len(text)):
+                    if text[k] == '|':
+                        tableText += text[j + 1 : k] + '|'
+                        tableItemList.append(text[j + 1 : k].strip(' '))
+                        j = k
+                    k += 1
+                break
+            i += 1
+        for index, tableItem in enumerate(tableItemList):
+            if '\n' in tableItem:
+                row_full += 1
+            else:
+                if row_full == 0:
+                    column += 1
+                if index == len(tableItemList) - 1:
+                    row_full += 1
+        if row_full > 1:
+            row = row_full - 1
+        else:
+            row = row_full
+        if row >= 1:
+            tableItemList1 = tableItemList1 + tableItemList[0 : column]
+        if row_full >= 2:
+            tableAlignList = tableItemList[column + 1 : 2 * (column + 1) - 1]
+        if row >= 2:
+            for r in range(1, row):
+                tableItemList1 = tableItemList1 + tableItemList[(r + 1) * (column + 1) : (r + 2) * (column + 1) - 1]
+            if '\n' in tableItemList[-1]:
+                if len(tableItemList) == row_full * (column + 1):
+                    tableIsComplete = True
+            else:
+                if len(tableItemList) == row_full * (column + 1) - 1:
+                    tableIsComplete = True
+        return tableText, tableItemList1, tableAlignList, row, column, tableIsComplete
+
+    def htmlReplaceText(self, text):
+        markdown_content = text.replace('\$', '\\\$')
+        markdown_content = markdown_content.replace('\frac', '\\frac')
+        markdown_content = markdown_content.replace('\,', '\\\,')
+        markdown_content = markdown_content.replace('\alpha', '\\alpha')
+        markdown_content = markdown_content.replace('\beta', '\\beta')
+        markdown_content = markdown_content.replace('\theta', '\\theta')
+        markdown_content = markdown_content.replace('\nu', '\\nu')
+        markdown_content = markdown_content.replace('\rho', '\\rho')
+        markdown_content = markdown_content.replace('\tau', '\\tau')
+        return markdown_content
+
+    def toggleWidget(self):
+        markdown_content = ''
+        self.html_text = ''
+        self.full_html_text = ''
+        initWidth = self.font_metrics.width(self.text)
+        if initWidth > self.maxWidth:
+            self.webEngineView.setFixedWidth(self.maxWidth)
+        else:
+            if self.text == '':
+                self.webEngineView.setFixedSize(20, 66)
+            else:
+                self.webEngineView.setFixedWidth(int(initWidth))
+        # 添加 MathJax CDN 链接到 HTML 头部
+        self.mathjax_cdn = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <script type="text/javascript">
+                    MathJax = {{
+                        options: {{
+                            enableMenu: false
+                        }},
+                        tex: {{
+                            inlineMath: [["$", "$"], ["\\(", "\\)"]],
+                            displayMath: [["$$", "$$"], ["\\[", "\\]"]]
+                        }},
+                        svg: {{
+                            fontCache: 'global'
+                        }}
+                    }};
+                </script>
+                <script type="text/javascript"
+                    src="{mathjax_script_path}">
+                </script>
+                <style>
+                    table {{
+                        width: 50%;
+                        border-collapse: collapse;
+                        margin: 10px 0;
+                    }}  
+                    th, td {{
+                        border: 1px solid #000;
+                        padding: 8px;
+                    }}
+                    th {{
+                        background-color: #b0b0b0;
+                    }}
+                    .left-align {{ text-align: left; }}
+                    .center-align {{ text-align: center; }}
+                    .right-align {{ text-align: right; }}
+                </style>
+                <style>
+                    body, html {{
+                        margin: 0;
+                        padding: 0;
+                        width: 100%;
+                        height: 100%;
+                        box-sizing: border-box;
+                        font-size: {bubbleFontPixelSize}px;
+                        color: gray;
+                    }}
+                    .content {{
+                        width: auto;
+                        height: auto;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                    }}
+                </style>
+            </head>
+        """
+        self.markdown = mistune.create_markdown(escape=False, renderer='html')
+        if not self.text == '':
+            tableText, tableItemList, tableAlignList, row, column, tableIsComplete= self.getTable(self.text)
+            if tableIsComplete:
+                textList = self.text.split(tableText, 1)
+                markdown_content = self.htmlReplaceText(textList[0])
+                # 使用 mistune 将 Markdown 转换为 HTML
+                self.html_text = self.markdown(markdown_content)
+                self.html_text += """
+                    <table>
+                        <thead>
+                            <tr>
+                """
+                # 添加表头  
+                for i in range(column):
+                    self.html_text += f"<th class='{self.getAlignmentClass(tableAlignList[i])}'>{tableItemList[i]}</th>"
+                self.html_text += """
+                            </tr>
+                        </thead>
+                        <tbody>
+                """
+                # 添加数据行
+                for i in range(1, row):
+                    self.html_text += "<tr>"
+                    for j in range(column):
+                        self.html_text += f"<td class='{self.getAlignmentClass(tableAlignList[j])}'>{tableItemList[i * column + j]}</td>"
+                    self.html_text += "</tr>"
+                self.html_text += """
+                        </tbody>
+                    </table>
+                """
+                markdown_content = self.htmlReplaceText(textList[1])
+                # 使用 mistune 将 Markdown 转换为 HTML
+                self.html_text += self.markdown(markdown_content)
+            else:
+                markdown_content = self.htmlReplaceText(self.text)
+                # 使用 mistune 将 Markdown 转换为 HTML
+                self.html_text = self.markdown(markdown_content)
+            # 将转换后的 HTML 内容添加到 body 中
+            self.full_html_text = f"{self.mathjax_cdn}<body>\n<div class='content'>\n{self.html_text}\n</div>\n</body>\n</html>\n"
+            baseUrl = QUrl.fromLocalFile(os.path.dirname(os.path.abspath(__file__)) + '/')
+            if self.isLabel:
+                self.mainHLayout.removeWidget(self.label)
+                self.label.deleteLater()
+                self.mainHLayout.addWidget(self.webEngineView)
+            self.webEngineView.setHtml(str(self.full_html_text), baseUrl)
+            self.isLabel = False
+        else:
+            if self.isLabel:
+                self.mainHLayout.removeWidget(self.label)
+                self.label.deleteLater()
+                self.mainHLayout.addWidget(self.webEngineView)
+            self.setFixedSize(self.webEngineView.width() + 15, self.webEngineView.height() + 10)
+            self.setSizeFinished.emit()
+            self.isLabel = False
+
+    def getWebEngineView(self):
+        return self.webEngineView
+
+    def hasSelectedText(self):
+        if self.isLabel:
+            return self.label.hasSelectedText()
+        else:
+            return self.webEngineView.hasSelection()
+
+    def getSelectedText(self):
+        if self.isLabel:
+            return self.label.selectedText()
+        else:
+            return self.webEngineView.selectedText()
+
 class MessageWidget(QWidget):
-    def __init__(self, text, copyFun, renewResponseFun, listWidget, isUser=True, textMaxWidth=780, parent=None):
+    thinkTextRecvEnd = pyqtSignal()
+
+    def __init__(self, text, copyFun, renewResponseFun, listWidget, isUser=True, thinkIsExpand=True, textMaxWidth=780, parent=None):
         super(MessageWidget, self).__init__(parent)
         self.listWidget = listWidget
         self.text = text
@@ -1120,22 +1678,69 @@ class MessageWidget(QWidget):
         self.isUser = isUser
         #ImageLabel
         self.imageLabel = ImageLabel(isUser=self.isUser)
-        #TextShow
-        self.textShow = TextShow(text, isUser=self.isUser, maxWidth=textMaxWidth)
+        #textWidget QWidget
+        self.textWidget = TextWidget(isUser=isUser)
+        #textLayout QHBoxLayout
+        self.textLayout = QVBoxLayout()
+        self.textWidget.setLayout(self.textLayout)
+        #textBox TextWidget
+        self.textBoxWidget = TextBoxWidget()
+        #textLayout QHBoxLayout
+        self.textBoxLayout = QVBoxLayout()
+        self.textBoxWidget.setLayout(self.textBoxLayout)
+
+        if not self.isUser:
+            thinkText = ''
+            resultText = ''
+            #
+            self.thinkTextIsRecvEnd = False
+            self.isRecvFirst = True
+            if '<think>' in self.text:
+                textList = self.text.split('<think>')
+                tempText = textList[1]
+                if '</think>' in tempText:
+                    textList2 = tempText.split('</think>')
+                    thinkText = textList2[0]
+                    resultText = self.text.split('<think>' + thinkText + '</think>')[1]
+                    self.thinkTextIsRecvEnd = True
+                    print('0_1')
+                else:
+                    thinkText = tempText
+                    print('0_2')
+            elif not (self.text in '<think>' or self.text == ''):
+                resultText = self.text
+                self.thinkTextIsRecvEnd = True
+                print('resultText:', resultText)
+                print('0_3')
+            #TextShow
+            self.textShow = TextShow(resultText, isUser=self.isUser, maxWidth=textMaxWidth)
+            #ThinkingButton
+            self.thinkButton = ThinkingButton()
+            self.thinkButton.connectButtonClick(self.thinkButtonClicked)
+            #ThinkWidget
+            self.thinkWidget = ThinkWidget(thinkText, maxWidth=textMaxWidth)
+            #textLayout
+            self.textLayout.addWidget(self.thinkButton)
+            self.textLayout.addWidget(self.thinkWidget)
+            #set visible
+            self.thinkIsExpand = thinkIsExpand
+            self.thinkWidget.setVisible(self.thinkIsExpand)
+            #
+            self.thinkTextRecvEnd.connect(self.thinkToggleWidget)
+            if self.thinkTextIsRecvEnd and self.isRecvFirst:
+                print('1')
+                self.thinkTextRecvEnd.emit()
+                self.isRecvFirst = False
+        else:
+            #TextShow
+            self.textShow = TextShow(text, isUser=self.isUser, maxWidth=textMaxWidth)
+
+        self.textLayout.addWidget(self.textShow)
+        self.textLayout.setContentsMargins(5, 5, 5, 5)
         #loadingWidgetIsRemove
         self.loadingWidgetIsRemove = True
         #renewResponseButtonIsRemove
         self.renewResponseButtonIsRemove = True
-        #textWidget QWidget
-        self.textWidget = TextWidget()
-        #textLayout QHBoxLayout
-        self.textLayout = QVBoxLayout()
-        self.textWidget.setLayout(self.textLayout)
-        self.textLayout.addWidget(self.textShow)
-        self.textLayout.setContentsMargins(0, 0, 0, 0)
-        #mainHLayout QHBoxLayout
-        self.mainHLayout = QHBoxLayout()
-        self.setLayout(self.mainHLayout)
         #subVLayout QVBoxLayout
         self.subVLayout1 = QVBoxLayout()
         self.subVLayout1.setAlignment(Qt.AlignTop)
@@ -1194,27 +1799,65 @@ class MessageWidget(QWidget):
         self.setMouseTracking(True)
         #add imageLabel and textWidget
         if self.isUser:
-            self.textLayout.addWidget(self.funWidget)
-            self.textLayout.setSpacing(0)
-            self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
-            self.subVLayout1.addWidget(self.textWidget)
+            """ self.textLayout.addWidget(self.funWidget)
+            self.textLayout.setSpacing(0) """
+            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
+            self.textBoxLayout.addWidget(self.textWidget)
+            self.textBoxLayout.addWidget(self.funWidget)
+            self.textBoxLayout.setContentsMargins(0, 0, 0, 0)
+            self.textBoxLayout.setSpacing(0)
+            self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
+            self.subVLayout1.addWidget(self.textBoxWidget)
             self.subVLayout2.addWidget(self.imageLabel)
         else:
             self.subVLayout1.addWidget(self.imageLabel)
-            self.loadingWidget = LoadingWidget()
-            self.textLayout.addWidget(self.loadingWidget)
             self.textLayout.setSpacing(0)
-            self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textShow.height() + self.loadingWidget.height())
-            self.subVLayout2.addWidget(self.textWidget)
+            if self.thinkIsExpand:
+                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.thinkWidget.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.thinkWidget.height() + self.textShow.height() + 10)
+            else:
+                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10)
+            self.loadingWidget = LoadingWidget()
+            """ self.textLayout.addWidget(self.loadingWidget)
+            self.textLayout.setSpacing(0) """
+            self.textBoxLayout.addWidget(self.textWidget)
+            self.textBoxLayout.addWidget(self.loadingWidget)
+            self.textBoxLayout.setContentsMargins(0, 0, 0, 0)
+            self.textBoxLayout.setSpacing(0)
+            self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.loadingWidget.width()), self.textWidget.height() + self.loadingWidget.height())
+            """ if self.thinkIsExpand:
+                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.thinkWidget.width(), self.textShow.width(), self.loadingWidget.width()), self.thinkButton.height() + self.thinkWidget.height() + self.textShow.height() + self.loadingWidget.height())
+            else:
+                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width(), self.loadingWidget.width()), self.thinkButton.height() + self.textShow.height() + self.loadingWidget.height()) """
+            self.subVLayout2.addWidget(self.textBoxWidget)
             #loadingWidgetIsRemove
             self.loadingWidgetIsRemove = False
+            #
+            self.thinkWidget.setSizeFinished.connect(self.setSize)
+        #mainHLayout QHBoxLayout
+        self.mainHLayout = QHBoxLayout()
+        self.setLayout(self.mainHLayout)
         #mainHLayout add subVLayout
         self.mainHLayout.addLayout(self.subVLayout1)
         self.mainHLayout.addLayout(self.subVLayout2)
         self.mainHLayout.setContentsMargins(0, 0, 0, 0)
         self.mainHLayout.setSpacing(5)
         #main widget set size
-        self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
+        self.setFixedSize(self.imageLabel.width() + self.textBoxWidget.width() + 5, max(self.imageLabel.height(), self.textBoxWidget.height()))
+
+    def getThinkIsExpanded(self):
+        if not self.isUser:
+            return self.thinkIsExpand
+        else:
+            return
+
+    def thinkButtonClicked(self):
+        self.thinkIsExpand = not self.thinkIsExpand
+        self.thinkWidget.setVisible(self.thinkIsExpand)
+        # 调整父布局大小
+        self.textShow.setSizeFinished.emit()
+
+    def thinkToggleWidget(self):
+        self.thinkWidget.toggleWidget()
 
     def connectSetTexting(self, fun):
         self.textShow.connectSetTexting(fun)
@@ -1227,25 +1870,63 @@ class MessageWidget(QWidget):
 
     def setSize(self):
         if self.isUser:
-            self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
+            self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
         else:
-            if self.loadingWidgetIsRemove:
-                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+            print(self.thinkWidget.geometry())
+            if self.thinkIsExpand:
+                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.thinkWidget.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.thinkWidget.height() + self.textShow.height() + 10)
             else:
-                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textShow.height() + self.loadingWidget.height())
-        self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
+                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10)
+            if self.loadingWidgetIsRemove:
+                self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
+            else:
+                self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.loadingWidget.width()), self.textWidget.height() + self.loadingWidget.height())
+        self.setFixedSize(self.imageLabel.width() + self.textBoxWidget.width() + 5, max(self.imageLabel.height(), self.textBoxWidget.height()))
 
     def setText(self, text):
         self.text = text
-        self.textShow.setText(self.text)
-        if self.isUser:
-            self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+
+        if not self.isUser:
+            thinkText = ''
+            resultText = ''
+            if '<think>' in self.text:
+                textList = self.text.split('<think>')
+                tempText = textList[1]
+                if '</think>' in tempText:
+                    textList2 = tempText.split('</think>')
+                    thinkText = textList2[0]
+                    resultText = self.text.split('<think>' + thinkText + '</think>')[1]
+                    self.thinkTextIsRecvEnd = True
+                else:
+                    thinkText = tempText
+            elif not (self.text in '<think>' or self.text == ''):
+                resultText = self.text
+                self.thinkTextIsRecvEnd = True
+            #set text
+            if not self.thinkTextIsRecvEnd:
+                self.thinkWidget.setText(thinkText)
+            if self.thinkTextIsRecvEnd and self.isRecvFirst:
+                print('3')
+                self.thinkTextRecvEnd.emit()
+                self.isRecvFirst = False
+            self.textShow.setText(resultText)
         else:
-            if self.loadingWidgetIsRemove:
-                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
+            self.textShow.setText(text)
+
+        if self.isUser:
+            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
+            self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
+        else:
+            if self.thinkIsExpand:
+                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.thinkWidget.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.thinkWidget.height() + self.textShow.height() + 10)
             else:
-                self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.loadingWidget.width() else self.loadingWidget.width(), self.textShow.height() + self.loadingWidget.height())
-        self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
+                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10)
+            if self.loadingWidgetIsRemove:
+                self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
+            else:
+                self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.loadingWidget.width()), self.textWidget.height() + self.loadingWidget.height())
+        self.setFixedSize(self.imageLabel.width() + self.textBoxWidget.width() + 5, max(self.imageLabel.height(), self.textBoxWidget.height()))
 
     def getText(self):
         return self.text
@@ -1264,13 +1945,17 @@ class MessageWidget(QWidget):
 
     def removeLoadingWidget(self):
         if not self.isUser and not self.loadingWidgetIsRemove:
-            self.textLayout.removeWidget(self.loadingWidget)
+            self.textBoxLayout.removeWidget(self.loadingWidget)
             self.loadingWidget.deleteLater()
             self.loadingWidgetIsRemove = True
-            self.textLayout.addWidget(self.funWidget)
-            self.textLayout.setSpacing(0)
-            self.textWidget.setFixedSize(self.textShow.width() if self.textShow.width() > self.funWidget.width() else self.funWidget.width(), self.textShow.height() + self.funWidget.height())
-            self.setFixedSize(self.imageLabel.width() + 5 + self.textWidget.width(), self.imageLabel.height() if self.imageLabel.height() > self.textWidget.height() else self.textWidget.height())
+            self.textBoxLayout.addWidget(self.funWidget)
+            self.textBoxLayout.setSpacing(0)
+            """ if self.thinkIsExpand:
+                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.thinkWidget.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.thinkWidget.height() + self.textShow.height() + 10)
+            else:
+                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10) """
+            self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
+            self.setFixedSize(self.imageLabel.width() + self.textBoxWidget.width() + 5, max(self.imageLabel.height(), self.textBoxWidget.height()))
 
     def showFunWidget(self):
         if not self.funWidgetIsShow:
@@ -1295,10 +1980,22 @@ class MessageWidget(QWidget):
             self.funWidget.setFixedSize(26, 26)
 
     def hasSelectedText(self):
-        return self.textShow.hasSelectedText()
+        if self.textShow.hasSelectedText():
+            return True
+        else:
+            if not self.isUser:
+                return self.thinkWidget.hasSelectedText()
+            else:
+                return False
 
     def getSelectedText(self):
-        return self.textShow.getSelectedText()
+        if self.textShow.hasSelectedText():
+            return self.textShow.getSelectedText()
+        else:
+            if not self.isUser:
+                return self.thinkWidget.getSelectedText()
+            else:
+                return ''
 
     def showColorful(self):
         self.textShow.isColorful = True
@@ -1390,11 +2087,11 @@ class Label(QLabel):
         self.setFixedHeight(32)
         self.font = QFont()
         self.font.setPointSize(windowFontPointSize)
-        self.font.setBold(True)
+        """ self.font.setBold(True) """
         self.setFont(self.font)
-        self.palette = self.palette()
+        """ self.palette = self.palette()
         self.palette.setColor(QPalette.WindowText, QColor(23, 171, 227))
-        self.setPalette(self.palette)
+        self.setPalette(self.palette) """
 
 class SettingEdit(QLineEdit):
     def __init__(self, parent=None):
@@ -1418,12 +2115,10 @@ class SpinBox(QSpinBox):
         down_arrow_images_path = os.path.join(images_dir, 'down_arrow.png').replace('\\', '/')
         self.setStyleSheet(f'''
         QSpinBox{{
-            border: 2px solid rgb(23, 171, 227);
+            border: 2px solid;
             border-radius: 8px;
             background: transparent;
-            font: {windowFontPointSize}pt, bold;
-            color: rgb(23, 171, 227);
-            selection-background-color: rgb(23, 171, 227);
+            font: {windowFontPointSize}pt;
         }}
         QSpinBox::up-button{{
             width: 16px;
@@ -1461,12 +2156,10 @@ class DoubleSpinBox(QDoubleSpinBox):
         down_arrow_images_path = os.path.join(images_dir, 'down_arrow.png').replace('\\', '/')
         self.setStyleSheet(f'''
         QDoubleSpinBox{{
-            border: 2px solid rgb(23, 171, 227);
+            border: 2px solid;
             border-radius: 8px;
             background: transparent;
-            font: {windowFontPointSize}pt, bold;
-            color: rgb(23, 171, 227);
-            selection-background-color: rgb(23, 171, 227);
+            font: {windowFontPointSize}pt;
         }}
         QDoubleSpinBox::up-button{{
             width: 16px;
@@ -1509,14 +2202,14 @@ class Slider(QSlider):
             width: 26px;
             margin: -9px 0px -9px 0px;
             border-radius: 13px;
-            background-color: rgb(80, 80, 80);
+            background-color: rgb(50, 50, 50);
         }
         QSlider::handle:hover:horizontal{
-            background-color: rgb(100, 100, 100);
+            background-color: rgb(70, 70, 70);
         }
         QSlider::sub-page:horizontal{
             border-radius: 4px;
-            background-color: rgb(23, 171, 227);
+            background-color: rgb(90, 90, 90);
         }
         ''')
 
@@ -1985,6 +2678,9 @@ class MainWindow(QMainWindow):
         self.chatRecordsFoldButton.setIconSize(QSize(30, 50))
         self.chatRecordsFoldButton.setStyleSheet(f'''
         QPushButton{{
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            background: #d0d0d0;
             border-image: url("{self.fold_images_path}");
         }}
         QPushButton:hover{{
@@ -2027,6 +2723,10 @@ class MainWindow(QMainWindow):
         self.lastScreen = self.curScreen = self.screen()
         self.dpi = 0.0
         self.screenChanged = False
+        #thinkExpandedList
+        self.thinkExpandedList = []
+        #messageIsRenewResponse
+        self.messageIsRenewResponse = False
 
     def moveEvent(self, event):
         #screen
@@ -2309,7 +3009,7 @@ class MainWindow(QMainWindow):
     def titleWidgetInit(self):
         #titleIconLabel QLabel
         self.titleIconLabel = QLabel()
-        self.titleIconLabel.setFixedSize(30, 30)
+        self.titleIconLabel.setFixedSize(40, 30)
         self.titleIconLabel.setScaledContents(True)
         self.ai_assistant_images_path = os.path.join(images_dir, 'ai_assistant.png').replace('\\', '/')
         self.titleIconLabel.setPixmap(QPixmap(f'{self.ai_assistant_images_path}'))
@@ -2413,12 +3113,17 @@ class MainWindow(QMainWindow):
 
     def settingWidgetInit(self):
         #setting config file
-        if not os.path.exists(config_file_path):
-            with open(config_file_path, "w") as f:
-                global init_base_url, init_api_key, init_model, init_maxTokens_currentVal, init_topP_currentVal, init_temperature_currentVal
-                f.write(init_base_url + '\n' + init_api_key + '\n' + init_model + '\n' + str(init_maxTokens_currentVal) + '\n' + str(init_topP_currentVal) + '\n' + str(init_temperature_currentVal) + '\n')
-        with open(config_file_path, "r") as f:
-            content = f.readlines()
+        try:
+            if not os.path.exists(config_file_path):
+                with open(config_file_path, "w", encoding='utf-8') as f:
+                    global init_base_url, init_api_key, init_model, init_maxTokens_currentVal, init_topP_currentVal, init_temperature_currentVal
+                    f.write(init_base_url + '\n' + init_api_key + '\n' + init_model + '\n' + str(init_maxTokens_currentVal) + '\n' + str(init_topP_currentVal) + '\n' + str(init_temperature_currentVal) + '\n')
+            with open(config_file_path, "r", encoding='utf-8') as f:
+                content = f.readlines()
+        except FileNotFoundError:
+            print(f"错误：文件 {config_file_path} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
         base_url = content[0].strip('\n')
         api_key = content[1].strip('\n')
         model = content[2].strip('\n')
@@ -2728,6 +3433,9 @@ class MainWindow(QMainWindow):
         self.fold_hover_images_path = os.path.join(images_dir, 'fold_hover.png').replace('\\', '/')
         self.settingFoldButton.setStyleSheet(f'''
         QPushButton{{
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            background: #d0d0d0;
             border-image: url("{self.fold_images_path}");
         }}
         QPushButton:hover{{
@@ -2859,72 +3567,117 @@ class MainWindow(QMainWindow):
             self.settingIsTop = True
 
     def baseUrlTextChanged(self, text):
-        with open(config_file_path, "r") as f:
-            lines = f.readlines()
-        lines[0] = text + '\n'
-        with open(config_file_path, "w") as f:
-            f.writelines(lines)
+        try:
+            with open(config_file_path, "r", encoding='utf-8') as f:
+                lines = f.readlines()
+            lines[0] = text + '\n'
+            with open(config_file_path, "w", encoding='utf-8') as f:
+                f.writelines(lines)
+        except FileNotFoundError:
+            print(f"错误：文件 {config_file_path} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
 
     def apiKeyTextChanged(self, text):
-        with open(config_file_path, "r") as f:
-            lines = f.readlines()
-        lines[1] = text + '\n'
-        with open(config_file_path, "w") as f:
-            f.writelines(lines)
+        try:
+            with open(config_file_path, "r", encoding='utf-8') as f:
+                lines = f.readlines()
+            lines[1] = text + '\n'
+            with open(config_file_path, "w", encoding='utf-8') as f:
+                f.writelines(lines)
+        except FileNotFoundError:
+            print(f"错误：文件 {config_file_path} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
 
     def modelNameTextChanged(self, text):
-        with open(config_file_path, "r") as f:
-            lines = f.readlines()
-        lines[2] = text + '\n'
-        with open(config_file_path, "w") as f:
-            f.writelines(lines)
+        try:
+            with open(config_file_path, "r", encoding='utf-8') as f:
+                lines = f.readlines()
+            lines[2] = text + '\n'
+            with open(config_file_path, "w", encoding='utf-8') as f:
+                f.writelines(lines)
+        except FileNotFoundError:
+            print(f"错误：文件 {config_file_path} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
 
     def maxTokensBoxValueChanged(self, i):
-        with open(config_file_path, "r") as f:
-            lines = f.readlines()
-        lines[3] = str(i) + '\n'
-        with open(config_file_path, "w") as f:
-            f.writelines(lines)
+        try:
+            with open(config_file_path, "r", encoding='utf-8') as f:
+                lines = f.readlines()
+            lines[3] = str(i) + '\n'
+            with open(config_file_path, "w", encoding='utf-8') as f:
+                f.writelines(lines)
+        except FileNotFoundError:
+            print(f"错误：文件 {config_file_path} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
         self.maxTokensSlider.setValue(i)
 
     def topPBoxValueChanged(self, d):
-        with open(config_file_path, "r") as f:
-            lines = f.readlines()
-        lines[4] = str(d) + '\n'
-        with open(config_file_path, "w") as f:
-            f.writelines(lines)
+        try:
+            with open(config_file_path, "r", encoding='utf-8') as f:
+                lines = f.readlines()
+            lines[4] = str(d) + '\n'
+            with open(config_file_path, "w", encoding='utf-8') as f:
+                f.writelines(lines)
+        except FileNotFoundError:
+            print(f"错误：文件 {config_file_path} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
         self.topPSlider.setValue(int(d * 100))
 
     def temperatureBoxValueChanged(self, d):
-        with open(config_file_path, "r") as f:
-            lines = f.readlines()
-        lines[5] = str(d) + '\n'
-        with open(config_file_path, "w") as f:
-            f.writelines(lines)
+        try:
+            with open(config_file_path, "r", encoding='utf-8') as f:
+                lines = f.readlines()
+            lines[5] = str(d) + '\n'
+            with open(config_file_path, "w", encoding='utf-8') as f:
+                f.writelines(lines)
+        except FileNotFoundError:
+            print(f"错误：文件 {config_file_path} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
         self.temperatureSlider.setValue(int((d - 0.01) * 100))
 
     def maxTokensSliderValueChanged(self, i):
-        with open(config_file_path, "r") as f:
-            lines = f.readlines()
-        lines[3] = str(i) + '\n'
-        with open(config_file_path, "w") as f:
-            f.writelines(lines)
+        try:
+            with open(config_file_path, "r", encoding='utf-8') as f:
+                lines = f.readlines()
+            lines[3] = str(i) + '\n'
+            with open(config_file_path, "w", encoding='utf-8') as f:
+                f.writelines(lines)
+        except FileNotFoundError:
+            print(f"错误：文件 {config_file_path} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
         self.maxTokensBox.setValue(i)
 
     def topPSliderValueChanged(self, i):
-        with open(config_file_path, "r") as f:
-            lines = f.readlines()
-        lines[4] = str(i / 100) + '\n'
-        with open(config_file_path, "w") as f:
-            f.writelines(lines)
+        try:
+            with open(config_file_path, "r", encoding='utf-8') as f:
+                lines = f.readlines()
+            lines[4] = str(i / 100) + '\n'
+            with open(config_file_path, "w", encoding='utf-8') as f:
+                f.writelines(lines)
+        except FileNotFoundError:
+            print(f"错误：文件 {config_file_path} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
         self.topPBox.setValue(i / 100)
 
     def temperatureSliderValueChanged(self, i):
-        with open(config_file_path, "r") as f:
-            lines = f.readlines()
-        lines[5] = str(i / 100 + 0.01) + '\n'
-        with open(config_file_path, "w") as f:
-            f.writelines(lines)
+        try:
+            with open(config_file_path, "r", encoding='utf-8') as f:
+                lines = f.readlines()
+            lines[5] = str(i / 100 + 0.01) + '\n'
+            with open(config_file_path, "w", encoding='utf-8') as f:
+                f.writelines(lines)
+        except FileNotFoundError:
+            print(f"错误：文件 {config_file_path} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
         self.temperatureBox.setValue(i / 100 + 0.01)
 
     def messageWidgetResize(self):
@@ -3025,6 +3778,14 @@ class MainWindow(QMainWindow):
         self.chatShow.setItemWidget(self.recvItem, self.itemRecvWidget)
         #first
         self.first = True
+        #messageIsRenewResponse
+        if self.messageIsRenewResponse:
+            for i in range(0, len(self.messageWidgetList)):
+                self.messageWidgetList[i].showDefaultColor()
+            self.messageWidgetIsSelect = True
+            self.selectMessageWidgetNumber += 1
+            self.messageWidgetList[self.selectMessageWidgetNumber].showColorful()
+            self.messageIsRenewResponse = False
 
     def recvMessage(self, text):
         if self.first:
@@ -3069,21 +3830,58 @@ class MainWindow(QMainWindow):
     def messageRenewResponse(self):
         i = len(self.messageWidgetList) - 1
         j = 0
+        context = []
         while i >= j:
             if self.messageWidgetList[i - j].getIsUser():
+                for k in range(0, i - j):
+                    messageWidget = self.messageWidgetList[k]
+                    if messageWidget.getIsUser():
+                        context += [
+                            {
+                                "role": "user",
+                                "content": messageWidget.getText()
+                            }
+                        ]
+                    else:
+                        context += [
+                            {
+                                "role": "assistant",
+                                "content": messageWidget.getText()
+                            }
+                        ]
                 #create thread
-                self.thread = messageThread(self.messageWidgetList[i - j].getText())
+                self.thread = messageThread(self.messageWidgetList[i - j].getText(), context=context)
                 self.thread.started.connect(self.messageStart)
                 self.thread.newMessage.connect(self.recvMessage)
                 self.thread.finished.connect(self.messageFinish)
                 self.thread.start()
                 #disable sendButton
                 self.chatInput.disableSendButton()
+                self.messageIsRenewResponse = True
                 break
             else:
                 j += 1
         #pushButtonIsPress
         self.pushButtonIsPress = True
+
+    def writeToChatRecordFile(self, withholdCurChatFile=False):
+        #chatRecordFileName QString
+        self.chatRecordFileName = "chat_"
+        self.chatRecordFileName += QDateTime.currentDateTime().toString("yyyy_MM_dd_HH_mm_ss")
+        self.chatRecordFileName += ".txt"
+        #write to chatRecord file
+        try:
+            with open(os.path.join(chat_records_dir, self.chatRecordFileName), 'a', encoding='utf-8') as f:
+                for i in range(0, self.chatShow.count()):
+                    chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                    f.write(chatRecordStr)
+        except FileNotFoundError:
+            print(f"错误：文件 {os.path.join(chat_records_dir, self.chatRecordFileName)} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
+        if not withholdCurChatFile:
+            #assign chatRecord fileName to curChatFile
+            self.curChatFile = self.chatRecordFileName
 
     def saveCurChatRecord(self, withholdCurChatFile=False):
         #init
@@ -3093,65 +3891,79 @@ class MainWindow(QMainWindow):
         if len(self.messageWidgetList) != 0:
             #judge whether curChatFile is empty
             if self.curChatFile == '':
-                #chatRecordFileName QString
-                self.chatRecordFileName = "chat_"
-                self.chatRecordFileName += QDateTime.currentDateTime().toString("yyyy_MM_dd_HH_mm_ss")
-                self.chatRecordFileName += ".txt"
-                #write to chatRecord file
-                with open(os.path.join(chat_records_dir, self.chatRecordFileName), 'a') as f:
-                    for i in range(0, self.chatShow.count()):
-                        chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
-                        f.write(chatRecordStr)
-                if not withholdCurChatFile:
-                    #assign chatRecord fileName to curChatFile
-                    self.curChatFile = self.chatRecordFileName
+                self.writeToChatRecordFile(withholdCurChatFile)
             else:
-                for i in range(0, len(self.messageWidgetList)):
-                    chatStrCount += self.messageWidgetList[i].getText().count('\n') + 2
-                #read curChat file
-                with open(os.path.join(chat_records_dir, self.curChatFile), 'r') as f:
-                    lines = f.readlines()
-                if chatStrCount > len(lines):
-                    #clear curChat file
-                    with open(os.path.join(chat_records_dir, self.curChatFile), 'w') as f:
-                        f.truncate()
-                    #write to curChat file
-                    with open(os.path.join(chat_records_dir, self.curChatFile), 'a') as f:
-                        for i in range(0, self.chatShow.count()):
-                            chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
-                            f.write(chatRecordStr)
+                if not os.path.exists(os.path.join(chat_records_dir, self.curChatFile)):
+                    self.writeToChatRecordFile(withholdCurChatFile)
+                else:
+                    try:
+                        for i in range(0, len(self.messageWidgetList)):
+                            chatStrCount += self.messageWidgetList[i].getText().count('\n') + 2
+                        #read curChat file
+                        with open(os.path.join(chat_records_dir, self.curChatFile), 'r', encoding='utf-8') as f:
+                            lines = f.readlines()
+                        if chatStrCount > len(lines):
+                            #clear curChat file
+                            with open(os.path.join(chat_records_dir, self.curChatFile), 'w', encoding='utf-8') as f:
+                                f.truncate()
+                            #write to curChat file
+                            with open(os.path.join(chat_records_dir, self.curChatFile), 'a', encoding='utf-8') as f:
+                                for i in range(0, self.chatShow.count()):
+                                    chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                                    f.write(chatRecordStr)
+                    except FileNotFoundError:
+                        print(f"错误：文件 {os.path.join(chat_records_dir, self.curChatFile)} 不存在")
+                    except Exception as e:
+                        print(f"发生未知错误：{e}")
 
     def chatRecordsGenerateItem(self, searchText=''):
         #generate item
         for fileName in os.listdir(os.path.join(os.getcwd(), chat_records_dir)):
             if fileName.endswith(".txt"):
                 if searchText == '':
-                    with open(os.path.join(chat_records_dir, fileName), 'r') as f:
-                        lines = f.readlines()
+                    try:
+                        with open(os.path.join(chat_records_dir, fileName), 'r', encoding='utf-8') as f:
+                            lines = f.readlines()
+                    except FileNotFoundError:
+                        print(f"错误：文件 {os.path.join(chat_records_dir, fileName)} 不存在")
+                    except Exception as e:
+                        print(f"发生未知错误：{e}")
                     #create item
                     chatRecordStr = lines[0] + lines[len(lines) - 2].strip('\n')
                     item = self.chatRecordsWidget.addListItem(chatRecordStr)
                     #item set data
                     self.chatRecordsWidget.listItemSetData(item, fileName)
                 else:
-                    with open(os.path.join(chat_records_dir, fileName), 'r') as f:
-                        content = f.read()
-                    if searchText in content:
-                        with open(os.path.join(chat_records_dir, fileName), 'r') as f:
-                            lines = f.readlines()
-                        #create item
-                        chatRecordStr = lines[0] + lines[len(lines) - 2].strip('\n')
-                        item = self.chatRecordsWidget.addListItem(chatRecordStr)
-                        #item set data
-                        self.chatRecordsWidget.listItemSetData(item, fileName)
+                    try:
+                        with open(os.path.join(chat_records_dir, fileName), 'r', encoding='utf-8') as f:
+                            content = f.read()
+                        if searchText in content:
+                            with open(os.path.join(chat_records_dir, fileName), 'r', encoding='utf-8') as f:
+                                lines = f.readlines()
+                            #create item
+                            chatRecordStr = lines[0] + lines[len(lines) - 2].strip('\n')
+                            item = self.chatRecordsWidget.addListItem(chatRecordStr)
+                            #item set data
+                            self.chatRecordsWidget.listItemSetData(item, fileName)
+                    except FileNotFoundError:
+                        print(f"错误：文件 {os.path.join(chat_records_dir, fileName)} 不存在")
+                    except Exception as e:
+                        print(f"发生未知错误：{e}")
 
-    def generateCurChatRecord(self, lastIsToggle=True):
+    def generateCurChatRecord(self, lastIsToggle=True, useThinkExpandList=False):
         #init
         text = ''
         isUser = True
+        if useThinkExpandList:
+            expandIndex = 0
         #read curChat file
-        with open(os.path.join(chat_records_dir, self.curChatFile), 'r') as f:
-            lines = f.readlines()
+        try:
+            with open(os.path.join(chat_records_dir, self.curChatFile), 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        except FileNotFoundError:
+            print(f"错误：文件 {os.path.join(chat_records_dir, self.curChatFile)} 不存在")
+        except Exception as e:
+            print(f"发生未知错误：{e}")
         #generate QListWidgetItem
         for i in range(0, len(lines)):
             if lines[i] == 'True\n' or lines[i] == 'False\n':
@@ -3166,7 +3978,13 @@ class MainWindow(QMainWindow):
                         self.messageWidgetList[j].removeRenewResponseButton()
                 text = text.strip('\n')
                 #MessageWidget
-                self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, textMaxWidth=self.chatShow.width() * 2 // 3)
+                if useThinkExpandList:
+                    if not isUser:
+                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=self.thinkExpandedList[expandIndex], textMaxWidth=self.chatShow.width() * 2 // 3)
+                    else:
+                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, textMaxWidth=self.chatShow.width() * 2 // 3)
+                else:
+                    self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=False, textMaxWidth=self.chatShow.width() * 2 // 3)
                 self.messageWidget.connectSetSizeFinished(self.messageWidgetResize)
                 self.messageWidget.connectSetTexting(self.getSetTexting)
                 if not isUser:
@@ -3194,6 +4012,9 @@ class MainWindow(QMainWindow):
                     self.messageWidget.toggleWidget()
                 #clear text
                 text = ''
+                if useThinkExpandList and not isUser:
+                    #expandIndex
+                    expandIndex += 1
             else:
                 text += lines[i]
 
@@ -3203,20 +4024,25 @@ class MainWindow(QMainWindow):
 
     def messageWidgetRegenerate(self):
         if len(self.messageWidgetList) != 0:
+            self.thinkExpandedList = []
             if not self.isSetTexting:
                 self.current_scroll_value = self.chatShow.verticalScrollBar().value()
                 self.max_scroll_value = self.chatShow.verticalScrollBar().maximum()
             self.saveCurChatRecord()
+            for i in range(0, len(self.messageWidgetList)):
+                messageWidget = self.messageWidgetList[i]
+                if not messageWidget.getIsUser():
+                    self.thinkExpandedList.append(messageWidget.getThinkIsExpanded())
             self.messageWidgetList.clear()
             for i in range(0, self.chatShow.count()):
                 itemWidget = self.chatShow.itemWidget(self.chatShow.item(i))
                 itemWidget.deleteLater()
             self.chatShow.clear()
             if not self.isSetTexting:
-                self.generateCurChatRecord()
+                self.generateCurChatRecord(useThinkExpandList=True)
                 QTimer.singleShot(5, self.setScrollValue)
             else:
-                self.generateCurChatRecord(lastIsToggle=False)
+                self.generateCurChatRecord(lastIsToggle=False, useThinkExpandList=True)
                 self.messageRecvWidget = self.messageWidget
                 self.itemRecvHLayout = self.itemHLayout
                 self.itemRecvWidget = self.itemWidget
@@ -3226,7 +4052,8 @@ class MainWindow(QMainWindow):
 
     def setScrollValue(self):
         new_max_scroll_value = self.chatShow.verticalScrollBar().maximum()
-        self.chatShow.verticalScrollBar().setValue(int(self.current_scroll_value / self.max_scroll_value * new_max_scroll_value))
+        if self.max_scroll_value != 0:
+            self.chatShow.verticalScrollBar().setValue(int(self.current_scroll_value / self.max_scroll_value * new_max_scroll_value))
 
     def showChatRecords(self):
         if not self.chatRecordsWidgetIsOpen:

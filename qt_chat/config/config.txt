@@ -1,6 +1,6 @@
 http://7613907zg6.vicp.fun:45861/v1
 EMPTY
 deepseek-r1:14b
-3000
+5000
 0.8
 0.8

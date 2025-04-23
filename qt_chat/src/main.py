@@ -8,11 +8,16 @@ Created on Tue Feb 13 18:31:44 2024
 import sys, os
 from enum import Enum
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QTextEdit, QMenu, QFrame, QGraphicsDropShadowEffect
-from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient
+from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QRectF
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextOption
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
+from pygments import highlight, token
+from pygments.lexers import CLexer, CppLexer, PythonLexer, JavaLexer, JavaScriptLexer
+from pygments.formatters import HtmlFormatter
+from pygments.style import Style
 from openai import OpenAI
 import math
+import re
 import mistune
 
 #test
@@ -1667,6 +1672,157 @@ class ThinkWidget(QWidget):
         else:
             return self.webEngineView.selectedText()
 
+class LineNumberWidget(QWidget):
+    def __init__(self, editor, parent=None):
+        super(LineNumberWidget, self).__init__(parent)
+        self.editor = editor
+        self.curScreen = self.screen()
+        self.dpi = self.curScreen.physicalDotsPerInch()
+        print('LineNumberWidget dpi:', self.dpi)
+        self.pixelHeight = math.ceil(12 * (self.dpi / 72)) + 2
+        print('LineNumberWidget pixelHeight:', self.pixelHeight)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.fillRect(event.rect(), QColor(20, 20, 28))
+        pen = QPen(QColor(178, 170, 164))
+        painter.setPen(pen)
+        font = painter.font()
+        font.setPointSize(12)
+        painter.setFont(font)
+        print('LineNumberWidget paintEvent', self.editor.fontMetrics().height())
+        for lineNumber in range(self.editor.document().lineCount()):
+            block = self.editor.document().findBlockByLineNumber(lineNumber)
+            if block and block.isValid():
+                rect = QRectF(0, self.pixelHeight * lineNumber, self.width(), self.pixelHeight)
+                painter.drawText(rect, str(lineNumber + 1), QTextOption(Qt.AlignCenter))
+        painter.end()
+
+class CodeEdit(QTextEdit):
+    setSizeFinished = pyqtSignal()
+
+    def __init__(self, parent=None):
+        super(CodeEdit, self).__init__(parent)
+        """ self.setTabStopWidth(4) """
+        self.setFont(QFont("Courier New", 12))
+        print('CodeEdit font pixelSize:', self.font().pixelSize())
+        print('CodeEdit font height:', self.fontMetrics().height())
+        self.setStyleSheet('''
+        QTextEdit {
+            background-color: #14141c;
+        }
+        ''')
+        #
+        self.lineNumberWidget = LineNumberWidget(self)
+        self.lineNumberWidget.move(0, 0)
+        #
+        self.textChanged.connect(self.onTextChanged)
+
+    def highlightCode(self, text, lexerName='python'):
+        match lexerName:
+            case 'c':
+                lexer = CLexer()
+            case 'cpp':
+                lexer = CppLexer()
+            case 'python':
+                lexer = PythonLexer()
+            case 'java':
+                lexer = JavaLexer()
+            case 'javascript':
+                lexer = JavaScriptLexer()
+            case _:
+                lexer = PythonLexer()
+        formatter = HtmlFormatter(style=CustomStyle, noclasses=True)
+        html = highlight(text, lexer, formatter)
+        self.setHtml(html)
+
+    def updateLineNumberAreaWidth(self):
+        self.setViewportMargins(self.lineNumberWidget.width(), 0, 0, 0)
+
+    def onTextChanged(self):
+        QTimer.singleShot(1, self.lineNumberAdjustSize)
+
+    def lineNumberAdjustSize(self):
+        self.adjustSize()
+        self.lineNumberWidget.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().lineCount())) + 2), self.height())
+        self.updateLineNumberAreaWidth()
+        self.setSizeFinished.emit()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.lineNumberWidget.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().lineCount())) + 2), self.height())
+        self.updateLineNumberAreaWidth()
+
+class CustomStyle(Style):
+    default_style = ""
+    background_color = '#14141c'
+    styles = {
+        token.Token: "#b2aaa4",
+        token.Keyword: "#a6538c",  # 关键字为紫色
+        token.Name.Class: "#6dae59",  # 类型名为绿色
+        token.Name.Function: "#6dae59",  # 类型名为绿色
+        token.Comment: "#aaa676",  # 注释为灰色
+        token.String: "#399cc6",  # 字符串为蓝色
+        token.Number: "#d2bd48",  # 数字为黄色
+    }
+
+class CodeShow(QWidget):
+    def __init__(self, codeText, lexerName='python', maxWidth=650, parent=None):
+        super(CodeShow, self).__init__(parent)
+        self.maxWidth = maxWidth
+        self.mainVLayout = QVBoxLayout()
+        self.setLayout(self.mainVLayout)
+        #
+        self.topWidget = QWidget()
+        self.topWidget.setFixedHeight(20)
+        self.topWidget.setStyleSheet('''
+        QWidget {
+            background-color: #14141c;
+        }
+        ''')
+        self.topSubHLayout = QHBoxLayout()
+        self.topWidget.setLayout(self.topSubHLayout)
+        #
+        self.label = QLabel('python')
+        font = QFont()
+        font.setPointSize(windowFontPointSize)
+        self.label.setFont(font)
+        self.palette = self.label.palette()
+        self.palette.setColor(QPalette.WindowText, QColor(178, 170, 164))
+        self.label.setPalette(self.palette)
+        #
+        self.codeCopyButton = PushButton(tipText='复制代码', tipOffsetX=15, tipOffsetY=35)
+        self.codeCopyButton.setFixedSize(20, 20)
+        self.menu_copy_images_path = os.path.join(images_dir, 'menu_copy.png').replace('\\', '/')
+        self.codeCopyButton.setIcon(QIcon(f"{self.menu_copy_images_path}"))
+        self.codeCopyButton.setIconSize(QSize(20, 20))
+        self.codeCopyButton.setStyleSheet('''
+        QPushButton{
+            border: none;
+            background: transparent;
+        }
+        ''')
+        #
+        self.topSubHLayout.addWidget(self.label, 0, Qt.AlignLeft)
+        self.topSubHLayout.addWidget(self.codeCopyButton, 0, Qt.AlignRight)
+        self.topSubHLayout.setContentsMargins(0, 0, 0, 0)
+        #
+        self.codeEdit = CodeEdit()
+        self.codeEdit.setSizeFinished.connect(self.OnSizeFinished)
+        self.codeEdit.highlightCode(codeText, lexerName=lexerName)
+        #
+        self.mainVLayout.addWidget(self.topWidget)
+        self.mainVLayout.addWidget(self.codeEdit)
+        self.mainVLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainVLayout.setSpacing(0)
+
+    def setText(self, codeText, lexerName='python'):
+        self.codeEdit.highlightCode(codeText, lexerName=lexerName)
+
+    def OnSizeFinished(self):
+        self.setFixedSize(self.maxWidth, self.codeEdit.height())
+
 class MessageWidget(QWidget):
     thinkTextRecvEnd = pyqtSignal()
 
@@ -1688,10 +1844,17 @@ class MessageWidget(QWidget):
         #textLayout QHBoxLayout
         self.textBoxLayout = QVBoxLayout()
         self.textBoxWidget.setLayout(self.textBoxLayout)
+        #thinkButtonHaveCreated
+        self.thinkButtonHaveCreated = False
 
         if not self.isUser:
-            thinkText = ''
-            resultText = ''
+            self.thinkTextShowList = []
+            self.thinkCodeShowList = []
+            self.resultTextShowList = []
+            self.resultCodeShowList = []
+            #
+            self.thinkText = ''
+            self.resultText = ''
             #
             self.thinkTextIsRecvEnd = False
             self.isRecvFirst = True
@@ -1700,25 +1863,104 @@ class MessageWidget(QWidget):
                 tempText = textList[1]
                 if '</think>' in tempText:
                     textList2 = tempText.split('</think>')
-                    thinkText = textList2[0]
-                    resultText = self.text.split('<think>' + thinkText + '</think>')[1]
+                    self.thinkText = textList2[0]
+                    self.resultText = self.text.split('<think>' + self.thinkText + '</think>')[1]
                     self.thinkTextIsRecvEnd = True
                     print('0_1')
                 else:
-                    thinkText = tempText
+                    self.thinkText = tempText
                     print('0_2')
             elif not (self.text in '<think>' or self.text == ''):
-                resultText = self.text
+                self.resultText = self.text
                 self.thinkTextIsRecvEnd = True
-                print('resultText:', resultText)
+                print('resultText:', self.resultText)
                 print('0_3')
+            #ThinkWidget
+            if self.thinkText != '':
+                thinkCodeBlocks = self.extract_code_blocks(self.thinkText)
+                thinkSplitTextList = []
+                thinkTempTextList = []
+                thinkTempText = self.thinkText
+                """ lexerNameList = ['c', 'cpp', 'python', 'java', 'javascript']
+                for index, codeBlock in enumerate(thinkCodeBlocks):
+                    if codeBlock != []:
+                        for code in codeBlock:
+                            self.thinkCodeShowList.append(CodeShow(code, lexerName=lexerNameList[index], maxWidth=textMaxWidth))
+                            thinkTempTextList = thinkTempText.split('```' + lexerNameList[index] + '\n' + code + '\n' + '```')
+                            thinkSplitTextList.append(thinkTempTextList[0])
+                            thinkTempText = thinkTempTextList[1] """
+                for language, code in thinkCodeBlocks:
+                    self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth))
+                    thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```')
+                    thinkSplitTextList.append(thinkTempTextList[0])
+                    thinkTempText = thinkTempTextList[1]
+                """ if thinkTempText != '': """
+                thinkSplitTextList.append(thinkTempText)
+                #ThinkingButton
+                self.thinkButton = ThinkingButton()
+                self.thinkButton.connectButtonClick(self.thinkButtonClicked)
+                self.thinkButtonHaveCreated = True
+                #ThinkWidget
+                for splitText in thinkSplitTextList:
+                    if splitText != '':
+                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=textMaxWidth))
+                #textLayout
+                self.textLayout.addWidget(self.thinkButton)
+                j = 0
+                for i in range(len(self.thinkCodeShowList)):
+                    if thinkSplitTextList[i] != '':
+                        self.textLayout.addWidget(self.thinkTextShowList[i - j])
+                    else:
+                        j += 1
+                    self.textLayout.addWidget(self.thinkCodeShowList[i])
+                if thinkSplitTextList[-1] != '':
+                    self.textLayout.addWidget(self.thinkTextShowList[-1])
+                #set visible
+                self.thinkIsExpand = thinkIsExpand
+                self.thinkWidget.setVisible(self.thinkIsExpand)
+                #
+                self.thinkTextRecvEnd.connect(self.thinkToggleWidget)
+                if self.thinkTextIsRecvEnd and self.isRecvFirst:
+                    print('1')
+                    self.thinkTextRecvEnd.emit()
+                    self.isRecvFirst = False
             #TextShow
-            self.textShow = TextShow(resultText, isUser=self.isUser, maxWidth=textMaxWidth)
+            if self.resultText != '':
+                resultCodeBlocks = self.extract_code_blocks(self.resultText)
+                resultSplitTextList = []
+                resultTempTextList = []
+                resultTempText = self.resultText
+                for language, code in resultCodeBlocks:
+                    self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth))
+                    resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```')
+                    resultSplitTextList.append(resultTempTextList[0])
+                    resultTempText = resultTempTextList[1]
+                resultSplitTextList.append(resultTempText)
+                #TextShow
+                for splitText in resultSplitTextList:
+                    if splitText != '':
+                        self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=textMaxWidth))
+                #textLayout
+                j = 0
+                for i in range(len(self.resultCodeShowList)):
+                    if resultSplitTextList[i] != '':
+                        self.textLayout.addWidget(self.resultTextShowList[i - j])
+                    else:
+                        j += 1
+                    self.textLayout.addWidget(self.resultCodeShowList[i])
+                if resultSplitTextList[-1] != '':
+                    self.textLayout.addWidget(self.resultTextShowList[-1])
+            self.textLayout.setContentsMargins(5, 5, 5, 5)
+            """ #TextShow
+            for splitText in splitTextList:
+                if splitText != '':
+                    self.textShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=textMaxWidth))
+            self.textShow = TextShow(self.resultText, isUser=self.isUser, maxWidth=textMaxWidth)
             #ThinkingButton
             self.thinkButton = ThinkingButton()
             self.thinkButton.connectButtonClick(self.thinkButtonClicked)
             #ThinkWidget
-            self.thinkWidget = ThinkWidget(thinkText, maxWidth=textMaxWidth)
+            self.thinkWidget = ThinkWidget(self.thinkText, maxWidth=textMaxWidth)
             #textLayout
             self.textLayout.addWidget(self.thinkButton)
             self.textLayout.addWidget(self.thinkWidget)
@@ -1730,13 +1972,23 @@ class MessageWidget(QWidget):
             if self.thinkTextIsRecvEnd and self.isRecvFirst:
                 print('1')
                 self.thinkTextRecvEnd.emit()
-                self.isRecvFirst = False
+                self.isRecvFirst = False """
         else:
             #TextShow
             self.textShow = TextShow(text, isUser=self.isUser, maxWidth=textMaxWidth)
-
-        self.textLayout.addWidget(self.textShow)
-        self.textLayout.setContentsMargins(5, 5, 5, 5)
+            self.textLayout.addWidget(self.textShow)
+            self.textLayout.setContentsMargins(5, 5, 5, 5)
+        """ if self.isUser:
+            self.textLayout.addWidget(self.textShow)
+            self.textLayout.setContentsMargins(5, 5, 5, 5)
+        else:
+            for i in range(len(self.codeShowList)):
+                if splitTextList[i] != '':
+                    self.textLayout.addWidget(self.textShowList[i])
+                self.textLayout.addWidget(self.codeShowList[i])
+            if splitTextList[-1] != '':
+                self.textLayout.addWidget(self.textShowList[-1])
+            self.textLayout.setContentsMargins(5, 5, 5, 5) """
         #loadingWidgetIsRemove
         self.loadingWidgetIsRemove = True
         #renewResponseButtonIsRemove
@@ -1813,9 +2065,44 @@ class MessageWidget(QWidget):
             self.subVLayout1.addWidget(self.imageLabel)
             self.textLayout.setSpacing(0)
             if self.thinkIsExpand:
-                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.thinkWidget.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.thinkWidget.height() + self.textShow.height() + 10)
+                if self.thinkText != '':
+                    thinkWidth = max([self.thinkButton.width()] + [textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList])
+                    thinkHeight = sum([self.thinkButton.height()] + [textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
+                else:
+                    thinkWidth = 0
+                    thinkHeight = 0
+                if self.resultText != '':
+                    resultWidth = max([textShow.width() for textShow in self.resultTextShowList] + [codeShow.width() for codeShow in self.resultCodeShowList])
+                    resultHeight = sum([textShow.height() for textShow in self.resultTextShowList] + [codeShow.height() for codeShow in self.resultCodeShowList])
+                else:
+                    resultWidth = 0
+                    resultHeight = 0
+                """ textShowWidths = [textShow.width() for textShow in self.textShowList]
+                allWidths = [self.thinkButton.width(), self.thinkWidget.width()] + textShowWidths
+                textShowHeights = sum([textShow.height() for textShow in self.textShowList])
+                codeShowHeights = sum([codeShow.height() for codeShow in self.codeShowList]) """
+                """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + self.thinkWidget.height() + textShowHeights + codeShowHeights + 10) """
+                """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.thinkWidget.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.thinkWidget.height() + self.textShow.height() + 10) """
             else:
-                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10)
+                if self.thinkText != '':
+                    thinkWidth = self.thinkButton.width()
+                    thinkHeight = self.thinkButton.height()
+                else:
+                    thinkWidth = 0
+                    thinkHeight = 0
+                if self.resultText != '':
+                    resultWidth = max([textShow.width() for textShow in self.resultTextShowList] + [codeShow.width() for codeShow in self.resultCodeShowList])
+                    resultHeight = sum([textShow.height() for textShow in self.resultTextShowList] + [codeShow.height() for codeShow in self.resultCodeShowList])
+                else:
+                    resultWidth = 0
+                    resultHeight = 0
+                """ textShowWidths = [textShow.width() for textShow in self.textShowList]
+                allWidths = [self.thinkButton.width()] + textShowWidths
+                textShowHeights = sum([textShow.height() for textShow in self.textShowList])
+                codeShowHeights = sum([codeShow.height() for codeShow in self.codeShowList]) """
+                """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + textShowHeights + codeShowHeights + 10) """
+                """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10) """
+            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 10, thinkHeight + resultHeight + 10)
             self.loadingWidget = LoadingWidget()
             """ self.textLayout.addWidget(self.loadingWidget)
             self.textLayout.setSpacing(0) """
@@ -1843,6 +2130,34 @@ class MessageWidget(QWidget):
         self.mainHLayout.setSpacing(5)
         #main widget set size
         self.setFixedSize(self.imageLabel.width() + self.textBoxWidget.width() + 5, max(self.imageLabel.height(), self.textBoxWidget.height()))
+
+    """ def extract_code_blocks(text):
+        code_blocks = []
+        # 正则表达式匹配代码块
+        cPattern = r"```c\n(.*?)\n```"
+        cppPattern = r"```cpp\n(.*?)\n```"
+        pythonPattern = r"```python\n(.*?)\n```"
+        javaPattern = r"```java\n(.*?)\n```"
+        javascriptPattern = r"```javascript\n(.*?)\n```" 
+        # re.DOTALL 表示让 . 匹配换行符
+        code_blocks.append(re.findall(cPattern, text, re.DOTALL))
+        code_blocks.append(re.findall(cppPattern, text, re.DOTALL))
+        code_blocks.append(re.findall(pythonPattern, text, re.DOTALL))
+        code_blocks.append(re.findall(javaPattern, text, re.DOTALL))
+        code_blocks.append(re.findall(javascriptPattern, text, re.DOTALL))
+        return code_blocks """
+    def extract_code_blocks(text):
+        # 定义正则表达式模式，匹配代码块
+        pattern = r"```(\w+)\n(.*?)```"
+        # 使用 re.DOTALL 让 . 匹配换行符
+        matches = re.findall(pattern, text, re.DOTALL)
+        # 过滤出指定语言的代码块
+        supported_languages = {"c", "cpp", "python", "java", "javascript"}
+        code_blocks = []
+        for language, code in matches:
+            if language.lower() in supported_languages:
+                code_blocks.append([language, code])
+        return code_blocks
 
     def getThinkIsExpanded(self):
         if not self.isUser:
@@ -1873,11 +2188,45 @@ class MessageWidget(QWidget):
             self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
             self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
         else:
-            print(self.thinkWidget.geometry())
             if self.thinkIsExpand:
-                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.thinkWidget.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.thinkWidget.height() + self.textShow.height() + 10)
+                if self.thinkText != '':
+                    thinkWidth = max([self.thinkButton.width()] + [textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList])
+                    thinkHeight = sum([self.thinkButton.height()] + [textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
+                else:
+                    thinkWidth = 0
+                    thinkHeight = 0
+                if self.resultText != '':
+                    resultWidth = max([textShow.width() for textShow in self.resultTextShowList] + [codeShow.width() for codeShow in self.resultCodeShowList])
+                    resultHeight = sum([textShow.height() for textShow in self.resultTextShowList] + [codeShow.height() for codeShow in self.resultCodeShowList])
+                else:
+                    resultWidth = 0
+                    resultHeight = 0
+                """ textShowWidths = [textShow.width() for textShow in self.textShowList]
+                allWidths = [self.thinkButton.width(), self.thinkWidget.width()] + textShowWidths
+                textShowHeights = sum([textShow.height() for textShow in self.textShowList])
+                codeShowHeights = sum([codeShow.height() for codeShow in self.codeShowList]) """
+                """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + self.thinkWidget.height() + textShowHeights + codeShowHeights + 10) """
+                """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.thinkWidget.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.thinkWidget.height() + self.textShow.height() + 10) """
             else:
-                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10)
+                if self.thinkText != '':
+                    thinkWidth = self.thinkButton.width()
+                    thinkHeight = self.thinkButton.height()
+                else:
+                    thinkWidth = 0
+                    thinkHeight = 0
+                if self.resultText != '':
+                    resultWidth = max([textShow.width() for textShow in self.resultTextShowList] + [codeShow.width() for codeShow in self.resultCodeShowList])
+                    resultHeight = sum([textShow.height() for textShow in self.resultTextShowList] + [codeShow.height() for codeShow in self.resultCodeShowList])
+                else:
+                    resultWidth = 0
+                    resultHeight = 0
+                """ textShowWidths = [textShow.width() for textShow in self.textShowList]
+                allWidths = [self.thinkButton.width()] + textShowWidths
+                textShowHeights = sum([textShow.height() for textShow in self.textShowList])
+                codeShowHeights = sum([codeShow.height() for codeShow in self.codeShowList]) """
+                """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + textShowHeights + codeShowHeights + 10) """
+                """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10) """
+            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 10, thinkHeight + resultHeight + 10)
             if self.loadingWidgetIsRemove:
                 self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
             else:
@@ -1888,29 +2237,115 @@ class MessageWidget(QWidget):
         self.text = text
 
         if not self.isUser:
-            thinkText = ''
-            resultText = ''
+            self.thinkText = ''
+            self.resultText = ''
             if '<think>' in self.text:
                 textList = self.text.split('<think>')
                 tempText = textList[1]
                 if '</think>' in tempText:
                     textList2 = tempText.split('</think>')
-                    thinkText = textList2[0]
-                    resultText = self.text.split('<think>' + thinkText + '</think>')[1]
+                    self.thinkText = textList2[0]
+                    self.resultText = self.text.split('<think>' + self.thinkText + '</think>')[1]
                     self.thinkTextIsRecvEnd = True
                 else:
-                    thinkText = tempText
+                    self.thinkText = tempText
             elif not (self.text in '<think>' or self.text == ''):
-                resultText = self.text
+                self.resultText = self.text
                 self.thinkTextIsRecvEnd = True
-            #set text
+            #ThinkWidget
+            if self.thinkText != '':
+                thinkCodeBlocks = self.extract_code_blocks(self.thinkText)
+                thinkSplitTextList = []
+                thinkTempTextList = []
+                thinkTempText = self.thinkText
+                thinkCodeShowListLastLen = len(self.thinkCodeShowList) - 1
+                for index, language, code in enumerate(thinkCodeBlocks):
+                    if thinkCodeShowListLastLen < index:
+                        self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth))
+                    else:
+                        self.thinkCodeShowList[index].setText(code.strip(), lexerName=language)
+                    thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```')
+                    thinkSplitTextList.append(thinkTempTextList[0])
+                    thinkTempText = thinkTempTextList[1]
+                thinkSplitTextList.append(thinkTempText)
+            if not self.thinkButtonHaveCreated:
+                #ThinkingButton
+                self.thinkButton = ThinkingButton()
+                self.thinkButton.connectButtonClick(self.thinkButtonClicked)
+                self.thinkButtonHaveCreated = True
+                #textLayout
+                self.textLayout.addWidget(self.thinkButton)
+            #ThinkWidget
+            i = 0
+            thinkTextShowListLastLen = len(self.thinkTextShowList) - 1
+            for splitText in thinkSplitTextList:
+                if splitText != '':
+                    if thinkTextShowListLastLen < i:
+                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=self.textMaxWidth))
+                    else:
+                        self.thinkTextShowList[i].setText(splitText)
+                    i += 1
+            #textLayout
+            j = 0
+            for i in range(len(self.thinkCodeShowList)):
+                if thinkSplitTextList[i] != '':
+                    if thinkTextShowListLastLen < i - j:
+                        self.textLayout.addWidget(self.thinkTextShowList[i - j])
+                else:
+                    j += 1
+                if thinkCodeShowListLastLen < i:
+                    self.textLayout.addWidget(self.thinkCodeShowList[i])
+            if thinkSplitTextList[-1] != '':
+                self.textLayout.addWidget(self.thinkTextShowList[-1])
+            """ #set text
             if not self.thinkTextIsRecvEnd:
-                self.thinkWidget.setText(thinkText)
+                self.thinkWidget.setText(self.thinkText) """
+            ##set visible
+
+            #
             if self.thinkTextIsRecvEnd and self.isRecvFirst:
                 print('3')
                 self.thinkTextRecvEnd.emit()
                 self.isRecvFirst = False
-            self.textShow.setText(resultText)
+            #TextShow
+            if self.resultText != '':
+                resultCodeBlocks = self.extract_code_blocks(self.resultText)
+                resultSplitTextList = []
+                resultTempTextList = []
+                resultTempText = self.resultText
+                resultCodeShowListLastLen = len(self.resultCodeShowList) - 1
+                for index, language, code in enumerate(resultCodeBlocks):
+                    if resultCodeShowListLastLen < index:
+                        self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth))
+                    else:
+                        self.resultCodeShowList[index].setText(code.strip(), lexerName=language)
+                    resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```')
+                    resultSplitTextList.append(resultTempTextList[0])
+                    resultTempText = resultTempTextList[1]
+                resultSplitTextList.append(resultTempText)
+                #TextShow
+                i = 0
+                resultTextShowListLastLen = len(self.resultTextShowList) - 1
+                for splitText in resultSplitTextList:
+                    if splitText != '':
+                        if resultTextShowListLastLen < i:
+                            self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=self.textMaxWidth))
+                        else:
+                            self.resultTextShowList[i].setText(splitText)
+                        i += 1
+                #textLayout
+                j = 0
+                for i in range(len(self.resultCodeShowList)):
+                    if resultSplitTextList[i] != '':
+                        if resultTextShowListLastLen < i - j:
+                            self.textLayout.addWidget(self.resultTextShowList[i - j])
+                    else:
+                        j += 1
+                    if resultCodeShowListLastLen < i:
+                        self.textLayout.addWidget(self.resultCodeShowList[i])
+                if resultSplitTextList[-1] != '':
+                    self.textLayout.addWidget(self.resultTextShowList[-1])
+            """ self.textShow.setText(self.resultText) """
         else:
             self.textShow.setText(text)
 
@@ -1919,9 +2354,44 @@ class MessageWidget(QWidget):
             self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
         else:
             if self.thinkIsExpand:
-                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.thinkWidget.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.thinkWidget.height() + self.textShow.height() + 10)
+                if self.thinkText != '':
+                    thinkWidth = max([self.thinkButton.width()] + [textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList])
+                    thinkHeight = sum([self.thinkButton.height()] + [textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
+                else:
+                    thinkWidth = 0
+                    thinkHeight = 0
+                if self.resultText != '':
+                    resultWidth = max([textShow.width() for textShow in self.resultTextShowList] + [codeShow.width() for codeShow in self.resultCodeShowList])
+                    resultHeight = sum([textShow.height() for textShow in self.resultTextShowList] + [codeShow.height() for codeShow in self.resultCodeShowList])
+                else:
+                    resultWidth = 0
+                    resultHeight = 0
+                """ textShowWidths = [textShow.width() for textShow in self.textShowList]
+                allWidths = [self.thinkButton.width(), self.thinkWidget.width()] + textShowWidths
+                textShowHeights = sum([textShow.height() for textShow in self.textShowList])
+                codeShowHeights = sum([codeShow.height() for codeShow in self.codeShowList]) """
+                """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + self.thinkWidget.height() + textShowHeights + codeShowHeights + 10) """
+                """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.thinkWidget.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.thinkWidget.height() + self.textShow.height() + 10) """
             else:
-                self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10)
+                if self.thinkText != '':
+                    thinkWidth = self.thinkButton.width()
+                    thinkHeight = self.thinkButton.height()
+                else:
+                    thinkWidth = 0
+                    thinkHeight = 0
+                if self.resultText != '':
+                    resultWidth = max([textShow.width() for textShow in self.resultTextShowList] + [codeShow.width() for codeShow in self.resultCodeShowList])
+                    resultHeight = sum([textShow.height() for textShow in self.resultTextShowList] + [codeShow.height() for codeShow in self.resultCodeShowList])
+                else:
+                    resultWidth = 0
+                    resultHeight = 0
+                """ textShowWidths = [textShow.width() for textShow in self.textShowList]
+                allWidths = [self.thinkButton.width()] + textShowWidths
+                textShowHeights = sum([textShow.height() for textShow in self.textShowList])
+                codeShowHeights = sum([codeShow.height() for codeShow in self.codeShowList]) """
+                """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + textShowHeights + codeShowHeights + 10) """
+                """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10) """
+            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 10, thinkHeight + resultHeight + 10)
             if self.loadingWidgetIsRemove:
                 self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
             else:

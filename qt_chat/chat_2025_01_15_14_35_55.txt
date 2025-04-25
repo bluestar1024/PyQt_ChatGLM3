@@ -1,4 +1,0 @@
-Òø
-True
-
-False

@@ -58,7 +58,197 @@ fulBubbleColor = QColor(119, 221, 255)
 userBubbleColor = QColor(16, 149, 222)
 aiBubbleColor = QColor(17, 173, 222)
 
-class messageThread(QThread):
+testText = '''<think>
+让我想一下两种方法。第一种方法更直观，适合新手理解。第二种方法效率更高，特别是当n很大的时候。那么对于这个问题来说，两种方式都行。我应该两种方法都写吗？可能问题只需要一种实现，但为了全面，我可以两种情况都考虑一下。
+
+那我先写出循环的方法。Java中，for循环从1到100，每次加i。代码结构大概是：
+
+```java
+int sum = 0;
+for (int i = 1; i <= 100; i++) {
+    sum += i;
+}
+System.out.println(sum);
+```
+
+这样应该就能得到结果了。或者直接用公式的话，可能更简洁：
+
+```java
+int n = 100;
+int sum = n * (n + 1) / 2;
+System.out.println(sum);
+```
+
+这两种方法都可行，我觉得第二种更好，因为效率更高而且代码更简洁。
+
+```cpp
+int sum = 0;
+for (int i = 1; i <= 100; ++i) {
+    sum += i;
+}
+std::cout << sum << std::endl;
+```
+
+或者用公式：
+
+```cpp
+int n = 100;
+int sum = n * (n + 1) / 2;
+std::cout << sum << std::endl;
+```
+
+同样，两种方法都适用。可能用公式更好。
+
+然后是Python的部分。Python的语法更简单，循环的话：
+
+```python
+sum = 0
+for i in range(1, 101):
+    sum += i
+print(sum)
+```
+
+或者，直接用公式：
+
+```python
+n = 100
+total = n * (n + 1) // 2
+print(total)
+```
+
+现在整理一下：
+
+Java：
+使用公式：n=100，sum = 100*101/2。
+或者用循环累加。
+
+C++：
+同样，两种方法都可以。
+
+Python：
+可以用循环、公式，或者生成一个range然后求和。
+
+那现在我来写出这三种语言的代码：
+
+Java：
+```java
+public class Sum {
+    public static void main(String[] args) {
+        int n = 100;
+        int sum = n * (n + 1) / 2;
+        System.out.println(sum);
+    }
+}
+```
+
+或者，如果用循环的话：
+
+```java
+public class Sum {
+    public static void main(String[] args) {
+        int sum = 0;
+        for (int i = 1; i <= 100; i++) {
+            sum += i;
+        }
+        System.out.println(sum);
+    }
+}
+```
+
+C++：
+```cpp
+#include <iostream>
+
+using namespace std;
+
+int main() {
+    int n = 100;
+    int sum = n * (n + 1) / 2;
+    cout << sum << endl;
+    return 0;
+}
+```
+
+或者循环：
+
+```cpp
+#include <iostream>
+
+using namespace std;
+
+int main() {
+    int sum = 0;
+    for (int i = 1; i <= 100; ++i) {
+        sum += i;
+    }
+    cout << sum << endl;
+    return 0;
+}
+```
+
+Python：
+```python
+n = 100
+total = n * (n + 1) // 2
+print(total)
+```
+
+或者循环：
+
+```python
+sum = 0
+for i in range(1, 101):
+    sum += i
+print(sum)
+```
+
+或者使用range和sum函数：
+
+print(sum(range(1, 101)))
+
+嗯，我觉得这三种方法都是可行的。现在，我需要把它们分别用Java、C++和Python写出来。
+
+总结一下，每个语言可以有两种实现方式，但问题可能只需要一种，所以我可以选择其中一种，比如公式的方法，这样更简洁高效。
+</think>
+
+以下是使用 Java、C++ 和 Python 分别计算整数 1 到 100 的和的代码示例：
+
+### Java
+```java
+public class Sum {
+    public static void main(String[] args) {
+        int n = 100;
+        int sum = n * (n + 1) / 2;
+        System.out.println(sum);
+    }
+}
+```
+
+### C++
+```cpp
+#include <iostream>
+
+using namespace std;
+
+int main() {
+    int n = 100;
+    int sum = n * (n + 1) / 2;
+    cout << sum << endl;
+    return 0;
+}
+```
+
+### Python
+```python
+n = 100
+total = n * (n + 1) // 2
+print(total)
+```
+
+这些代码都使用了高斯公式来计算从 1 到 100 的和，结果都是 5050。
+'''
+
+'''class messageThread(QThread):
     newMessage = pyqtSignal(str)
 
     def __init__(self, contentInput, context=None, use_stream=True, parent=None):
@@ -109,8 +299,8 @@ class messageThread(QThread):
                 self.newMessage.emit(self.contentOutput)
         else:
             print("Error:", response.status_code)
-        return
-""" class messageThread(QThread):
+        return'''
+class messageThread(QThread):
     newMessage = pyqtSignal(str)
 
     def __init__(self, contentInput, context=None, use_stream=True, parent=None):
@@ -124,14 +314,14 @@ class messageThread(QThread):
         self.use_stream = use_stream
 
     def run(self):
-        self.contentOutput = '锄禾日当午，汗滴禾下土，谁知盘中餐，粒粒皆辛苦。\n'
+        self.contentOutput = testText
         if self.use_stream:
-            for i in range(0, 8):
-                self.newMessage.emit(self.contentOutput)
-                time.sleep(1.5)
+            for i in range(0, len(self.contentOutput), 30):
+                self.newMessage.emit(self.contentOutput[i:i+30])
+                time.sleep(1)
         else:
             self.newMessage.emit(self.contentOutput)
-        return """
+        return
 
 class PushButton(QPushButton):
     def __init__(self, tipText='', tipOffsetX=10, tipOffsetY=40, parent=None):
@@ -828,7 +1018,6 @@ class TextShow(QWidget):
     def updateSize(self, result):
         width, height = result
         if width != 0 and height != 0:
-            print(width, height)
             self.webEngineView.setFixedSize(width, height)
             self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
             self.setSizeFinished.emit()
@@ -1449,7 +1638,6 @@ class ThinkWidget(QWidget):
     def updateSize(self, result):
         width, height = result
         if width != 0 and height != 0:
-            print('thinkWidget webEngineView size:', width, height)
             self.webEngineView.setFixedSize(width, height)
             self.setFixedSize(self.webEngineView.width() + 15, self.webEngineView.height() + 10)
             self.setSizeFinished.emit()
@@ -1673,14 +1861,13 @@ class ThinkWidget(QWidget):
             return self.webEngineView.selectedText()
 
 class LineNumberWidget(QWidget):
-    def __init__(self, editor, parent=None):
+    def __init__(self, parent=None):
         super(LineNumberWidget, self).__init__(parent)
-        self.editor = editor
         self.curScreen = self.screen()
         self.dpi = self.curScreen.physicalDotsPerInch()
-        print('LineNumberWidget dpi:', self.dpi)
+        """ print('LineNumberWidget dpi:', self.dpi) """
         self.pixelHeight = math.ceil(12 * (self.dpi / 72)) + 2
-        print('LineNumberWidget pixelHeight:', self.pixelHeight)
+        """ print('LineNumberWidget pixelHeight:', self.pixelHeight) """
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -1691,9 +1878,9 @@ class LineNumberWidget(QWidget):
         font = painter.font()
         font.setPointSize(12)
         painter.setFont(font)
-        print('LineNumberWidget paintEvent', self.editor.fontMetrics().height())
-        for lineNumber in range(self.editor.document().lineCount()):
-            block = self.editor.document().findBlockByLineNumber(lineNumber)
+        """ print('LineNumberWidget paintEvent', self.parent().fontMetrics().height()) """
+        for lineNumber in range(self.parent().document().lineCount()):
+            block = self.parent().document().findBlockByLineNumber(lineNumber)
             if block and block.isValid():
                 rect = QRectF(0, self.pixelHeight * lineNumber, self.width(), self.pixelHeight)
                 painter.drawText(rect, str(lineNumber + 1), QTextOption(Qt.AlignCenter))
@@ -1706,8 +1893,8 @@ class CodeEdit(QTextEdit):
         super(CodeEdit, self).__init__(parent)
         """ self.setTabStopWidth(4) """
         self.setFont(QFont("Courier New", 12))
-        print('CodeEdit font pixelSize:', self.font().pixelSize())
-        print('CodeEdit font height:', self.fontMetrics().height())
+        """ print('CodeEdit font pixelSize:', self.font().pixelSize()) """
+        """ print('CodeEdit font height:', self.fontMetrics().height()) """
         self.setStyleSheet('''
         QTextEdit {
             background-color: #14141c;
@@ -1715,7 +1902,7 @@ class CodeEdit(QTextEdit):
         ''')
         #
         self.lineNumberWidget = LineNumberWidget(self)
-        self.lineNumberWidget.move(0, 0)
+        self.lineNumberWidget.move(0, 1)
         #
         self.textChanged.connect(self.onTextChanged)
 
@@ -1784,18 +1971,19 @@ class CodeShow(QWidget):
         self.topSubHLayout = QHBoxLayout()
         self.topWidget.setLayout(self.topSubHLayout)
         #
-        self.label = QLabel('python')
+        self.label = QLabel(lexerName)
         font = QFont()
         font.setPointSize(windowFontPointSize)
         self.label.setFont(font)
         self.palette = self.label.palette()
-        self.palette.setColor(QPalette.WindowText, QColor(178, 170, 164))
+        self.palette.setColor(QPalette.Text, QColor(178, 170, 164))
         self.label.setPalette(self.palette)
+        self.label.adjustSize()
         #
         self.codeCopyButton = PushButton(tipText='复制代码', tipOffsetX=15, tipOffsetY=35)
-        self.codeCopyButton.setFixedSize(20, 20)
-        self.menu_copy_images_path = os.path.join(images_dir, 'menu_copy.png').replace('\\', '/')
-        self.codeCopyButton.setIcon(QIcon(f"{self.menu_copy_images_path}"))
+        self.codeCopyButton.setFixedSize(self.label.height(), self.label.height())
+        self.code_copy_images_path = os.path.join(images_dir, 'code_copy.png').replace('\\', '/')
+        self.codeCopyButton.setIcon(QIcon(f"{self.code_copy_images_path}"))
         self.codeCopyButton.setIconSize(QSize(20, 20))
         self.codeCopyButton.setStyleSheet('''
         QPushButton{
@@ -1807,10 +1995,12 @@ class CodeShow(QWidget):
         self.topSubHLayout.addWidget(self.label, 0, Qt.AlignLeft)
         self.topSubHLayout.addWidget(self.codeCopyButton, 0, Qt.AlignRight)
         self.topSubHLayout.setContentsMargins(0, 0, 0, 0)
+        self.topWidget.setFixedHeight(self.label.height())
         #
         self.codeEdit = CodeEdit()
         self.codeEdit.setSizeFinished.connect(self.OnSizeFinished)
         self.codeEdit.highlightCode(codeText, lexerName=lexerName)
+        self.codeEdit.setFixedWidth(self.maxWidth)
         #
         self.mainVLayout.addWidget(self.topWidget)
         self.mainVLayout.addWidget(self.codeEdit)
@@ -1819,6 +2009,7 @@ class CodeShow(QWidget):
 
     def setText(self, codeText, lexerName='python'):
         self.codeEdit.highlightCode(codeText, lexerName=lexerName)
+        self.codeEdit.setFixedWidth(self.maxWidth)
 
     def OnSizeFinished(self):
         self.setFixedSize(self.maxWidth, self.codeEdit.height())
@@ -1846,7 +2037,6 @@ class MessageWidget(QWidget):
         self.textBoxWidget.setLayout(self.textBoxLayout)
         #thinkButtonHaveCreated
         self.thinkButtonHaveCreated = False
-        print('aaa')
         if not self.isUser:
             self.thinkTextShowList = []
             self.thinkCodeShowList = []
@@ -1860,7 +2050,6 @@ class MessageWidget(QWidget):
             #
             self.thinkText = ''
             self.resultText = ''
-            print('aaaa')
             #
             self.thinkTextIsRecvEnd = False
             self.isRecvFirst = True
@@ -1872,15 +2061,11 @@ class MessageWidget(QWidget):
                     self.thinkText = textList2[0]
                     self.resultText = self.text.split('<think>' + self.thinkText + '</think>')[1]
                     self.thinkTextIsRecvEnd = True
-                    print('0_1')
                 else:
                     self.thinkText = tempText
-                    print('0_2')
             elif not (self.text in '<think>' or self.text == ''):
                 self.resultText = self.text
                 self.thinkTextIsRecvEnd = True
-                print('resultText:', self.resultText)
-                print('0_3')
             #ThinkWidget
             thinkSplitTextList = []
             thinkTempTextList = []
@@ -1895,11 +2080,10 @@ class MessageWidget(QWidget):
                             thinkTempTextList = thinkTempText.split('```' + lexerNameList[index] + '\n' + code + '\n' + '```')
                             thinkSplitTextList.append(thinkTempTextList[0])
                             thinkTempText = thinkTempTextList[1] """
-                print('aaaaa')
                 for CodeBlock in thinkCodeBlocks:
                     language, code = CodeBlock
                     self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth))
-                    thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```')
+                    thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     thinkSplitTextList.append(thinkTempTextList[0])
                     thinkTempText = thinkTempTextList[1]
                 """ if thinkTempText != '': """
@@ -1921,7 +2105,7 @@ class MessageWidget(QWidget):
                     else:
                         j += 1
                     self.textLayout.addWidget(self.thinkCodeShowList[i])
-                if len(thinkSplitTextList) > 0 and thinkSplitTextList[-1] != '':
+                if 0 < len(self.thinkTextShowList) - 1 - j and thinkSplitTextList[-1] != '':
                     self.textLayout.addWidget(self.thinkTextShowList[-1])
                 #set visible
                 for thinkWidget in self.thinkTextShowList:
@@ -1932,7 +2116,6 @@ class MessageWidget(QWidget):
                 #
                 self.thinkTextRecvEnd.connect(self.thinkToggleWidget)
                 if self.thinkTextIsRecvEnd and self.isRecvFirst:
-                    print('1')
                     self.thinkTextRecvEnd.emit()
                     self.isRecvFirst = False
             #TextShow
@@ -1944,7 +2127,7 @@ class MessageWidget(QWidget):
                 for CodeBlock in resultCodeBlocks:
                     language, code = CodeBlock
                     self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth))
-                    resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```')
+                    resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     resultSplitTextList.append(resultTempTextList[0])
                     resultTempText = resultTempTextList[1]
                 resultSplitTextList.append(resultTempText)
@@ -1960,7 +2143,7 @@ class MessageWidget(QWidget):
                     else:
                         j += 1
                     self.textLayout.addWidget(self.resultCodeShowList[i])
-                if len(resultSplitTextList) > 0 and resultSplitTextList[-1] != '':
+                if 0 < len(self.resultTextShowList) - 1 - j and resultSplitTextList[-1] != '':
                     self.textLayout.addWidget(self.resultTextShowList[-1])
                 for textShow in self.resultTextShowList:
                     textShow.setSizeFinished.connect(self.onSizeFinshed)
@@ -1984,16 +2167,13 @@ class MessageWidget(QWidget):
             #
             self.thinkTextRecvEnd.connect(self.thinkToggleWidget)
             if self.thinkTextIsRecvEnd and self.isRecvFirst:
-                print('1')
                 self.thinkTextRecvEnd.emit()
                 self.isRecvFirst = False """
         else:
-            print('bbbb')
             #TextShow
             self.textShow = TextShow(text, isUser=self.isUser, maxWidth=textMaxWidth)
             self.textLayout.addWidget(self.textShow)
             self.textLayout.setContentsMargins(5, 5, 5, 5)
-            print('bbbbb')
         """ if self.isUser:
             self.textLayout.addWidget(self.textShow)
             self.textLayout.setContentsMargins(5, 5, 5, 5)
@@ -2161,7 +2341,6 @@ class MessageWidget(QWidget):
         code_blocks.append(re.findall(javascriptPattern, text, re.DOTALL))
         return code_blocks """
     def extract_code_blocks(self, text):
-        """ print('extract:', text) """
         # 定义正则表达式模式，匹配代码块
         pattern = r"```(\w+)\n(.*?)```"
         # 使用 re.DOTALL 让 . 匹配换行符
@@ -2305,7 +2484,7 @@ class MessageWidget(QWidget):
                         self.thinkCodeShowList[-1].setVisible(self.thinkIsExpand)
                     else:
                         self.thinkCodeShowList[index].setText(code.strip(), lexerName=language)
-                    thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```')
+                    thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     thinkSplitTextList.append(thinkTempTextList[0])
                     thinkTempText = thinkTempTextList[1]
                 thinkSplitTextList.append(thinkTempText)
@@ -2339,16 +2518,13 @@ class MessageWidget(QWidget):
                     j += 1
                 if thinkCodeShowListLastLen < i:
                     self.textLayout.addWidget(self.thinkCodeShowList[i])
-            if len(thinkSplitTextList) > 0 and thinkSplitTextList[-1] != '':
+            if thinkTextShowListLastLen < len(self.thinkTextShowList) - 1 - j and thinkSplitTextList[-1] != '':
                 self.textLayout.addWidget(self.thinkTextShowList[-1])
-            """ print(len(self.thinkTextShowList), len(self.thinkCodeShowList)) """
-            """ print('widget count:', self.textLayout.count()) """
             """ #set text
             if not self.thinkTextIsRecvEnd:
                 self.thinkWidget.setText(self.thinkText) """
             #
             if self.thinkTextIsRecvEnd and self.isRecvFirst:
-                print('3')
                 self.thinkTextRecvEnd.emit()
                 self.isRecvFirst = False
             #TextShow
@@ -2357,7 +2533,6 @@ class MessageWidget(QWidget):
             resultTempText = self.resultText
             if self.resultText != '':
                 resultCodeBlocks = self.extract_code_blocks(self.resultText)
-                """ print('resultCodeBlocks:', resultCodeBlocks) """
                 resultCodeShowListLastLen = len(self.resultCodeShowList) - 1
                 for index, CodeBlock in enumerate(resultCodeBlocks):
                     language, code = CodeBlock
@@ -2365,7 +2540,7 @@ class MessageWidget(QWidget):
                         self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth))
                     else:
                         self.resultCodeShowList[index].setText(code.strip(), lexerName=language)
-                    resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```')
+                    resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     resultSplitTextList.append(resultTempTextList[0])
                     resultTempText = resultTempTextList[1]
                 resultSplitTextList.append(resultTempText)
@@ -2389,20 +2564,17 @@ class MessageWidget(QWidget):
                         j += 1
                     if resultCodeShowListLastLen < i:
                         self.textLayout.addWidget(self.resultCodeShowList[i])
-                if len(resultSplitTextList) > 0 and resultSplitTextList[-1] != '':
+                if resultTextShowListLastLen < len(self.resultTextShowList) - 1 - j and resultSplitTextList[-1] != '':
                     self.textLayout.addWidget(self.resultTextShowList[-1])
             """ self.textShow.setText(self.resultText) """
         else:
             self.textShow.setText(text)
-
-        """ print(len(self.thinkTextShowList), len(self.thinkCodeShowList), len(self.resultTextShowList), len(self.resultCodeShowList)) """
 
         if self.isUser:
             self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
             self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
         else:
             if self.thinkIsExpand:
-                """ print('thinkIsExpand', self.thinkIsExpand) """
                 if self.thinkText != '':
                     thinkWidth = max([self.thinkButton.width()] + [textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList])
                     thinkHeight = sum([self.thinkButton.height()] + [textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
@@ -2422,7 +2594,6 @@ class MessageWidget(QWidget):
                 """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + self.thinkWidget.height() + textShowHeights + codeShowHeights + 10) """
                 """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.thinkWidget.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.thinkWidget.height() + self.textShow.height() + 10) """
             else:
-                """ print('thinkIsExpand', self.thinkIsExpand) """
                 if self.thinkText != '':
                     thinkWidth = self.thinkButton.width()
                     thinkHeight = self.thinkButton.height()
@@ -2442,8 +2613,6 @@ class MessageWidget(QWidget):
                 """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + textShowHeights + codeShowHeights + 10) """
                 """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10) """
             """ print('textWidget:', thinkWidth, thinkHeight, resultWidth, resultHeight) """
-            for i in range(self.textLayout.count()):
-                print(i, self.textLayout.itemAt(i).widget())
             self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 10, thinkHeight + resultHeight + 10)
             """ print(self.textWidget.size()) """
             if self.loadingWidgetIsRemove:

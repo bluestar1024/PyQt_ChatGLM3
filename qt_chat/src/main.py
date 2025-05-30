@@ -1263,8 +1263,8 @@ class TextShow(QWidget):
     """ def connectSetTexting(self, fun):
         self.setTexting.connect(fun) """
 
-    def getWebEngineView(self):
-        return self.webEngineView
+    """ def getWebEngineView(self):
+        return self.webEngineView """
 
     def hasSelectedText(self):
         if self.isLabel:
@@ -1880,8 +1880,8 @@ class ThinkWidget(QWidget):
             self.setSizeFinished.emit()
             self.isLabel = False
 
-    def getWebEngineView(self):
-        return self.webEngineView
+    """ def getWebEngineView(self):
+        return self.webEngineView """
 
     def hasSelectedText(self):
         if self.isLabel:
@@ -2749,14 +2749,17 @@ class MessageWidget(QWidget):
     def getIsUser(self):
         return self.isUser
 
-    def getTextShow(self):
-        return self.textShow
+    """ def getTextShow(self):
+        return self.textShow """
 
     def getTextWidget(self):
         return self.textWidget
 
-    def getCopyButton(self):
-        return self.copyButton
+    def getTextBoxWidget(self):
+        return self.textBoxWidget
+
+    """ def getCopyButton(self):
+        return self.copyButton """
 
     def removeLoadingWidget(self):
         if not self.isUser and not self.loadingWidgetIsRemove:
@@ -2836,13 +2839,13 @@ class MessageWidget(QWidget):
                     return codeShow.getSelectedText()
             return ''
 
-    def showColorful(self):
+    """ def showColorful(self):
         self.textShow.isColorful = True
         self.textShow.repaint()
 
     def showDefaultColor(self):
         self.textShow.isColorful = False
-        self.textShow.repaint()
+        self.textShow.repaint() """
 
 class ItemWidget(QWidget):
     def __init__(self, parent=None):
@@ -3406,7 +3409,7 @@ class MainWindow(QMainWindow):
         self.chatFun.connectNewChatButtonClick(self.newChat)
         #ListWidget
         self.chatShow = ListWidget()
-        self.chatShow.itemClicked.connect(self.itemShowColorful)
+        """ self.chatShow.itemClicked.connect(self.itemShowColorful) """
         #chatShowWidget QWidget
         self.chatShowWidget = Widget()
         self.chatShowWidget.setMinimumHeight(244)
@@ -3550,10 +3553,10 @@ class MainWindow(QMainWindow):
         self.isSetTexting = False
         #pushButtonIsPress
         self.pushButtonIsPress = False
-        #messageWidgetIsSelect
+        """ #messageWidgetIsSelect
         self.messageWidgetIsSelect = False
         #selectMessageWidgetNumber
-        self.selectMessageWidgetNumber = -1
+        self.selectMessageWidgetNumber = -1 """
         #settingIsTop
         self.settingIsTop = False
         #chatRecordsIsTop
@@ -3564,8 +3567,8 @@ class MainWindow(QMainWindow):
         self.screenChanged = False
         #thinkExpandedList
         self.thinkExpandedList = []
-        #messageIsRenewResponse
-        self.messageIsRenewResponse = False
+        """ #messageIsRenewResponse
+        self.messageIsRenewResponse = False """
         #isSending
         self.isSending = False
         #isContinueShow
@@ -3617,6 +3620,20 @@ class MainWindow(QMainWindow):
             for i in range(0, len(self.messageWidgetList)):
                 messageWidget = self.messageWidgetList[i]
                 if widget == messageWidget.getTextWidget():
+                    messageWidget.showFunWidget()
+                    #chatShow itemWidget adjust size
+                    itemWidget = self.chatShow.itemWidget(self.chatShow.item(i))
+                    itemWidget.setFixedSize(self.chatShow.width(), messageWidget.height() + 10)
+                    if messageWidget.getIsUser():
+                        itemWidget.layout().setContentsMargins(itemWidget.width() - messageWidget.width() - 25, 5, 25, 5)
+                    else:
+                        itemWidget.layout().setContentsMargins(0, 5, itemWidget.width() - messageWidget.width(), 5)
+                    #chatShow item adjust size
+                    self.chatShow.item(i).setSizeHint(QSize(self.chatShow.width(), messageWidget.height() + 10))
+        elif isinstance(widget, TextBoxWidget):
+            for i in range(0, len(self.messageWidgetList)):
+                messageWidget = self.messageWidgetList[i]
+                if widget == messageWidget.getTextBoxWidget():
                     messageWidget.showFunWidget()
                     #chatShow itemWidget adjust size
                     itemWidget = self.chatShow.itemWidget(self.chatShow.item(i))
@@ -3750,7 +3767,7 @@ class MainWindow(QMainWindow):
             if self.pushButtonIsPress:
                 self.pushButtonIsPress = False
             else:
-                if self.settingWidgetIsOpen:
+                """ if self.settingWidgetIsOpen:
                     chatShowRect = QRect(self.chatShow.geometry().x() + self.settingWidget.width(), self.chatShow.geometry().y() + self.titleWidget.height() + self.chatFun.height(), self.chatShow.geometry().width(), self.chatShow.geometry().height())
                 elif self.chatRecordsWidgetIsOpen:
                     chatShowRect = QRect(self.chatShow.geometry().x() + self.chatRecordsWidget.width(), self.chatShow.geometry().y() + self.titleWidget.height() + self.chatFun.height(), self.chatShow.geometry().width(), self.chatShow.geometry().height())
@@ -3759,14 +3776,11 @@ class MainWindow(QMainWindow):
                 if not chatShowRect.contains(event.pos()):
                     self.messageWidgetIsSelect = False
                     self.selectMessageWidgetNumber = -1
-                    """ for i in range(0, len(self.messageWidgetList)):
-                        self.messageWidgetList[i].showDefaultColor() """
                 else:
                     widget = self.childAt(event.pos())
                     if isinstance(widget, CopyButton):
                         for i in range(0, len(self.messageWidgetList)):
                             messageWidget = self.messageWidgetList[i]
-                            """ messageWidget.showDefaultColor() """
                             if widget == messageWidget.getCopyButton():
                                 self.messageWidgetIsSelect = True
                                 self.selectMessageWidgetNumber = i
@@ -3774,11 +3788,10 @@ class MainWindow(QMainWindow):
                     elif isinstance(widget.parent(), WebEngineView):
                         for i in range(0, len(self.messageWidgetList)):
                             messageWidget = self.messageWidgetList[i]
-                            """ messageWidget.showDefaultColor() """
                             if widget.parent() == messageWidget.getTextShow().getWebEngineView():
                                 self.messageWidgetIsSelect = True
                                 self.selectMessageWidgetNumber = i
-                                messageWidget.showColorful()
+                                messageWidget.showColorful() """
                 if self.settingWidgetIsOpen:
                     chatInputRect = QRect(self.chatInput.geometry().x() + self.settingWidget.width(), self.chatInput.geometry().y() + self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height(), self.chatInput.geometry().width(), self.chatInput.geometry().height())
                 elif self.chatRecordsWidgetIsOpen:
@@ -3800,12 +3813,10 @@ class MainWindow(QMainWindow):
                 self.messageWidgetRegenerate()
         QMainWindow.mouseReleaseEvent(self, event)
 
-    def itemShowColorful(self, item):
-        """ for i in range(0, len(self.messageWidgetList)):
-            self.messageWidgetList[i].showDefaultColor() """
+    """ def itemShowColorful(self, item):
         self.messageWidgetList[self.chatShow.row(item)].showColorful()
         self.messageWidgetIsSelect = True
-        self.selectMessageWidgetNumber = self.chatShow.row(item)
+        self.selectMessageWidgetNumber = self.chatShow.row(item) """
 
     def resizeEvent(self, event):
         #mainWidget Frame
@@ -4629,14 +4640,12 @@ class MainWindow(QMainWindow):
         self.chatShow.setItemWidget(self.recvItem, self.itemRecvWidget)
         #first
         self.first = True
-        #messageIsRenewResponse
+        """ #messageIsRenewResponse
         if self.messageIsRenewResponse:
-            """ for i in range(0, len(self.messageWidgetList)):
-                self.messageWidgetList[i].showDefaultColor() """
             self.messageWidgetIsSelect = True
             self.selectMessageWidgetNumber += 1
             self.messageWidgetList[self.selectMessageWidgetNumber].showColorful()
-            self.messageIsRenewResponse = False
+            self.messageIsRenewResponse = False """
 
     def recvMessage(self, text):
         if self.first:
@@ -4711,7 +4720,7 @@ class MainWindow(QMainWindow):
                 self.thread.start()
                 """ #disable sendButton
                 self.chatInput.disableSendButton() """
-                self.messageIsRenewResponse = True
+                """ self.messageIsRenewResponse = True """
                 break
             else:
                 j += 1
@@ -4905,8 +4914,8 @@ class MainWindow(QMainWindow):
                 self.itemRecvWidget = self.itemWidget
                 self.recvItem = self.item
                 self.isContinueShow = True
-            if self.messageWidgetIsSelect:
-                self.messageWidgetList[self.selectMessageWidgetNumber].showColorful()
+            """ if self.messageWidgetIsSelect:
+                self.messageWidgetList[self.selectMessageWidgetNumber].showColorful() """
 
     def setScrollValue(self):
         new_max_scroll_value = self.chatShow.verticalScrollBar().maximum()

@@ -66,6 +66,7 @@ testText = '''<think>
 ```java
 int sum = 0;
 for (int i = 1; i <= 100; i++) {
+    #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
     sum += i;
 }
 System.out.println(sum);
@@ -76,6 +77,7 @@ System.out.println(sum);
 ```java
 int n = 100;
 int sum = n * (n + 1) / 2;
+#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
 System.out.println(sum);
 ```
 
@@ -84,6 +86,7 @@ System.out.println(sum);
 ```cpp
 int sum = 0;
 for (int i = 1; i <= 100; ++i) {
+    #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
     sum += i;
 }
 std::cout << sum << std::endl;
@@ -94,6 +97,7 @@ std::cout << sum << std::endl;
 ```cpp
 int n = 100;
 int sum = n * (n + 1) / 2;
+#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
 std::cout << sum << std::endl;
 ```
 
@@ -105,6 +109,7 @@ std::cout << sum << std::endl;
 sum = 0
 for i in range(1, 101):
     sum += i
+#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
 print(sum)
 ```
 
@@ -113,6 +118,7 @@ print(sum)
 ```python
 n = 100
 total = n * (n + 1) // 2
+#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
 print(total)
 ```
 
@@ -134,6 +140,7 @@ Java：
 ```java
 public class Sum {
     public static void main(String[] args) {
+        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
         int n = 100;
         int sum = n * (n + 1) / 2;
         System.out.println(sum);
@@ -146,6 +153,7 @@ public class Sum {
 ```java
 public class Sum {
     public static void main(String[] args) {
+        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
         int sum = 0;
         for (int i = 1; i <= 100; i++) {
             sum += i;
@@ -162,6 +170,7 @@ C++：
 using namespace std;
 
 int main() {
+    #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
     int n = 100;
     int sum = n * (n + 1) / 2;
     cout << sum << endl;
@@ -181,6 +190,7 @@ int main() {
     for (int i = 1; i <= 100; ++i) {
         sum += i;
     }
+    #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
     cout << sum << endl;
     return 0;
 }
@@ -190,6 +200,7 @@ Python：
 ```python
 n = 100
 total = n * (n + 1) // 2
+#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
 print(total)
 ```
 
@@ -199,6 +210,7 @@ print(total)
 sum = 0
 for i in range(1, 101):
     sum += i
+    #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
 print(sum)
 ```
 
@@ -217,6 +229,7 @@ print(sum(range(1, 101)))
 ```java
 public class Sum {
     public static void main(String[] args) {
+        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
         int n = 100;
         int sum = n * (n + 1) / 2;
         System.out.println(sum);
@@ -231,6 +244,7 @@ public class Sum {
 using namespace std;
 
 int main() {
+    #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
     int n = 100;
     int sum = n * (n + 1) / 2;
     cout << sum << endl;
@@ -242,6 +256,7 @@ int main() {
 ```python
 n = 100
 total = n * (n + 1) // 2
+#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
 print(total)
 ```
 
@@ -444,11 +459,12 @@ class FunWidget(QWidget):
 class ListWidget(QListWidget):
     def __init__(self, parent=None):
         super(ListWidget, self).__init__(parent)
-        self.resize(1171, 480)
+        self.resize(1170, 480)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.setFocusPolicy(Qt.NoFocus)
+        self.verticalScrollBar().setCursor(Qt.PointingHandCursor)
         self.setStyleSheet('''
         QListWidget{
             border: none;
@@ -466,8 +482,24 @@ class ListWidget(QListWidget):
         QListWidget::item:hover{
             background: transparent;
         }
-        QScrollBar{
-            width: 25px;
+        QScrollBar:vertical {
+            background: transparent;
+            width: 10px;
+            padding: 0px 4px 0px 0px;
+        }
+        QScrollBar::handle:vertical {
+            background: #bcbcbc;
+            width: 6px;
+            border-radius: 3px; /* 设置滑块为圆角矩形 */
+        }
+        QScrollBar::handle:vertical:hover {
+            background: #808080;
+        }
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+            background: transparent;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            width: 0px;
         }
         ''')
         #setMouseTracking
@@ -1892,13 +1924,32 @@ class CodeEdit(QTextEdit):
 
     def __init__(self, parent=None):
         super(CodeEdit, self).__init__(parent)
-        """ self.setTabStopWidth(4) """
         self.setFont(QFont("Courier New", 12))
         """ print('CodeEdit font pixelSize:', self.font().pixelSize()) """
         """ print('CodeEdit font height:', self.fontMetrics().height()) """
+        self.horizontalScrollBar().setCursor(Qt.PointingHandCursor)
         self.setStyleSheet('''
         QTextEdit {
             background-color: #14141c;
+        }
+        QScrollBar:horizontal {
+            background: transparent;
+            height: 10px;
+            padding: 0px 0px 4px 0px;
+        }
+        QScrollBar::handle:horizontal {
+            background: #44444c;
+            height: 6px;
+            border-radius: 3px; /* 设置滑块为圆角矩形 */
+        }
+        QScrollBar::handle:horizontal:hover {
+            background: #747474;
+        }
+        QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+            background: transparent;
+        }
+        QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+            width: 0px;
         }
         ''')
         #
@@ -1932,7 +1983,8 @@ class CodeEdit(QTextEdit):
         QTimer.singleShot(1, self.lineNumberAdjustSize)
 
     def lineNumberAdjustSize(self):
-        self.adjustSize()
+        height = int(self.document().size().height())
+        self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
         self.lineNumberWidget.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().lineCount())) + 2), self.height())
         self.updateLineNumberAreaWidth()
         self.setSizeFinished.emit()
@@ -1963,7 +2015,7 @@ class CodeShow(QWidget):
         self.setLayout(self.mainVLayout)
         #
         self.topWidget = QWidget()
-        self.topWidget.setFixedHeight(20)
+        """ self.topWidget.setFixedHeight(20) """
         self.topWidget.setStyleSheet('''
         QWidget {
             background-color: #14141c;
@@ -2013,7 +2065,8 @@ class CodeShow(QWidget):
         self.codeEdit.setFixedWidth(self.maxWidth)
 
     def OnSizeFinished(self):
-        self.setFixedSize(self.maxWidth, self.codeEdit.height())
+        self.setFixedSize(self.maxWidth, self.codeEdit.height() + self.topWidget.height())
+        print('CodeEdit:', self.codeEdit.width(), self.codeEdit.height())
 
 class MessageWidget(QWidget):
     thinkTextRecvEnd = pyqtSignal()
@@ -3271,7 +3324,7 @@ class MainWindow(QMainWindow):
         self.chatShowVLayout = QVBoxLayout()
         self.chatShowWidget.setLayout(self.chatShowVLayout)
         self.chatShowVLayout.addWidget(self.chatShow)
-        self.chatShowVLayout.setContentsMargins(27, 4, 2, 16)
+        self.chatShowVLayout.setContentsMargins(20, 4, 10, 16)
         #TextEditFull
         self.chatInput = TextEditFull()
         self.chatInput.connectSendButtonClick(self.sendMessage)

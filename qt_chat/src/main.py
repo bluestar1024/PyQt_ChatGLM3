@@ -909,7 +909,7 @@ class CustomLabel(QLabel):
 
 class TextShow(QWidget):
     setSizeFinished = pyqtSignal()
-    setTexting = pyqtSignal(bool)
+    """ setTexting = pyqtSignal(bool) """
 
     def __init__(self, text, isUser=True, maxWidth=650, parent=None):
         super(TextShow, self).__init__(parent)
@@ -995,7 +995,7 @@ class TextShow(QWidget):
         painter.end() """
 
     def setText(self, text):
-        self.setTexting.emit(self.isLabel)
+        """ self.setTexting.emit(self.isLabel) """
         self.text = text.strip('\n')
         if not self.text == '':
             textWidth = 0
@@ -1130,6 +1130,7 @@ class TextShow(QWidget):
         return markdown_content
 
     def toggleWidget(self):
+        """ print('TextShow') """
         markdown_content = ''
         self.html_text = ''
         self.full_html_text = ''
@@ -1248,7 +1249,7 @@ class TextShow(QWidget):
                 self.mainHLayout.addWidget(self.webEngineView)
             self.webEngineView.setHtml(str(self.full_html_text), baseUrl)
             self.isLabel = False
-            self.setTexting.emit(self.isLabel)
+            """ self.setTexting.emit(self.isLabel) """
         else:
             if self.isLabel:
                 self.mainHLayout.removeWidget(self.label)
@@ -1257,10 +1258,10 @@ class TextShow(QWidget):
             self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
             self.setSizeFinished.emit()
             self.isLabel = False
-            self.setTexting.emit(self.isLabel)
+            """ self.setTexting.emit(self.isLabel) """
 
-    def connectSetTexting(self, fun):
-        self.setTexting.connect(fun)
+    """ def connectSetTexting(self, fun):
+        self.setTexting.connect(fun) """
 
     def getWebEngineView(self):
         return self.webEngineView
@@ -1750,6 +1751,7 @@ class ThinkWidget(QWidget):
         return markdown_content
 
     def toggleWidget(self):
+        """ print('ThinkWidget') """
         markdown_content = ''
         self.html_text = ''
         self.full_html_text = ''
@@ -1893,31 +1895,15 @@ class ThinkWidget(QWidget):
         else:
             return self.webEngineView.selectedText()
 
-class LineNumberWidget(QWidget):
+""" class LineNumberShow(QTextEdit):
     def __init__(self, parent=None):
-        super(LineNumberWidget, self).__init__(parent)
-        self.curScreen = self.screen()
-        self.dpi = self.curScreen.physicalDotsPerInch()
-        """ print('LineNumberWidget dpi:', self.dpi) """
-        self.pixelHeight = math.ceil(12 * (self.dpi / 72)) + 2
-        """ print('LineNumberWidget pixelHeight:', self.pixelHeight) """
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.fillRect(event.rect(), QColor(20, 20, 28))
-        pen = QPen(QColor(178, 170, 164))
-        painter.setPen(pen)
-        font = painter.font()
-        font.setPointSize(12)
-        painter.setFont(font)
-        """ print('LineNumberWidget paintEvent', self.parent().fontMetrics().height()) """
-        for lineNumber in range(self.parent().document().lineCount()):
-            block = self.parent().document().findBlockByLineNumber(lineNumber)
-            if block and block.isValid():
-                rect = QRectF(0, self.pixelHeight * lineNumber, self.width(), self.pixelHeight)
-                painter.drawText(rect, str(lineNumber + 1), QTextOption(Qt.AlignCenter))
-        painter.end()
+        super(LineNumberShow, self).__init__(parent)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setFont(QFont("Courier New", 12))
+        palette = self.palette()
+        palette.setColor(QPalette.Text, QColor(178, 170, 164))
+        self.setPalette(palette) """
 
 class CodeEdit(QTextEdit):
     setSizeFinished = pyqtSignal()
@@ -1925,8 +1911,6 @@ class CodeEdit(QTextEdit):
     def __init__(self, parent=None):
         super(CodeEdit, self).__init__(parent)
         self.setFont(QFont("Courier New", 12))
-        """ print('CodeEdit font pixelSize:', self.font().pixelSize()) """
-        """ print('CodeEdit font height:', self.fontMetrics().height()) """
         self.horizontalScrollBar().setCursor(Qt.PointingHandCursor)
         self.setStyleSheet('''
         QTextEdit {
@@ -1952,11 +1936,11 @@ class CodeEdit(QTextEdit):
             width: 0px;
         }
         ''')
-        #
-        self.lineNumberWidget = LineNumberWidget(self)
-        self.lineNumberWidget.move(0, 1)
-        #
-        self.textChanged.connect(self.onTextChanged)
+        """ #
+        self.lineNumberWidget = LineNumberShow(self)
+        self.lineNumberWidget.move(0, 1) """
+        #textChanged
+        self.textChanged.connect(self.adjustSize)
 
     def highlightCode(self, text, lexerName='python'):
         match lexerName:
@@ -1972,27 +1956,49 @@ class CodeEdit(QTextEdit):
                 lexer = JavascriptLexer()
             case _:
                 lexer = PythonLexer()
+        text = self.add_line_numbers(text)
         formatter = HtmlFormatter(style=CustomStyle, noclasses=True)
         html = highlight(text, lexer, formatter)
+        """ html = html.replace('<pre style="line-height: 125%;">', '<pre style="line-height: 100%;">') """
         self.setHtml(html)
 
-    def updateLineNumberAreaWidth(self):
-        self.setViewportMargins(self.lineNumberWidget.width(), 0, 0, 0)
+    def add_line_numbers(self, text):
+        # 根据 '\n' 分割字符串成多行
+        lines = text.split('\n')
+        
+        # 为每一行添加行号和两个空格
+        numbered_lines = []
+        for i, line in enumerate(lines, start=1):
+            numbered_line = f"{i}  {line}"  # 行号加两个空格
+            numbered_lines.append(numbered_line)
+        
+        # 将处理后的行重新组合成字符串
+        result = '\n'.join(numbered_lines)
+        return result
 
-    def onTextChanged(self):
-        QTimer.singleShot(1, self.lineNumberAdjustSize)
+    """ def updateLineNumberAreaWidth(self):
+        self.setViewportMargins(self.lineNumberWidget.width(), 0, 0, 0) """
 
-    def lineNumberAdjustSize(self):
+    """ def onTextChanged(self):
+        self.adjustSize()
+        QTimer.singleShot(1, self.adjustSize) """
+
+    def adjustSize(self):
+        """ lineNumberText = '' """
         height = int(self.document().size().height())
         self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
-        self.lineNumberWidget.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().lineCount())) + 2), self.height())
+        """ self.lineNumberWidget.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().lineCount())) + 2), self.height())
+        print('lineNumberWidget.size():', self.lineNumberWidget.size())
         self.updateLineNumberAreaWidth()
+        for i in range(self.document().lineCount()):
+            lineNumberText += ' ' + str(i + 1) + ' \n'
+        self.lineNumberWidget.setText(lineNumberText) """
         self.setSizeFinished.emit()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self.lineNumberWidget.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().lineCount())) + 2), self.height())
-        self.updateLineNumberAreaWidth()
+        """ self.lineNumberWidget.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().lineCount())) + 2), self.height())
+        self.updateLineNumberAreaWidth() """
 
 class CustomStyle(Style):
     default_style = ""
@@ -2066,10 +2072,18 @@ class CodeShow(QWidget):
 
     def OnSizeFinished(self):
         self.setFixedSize(self.maxWidth, self.codeEdit.height() + self.topWidget.height())
-        print('CodeEdit:', self.codeEdit.width(), self.codeEdit.height())
+        """ print('CodeEdit:', self.codeEdit.width(), self.codeEdit.height()) """
+
+    def hasSelectedText(self):
+        return self.codeEdit.textCursor().hasSelection()
+
+    def getSelectedText(self):
+        return self.codeEdit.textCursor().selectedText()
 
 class MessageWidget(QWidget):
-    thinkTextRecvEnd = pyqtSignal()
+    """ thinkTextRecvEnd = pyqtSignal() """
+    resizeFinished = pyqtSignal()
+    setTexting = pyqtSignal(bool)
 
     def __init__(self, text, copyFun, renewResponseFun, listWidget, isUser=True, thinkIsExpand=True, textMaxWidth=780, parent=None):
         super(MessageWidget, self).__init__(parent)
@@ -2092,12 +2106,17 @@ class MessageWidget(QWidget):
         #thinkButtonHaveCreated
         self.thinkButtonHaveCreated = False
         if not self.isUser:
+            #
+            self.setTexting.emit(True)
+            #
             self.thinkTextShowList = []
             self.thinkCodeShowList = []
             self.resultTextShowList = []
             self.resultCodeShowList = []
             #thinkIsExpand
             self.thinkIsExpand = thinkIsExpand
+            """ #
+            self.thinkTextRecvEnd.connect(self.thinkToggleWidget) """
             #
             self.thinkWidgetSizeFinshedCount = 0
             self.textShowSizeFinshedCount = 0
@@ -2164,13 +2183,11 @@ class MessageWidget(QWidget):
                 #set visible
                 for thinkWidget in self.thinkTextShowList:
                     thinkWidget.setVisible(self.thinkIsExpand)
-                    thinkWidget.setSizeFinished.connect(self.onSizeFinshed)
                 for codeShow in self.thinkCodeShowList:
                     codeShow.setVisible(self.thinkIsExpand)
                 #
-                self.thinkTextRecvEnd.connect(self.thinkToggleWidget)
                 if self.thinkTextIsRecvEnd and self.isRecvFirst:
-                    self.thinkTextRecvEnd.emit()
+                    """ self.thinkTextRecvEnd.emit() """
                     self.isRecvFirst = False
             #TextShow
             resultSplitTextList = []
@@ -2199,8 +2216,6 @@ class MessageWidget(QWidget):
                     self.textLayout.addWidget(self.resultCodeShowList[i])
                 if 0 < len(self.resultTextShowList) - 1 - j and resultSplitTextList[-1] != '':
                     self.textLayout.addWidget(self.resultTextShowList[-1])
-                for textShow in self.resultTextShowList:
-                    textShow.setSizeFinished.connect(self.onSizeFinshed)
             self.textLayout.setContentsMargins(5, 5, 5, 5)
             """ #TextShow
             for splitText in splitTextList:
@@ -2423,36 +2438,51 @@ class MessageWidget(QWidget):
         #
         self.setSize()
 
-    def thinkToggleWidget(self):
-        for thinkWidget in self.thinkTextShowList:
-            thinkWidget.toggleWidget()
+    """ def thinkToggleWidget(self):
+        print('thinkToggleWidget') """
 
-    """ def connectSetTexting(self, fun):
-        for textShow in self.resultTextShowList:
-            textShow.connectSetTexting(fun) """
+    def connectSetTexting(self, fun):
+        self.setTexting.connect(fun)
 
     def toggleWidget(self):
+        """ print('toggleWidget') """
         if self.isUser:
             self.textShow.toggleWidget()
         else:
+            for thinkWidget in self.thinkTextShowList:
+                thinkWidget.setSizeFinished.connect(self.onSizeFinshed)
+                thinkWidget.toggleWidget()
             for textShow in self.resultTextShowList:
+                textShow.setSizeFinished.connect(self.onSizeFinshed)
                 textShow.toggleWidget()
 
     """ def connectSetSizeFinished(self, fun):
         for textShow in self.resultTextShowList:
             textShow.setSizeFinished.connect(fun) """
 
+    def connectResizeFinished(self, fun):
+        self.resizeFinished.connect(fun)
+
     def onSizeFinshed(self):
+        """ print('sizeFinish:', self.thinkWidgetSizeFinshedCount, self.textShowSizeFinshedCount, len(self.thinkTextShowList), len(self.resultTextShowList)) """
         if isinstance(self.sender(), ThinkWidget):
             self.thinkWidgetSizeFinshedCount += 1
             if self.thinkWidgetSizeFinshedCount == len(self.thinkTextShowList):
                 self.thinkWidgetSizeFinshedCount = 0
                 self.setSize()
+                if self.thinkWidgetSizeFinshedCount == 0 and self.textShowSizeFinshedCount == 0:
+                    """ print('ThinkWidget sizeFinish:', self.thinkWidgetSizeFinshedCount, self.textShowSizeFinshedCount) """
+                    self.resizeFinished.emit()
+                    self.setTexting.emit(False)
         else:
             self.textShowSizeFinshedCount += 1
             if self.textShowSizeFinshedCount == len(self.resultTextShowList):
                 self.textShowSizeFinshedCount = 0
                 self.setSize()
+                if self.thinkWidgetSizeFinshedCount == 0 and self.textShowSizeFinshedCount == 0:
+                    """ print('TextShow sizeFinish:', self.thinkWidgetSizeFinshedCount, self.textShowSizeFinshedCount) """
+                    self.resizeFinished.emit()
+                    self.setTexting.emit(False)
 
     def setSize(self):
         if self.isUser:
@@ -2560,7 +2590,8 @@ class MessageWidget(QWidget):
                         #set visible
                         self.thinkTextShowList[-1].setVisible(self.thinkIsExpand)
                     else:
-                        self.thinkTextShowList[i].setText(splitText)
+                        if self.isRecvFirst:
+                            self.thinkTextShowList[i].setText(splitText)
                     i += 1
             #textLayout
             j = 0
@@ -2578,8 +2609,10 @@ class MessageWidget(QWidget):
             if not self.thinkTextIsRecvEnd:
                 self.thinkWidget.setText(self.thinkText) """
             #
+            """ print('thinkTextIsRecvEnd:', self.thinkTextIsRecvEnd) """
             if self.thinkTextIsRecvEnd and self.isRecvFirst:
-                self.thinkTextRecvEnd.emit()
+                """ print('isRecvFirst:', self.isRecvFirst)
+                self.thinkTextRecvEnd.emit() """
                 self.isRecvFirst = False
             #TextShow
             resultSplitTextList = []
@@ -2727,22 +2760,46 @@ class MessageWidget(QWidget):
             self.funWidget.setFixedSize(26, 26)
 
     def hasSelectedText(self):
-        if self.textShow.hasSelectedText():
-            return True
-        else:
-            if not self.isUser:
-                return self.thinkWidget.hasSelectedText()
+        if self.isUser:
+            if self.textShow.hasSelectedText():
+                return True
             else:
                 return False
+        else:
+            for thinkWidget in self.thinkTextShowList:
+                if thinkWidget.hasSelectedText():
+                    return True
+            for codeShow in self.thinkCodeShowList:
+                if codeShow.hasSelectedText():
+                    return True
+            for textShow in self.resultTextShowList:
+                if textShow.hasSelectedText():
+                    return True
+            for codeShow in self.resultCodeShowList:
+                if codeShow.hasSelectedText():
+                    return True
+            return False
 
     def getSelectedText(self):
-        if self.textShow.hasSelectedText():
-            return self.textShow.getSelectedText()
-        else:
-            if not self.isUser:
-                return self.thinkWidget.getSelectedText()
+        if self.isUser:
+            if self.textShow.hasSelectedText():
+                return self.textShow.getSelectedText()
             else:
                 return ''
+        else:
+            for thinkWidget in self.thinkTextShowList:
+                if thinkWidget.hasSelectedText():
+                    return thinkWidget.getSelectedText()
+            for codeShow in self.thinkCodeShowList:
+                if codeShow.hasSelectedText():
+                    return codeShow.getSelectedText()
+            for textShow in self.resultTextShowList:
+                if textShow.hasSelectedText():
+                    return textShow.getSelectedText()
+            for codeShow in self.resultCodeShowList:
+                if codeShow.hasSelectedText():
+                    return codeShow.getSelectedText()
+            return ''
 
     def showColorful(self):
         self.textShow.isColorful = True
@@ -4471,7 +4528,8 @@ class MainWindow(QMainWindow):
                 #MessageWidget
                 self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=True, textMaxWidth=int(self.chatShow.width() * 2 / 3))
                 """ self.messageSendWidget.connectSetSizeFinished(self.messageWidgetResize) """
-                """ self.messageSendWidget.connectSetTexting(self.getSetTexting) """
+                self.messageSendWidget.connectResizeFinished(self.messageWidgetResize)
+                self.messageSendWidget.connectSetTexting(self.getSetTexting)
                 self.messageWidgetList.append(self.messageSendWidget)
                 #itemSendWidget QWidget
                 self.itemSendWidget = ItemWidget(self)
@@ -4518,7 +4576,8 @@ class MainWindow(QMainWindow):
         #MessageWidget
         self.messageRecvWidget = MessageWidget(self.Message, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=False, textMaxWidth=int(self.chatShow.width() * 2 / 3))
         """ self.messageRecvWidget.connectSetSizeFinished(self.messageWidgetResize) """
-        """ self.messageRecvWidget.connectSetTexting(self.getSetTexting) """
+        self.messageRecvWidget.connectResizeFinished(self.messageWidgetResize)
+        self.messageRecvWidget.connectSetTexting(self.getSetTexting)
         self.messageWidgetList.append(self.messageRecvWidget)
         #itemRecvWidget QWidget
         self.itemRecvWidget = ItemWidget(self)
@@ -4743,7 +4802,8 @@ class MainWindow(QMainWindow):
                 else:
                     self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=False, textMaxWidth=self.chatShow.width() * 2 // 3)
                 """ self.messageWidget.connectSetSizeFinished(self.messageWidgetResize) """
-                """ self.messageWidget.connectSetTexting(self.getSetTexting) """
+                self.messageWidget.connectResizeFinished(self.messageWidgetResize)
+                self.messageWidget.connectSetTexting(self.getSetTexting)
                 if not isUser:
                     self.messageWidget.removeLoadingWidget()
                 self.messageWidgetList.append(self.messageWidget)

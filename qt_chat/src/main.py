@@ -2157,7 +2157,8 @@ class MessageWidget(QWidget):
                 """ print('thinkCodeBlocks:', thinkCodeBlocks) """
                 for CodeBlock in thinkCodeBlocks:
                     language, code = CodeBlock
-                    self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth))
+                    self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth, parent=self))
+                    """ self.thinkCodeShowList[-1].hide() """
                     thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     thinkSplitTextList.append(thinkTempTextList[0])
                     thinkTempText = thinkTempTextList[1]
@@ -2171,7 +2172,7 @@ class MessageWidget(QWidget):
                 #ThinkWidget
                 for splitText in thinkSplitTextList:
                     if splitText != '':
-                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=textMaxWidth))
+                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=textMaxWidth, parent=self))
                     """ print('init len:', splitText[-10:], len(self.thinkTextShowList), len(self.thinkCodeShowList), len(self.resultTextShowList), len(self.resultCodeShowList)) """
                 #textLayout
                 self.textLayout.addWidget(self.thinkButton)
@@ -2182,6 +2183,8 @@ class MessageWidget(QWidget):
                     else:
                         j += 1
                     self.textLayout.addWidget(self.thinkCodeShowList[i])
+                    """ #set visible
+                    self.thinkCodeShowList[i].setVisible(self.thinkIsExpand) """
                 """ if 0 < len(self.thinkTextShowList) - 1 - j and thinkSplitTextList[-1] != '': """
                 if thinkSplitTextList[-1] != '':
                     self.textLayout.addWidget(self.thinkTextShowList[-1])
@@ -2204,7 +2207,8 @@ class MessageWidget(QWidget):
                 resultCodeBlocks = self.extract_code_blocks(self.resultText)
                 for CodeBlock in resultCodeBlocks:
                     language, code = CodeBlock
-                    self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth))
+                    self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth, parent=self))
+                    """ self.resultCodeShowList[-1].hide() """
                     resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     resultSplitTextList.append(resultTempTextList[0])
                     resultTempText = resultTempTextList[1]
@@ -2212,7 +2216,7 @@ class MessageWidget(QWidget):
                 #TextShow
                 for splitText in resultSplitTextList:
                     if splitText != '':
-                        self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=textMaxWidth))
+                        self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=textMaxWidth, parent=self))
                 #textLayout
                 j = 0
                 for i in range(len(self.resultCodeShowList)):
@@ -2221,6 +2225,7 @@ class MessageWidget(QWidget):
                     else:
                         j += 1
                     self.textLayout.addWidget(self.resultCodeShowList[i])
+                    """ self.resultCodeShowList[i].show() """
                 """ if 0 < len(self.resultTextShowList) - 1 - j and resultSplitTextList[-1] != '': """
                 if resultSplitTextList[-1] != '':
                     self.textLayout.addWidget(self.resultTextShowList[-1])
@@ -2586,9 +2591,10 @@ class MessageWidget(QWidget):
                 for index, CodeBlock in enumerate(thinkCodeBlocks):
                     language, code = CodeBlock
                     if thinkCodeShowListLastLen < index:
-                        self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth))
+                        self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth, parent=self))
                         #set visible
                         self.thinkCodeShowList[-1].setVisible(self.thinkIsExpand)
+                        """ self.thinkCodeShowList[-1].hide() """
                     else:
                         self.thinkCodeShowList[index].setText(code.strip(), lexerName=language)
                     thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
@@ -2609,7 +2615,7 @@ class MessageWidget(QWidget):
             for splitText in thinkSplitTextList:
                 if splitText != '':
                     if thinkTextShowListLastLen < i:
-                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=self.textMaxWidth))
+                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=self.textMaxWidth, parent=self))
                         #set visible
                         self.thinkTextShowList[-1].setVisible(self.thinkIsExpand)
                     else:
@@ -2628,6 +2634,8 @@ class MessageWidget(QWidget):
                     j += 1
                 if thinkCodeShowListLastLen < i:
                     self.textLayout.addWidget(self.thinkCodeShowList[i])
+                    """ #set visible
+                    self.thinkCodeShowList[i].setVisible(self.thinkIsExpand) """
             if thinkTextShowListLastLen < len(self.thinkTextShowList) - 1 - j and thinkSplitTextList[-1] != '':
                 self.textLayout.addWidget(self.thinkTextShowList[-1])
             """ #set text
@@ -2649,7 +2657,8 @@ class MessageWidget(QWidget):
                 for index, CodeBlock in enumerate(resultCodeBlocks):
                     language, code = CodeBlock
                     if resultCodeShowListLastLen < index:
-                        self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth))
+                        self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth, parent=self))
+                        """ self.resultCodeShowList[-1].hide() """
                     else:
                         self.resultCodeShowList[index].setText(code.strip(), lexerName=language)
                     resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
@@ -2662,7 +2671,7 @@ class MessageWidget(QWidget):
                 for splitText in resultSplitTextList:
                     if splitText != '':
                         if resultTextShowListLastLen < i:
-                            self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=self.textMaxWidth))
+                            self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=self.textMaxWidth, parent=self))
                         else:
                             self.resultTextShowList[i].setText(splitText)
                         i += 1
@@ -2676,6 +2685,7 @@ class MessageWidget(QWidget):
                         j += 1
                     if resultCodeShowListLastLen < i:
                         self.textLayout.addWidget(self.resultCodeShowList[i])
+                        """ self.resultCodeShowList[i].show() """
                 if resultTextShowListLastLen < len(self.resultTextShowList) - 1 - j and resultSplitTextList[-1] != '':
                     self.textLayout.addWidget(self.resultTextShowList[-1])
             """ self.textShow.setText(self.resultText) """

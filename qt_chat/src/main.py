@@ -323,6 +323,10 @@ class messageThread(QThread):
             self.newMessage.emit(self.contentOutput)
         return
 
+    def stop(self):
+        self.terminate()
+        self.wait()
+
 class PushButton(QPushButton):
     def __init__(self, tipText='', tipOffsetX=10, tipOffsetY=40, parent=None):
         super(PushButton, self).__init__(parent)
@@ -546,10 +550,6 @@ class TextEdit(QTextEdit):
             border: none;
             image: url("{self.send_images_path}");
         }}
-        QPushButton:disabled{{
-            border: none;
-            image: url("{self.send_disable_images_path}");
-        }}
         ''')
         self.setStyleSheet(f'''
         QTextEdit{{
@@ -563,6 +563,8 @@ class TextEdit(QTextEdit):
         ''')
         #setMouseTracking
         self.setMouseTracking(True)
+        #isSending
+        self.isSending = False
 
     def contextMenuEvent(self, event):
         menu = CustomMenu(self)
@@ -626,25 +628,28 @@ class TextEdit(QTextEdit):
     def emitSendButtonClicked(self):
         self.sendButton.clicked.emit()
 
-    def enableSendButton(self):
-        self.sendButton.setEnabled(True)
+    """ def enableSendButton(self):
+        self.sendButton.setEnabled(True) """
 
-    def disableSendButton(self):
-        self.sendButton.setEnabled(False)
+    """ def disableSendButton(self):
+        self.sendButton.setEnabled(False) """
 
-    def sendButtonIsEnable(self):
-        return self.sendButton.isEnabled()
+    """ def sendButtonIsEnable(self):
+        return self.sendButton.isEnabled() """
 
     def sendButtonShow(self):
-        if self.toPlainText() == '':
+        if self.isSending:
+            self.sendButton.setStyleSheet(f'''
+            QPushButton{{
+                border: none;
+                image: url("{self.send_disable_images_path}");
+            }}
+            ''')
+        elif self.toPlainText() == '':
             self.sendButton.setStyleSheet(f'''
             QPushButton{{
                 border: none;
                 image: url("{self.send_images_path}");
-            }}
-            QPushButton:disabled{{
-                border: none;
-                image: url("{self.send_disable_images_path}");
             }}
             ''')
         else:
@@ -652,10 +657,6 @@ class TextEdit(QTextEdit):
             QPushButton{{
                 border: none;
                 image: url("{self.send_hover_images_path}");
-            }}
-            QPushButton:disabled{{
-                border: none;
-                image: url("{self.send_disable_images_path}");
             }}
             ''')
 
@@ -765,14 +766,14 @@ class TextEditFull(QWidget):
     def connectSendButtonClick(self, fun):
         self.textEdit.connectSendButtonClick(fun)
 
-    def enableSendButton(self):
-        self.textEdit.enableSendButton()
+    """ def enableSendButton(self):
+        self.textEdit.enableSendButton() """
 
-    def disableSendButton(self):
-        self.textEdit.disableSendButton()
+    """ def disableSendButton(self):
+        self.textEdit.disableSendButton() """
 
-    def sendButtonIsEnable(self):
-        return self.textEdit.sendButtonIsEnable()
+    """ def sendButtonIsEnable(self):
+        return self.textEdit.sendButtonIsEnable() """
 
 class ImageLabel(QLabel):
     def __init__(self, isUser=True, parent=None):
@@ -3420,6 +3421,8 @@ class MainWindow(QMainWindow):
         self.thinkExpandedList = []
         #messageIsRenewResponse
         self.messageIsRenewResponse = False
+        #isSending
+        self.isSending = False
 
     def moveEvent(self, event):
         #screen
@@ -4388,60 +4391,66 @@ class MainWindow(QMainWindow):
             self.chatShow.item(i).setSizeHint(QSize(self.chatShow.width(), messageWidget.height() + 10))
 
     def sendMessage(self):
-        #judge status of sendButton
+        """ #judge status of sendButton
         if not self.chatInput.sendButtonIsEnable():
-            return
-        context = []
-        #get text from TextEditFull
-        text = self.chatInput.toPlainText()
-        if not text == '':
-            for i in range(0, len(self.messageWidgetList)):
-                messageWidget = self.messageWidgetList[i]
-                if messageWidget.getIsUser():
-                    context += [
-                        {
-                            "role": "user",
-                            "content": messageWidget.getText()
-                        }
-                    ]
-                else:
-                    context += [
-                        {
-                            "role": "assistant",
-                            "content": messageWidget.getText()
-                        }
-                    ]
-            #MessageWidget
-            self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=True, textMaxWidth=int(self.chatShow.width() * 2 / 3))
-            """ self.messageSendWidget.connectSetSizeFinished(self.messageWidgetResize) """
-            """ self.messageSendWidget.connectSetTexting(self.getSetTexting) """
-            self.messageWidgetList.append(self.messageSendWidget)
-            #itemSendWidget QWidget
-            self.itemSendWidget = ItemWidget(self)
-            self.itemSendHLayout = QHBoxLayout()
-            self.itemSendHLayout.addWidget(self.messageSendWidget)
-            self.itemSendWidget.setLayout(self.itemSendHLayout)
-            self.itemSendWidget.setFixedSize(self.chatShow.width(), self.messageSendWidget.height() + 10)
-            self.itemSendHLayout.setContentsMargins(self.itemSendWidget.width() - self.messageSendWidget.width() - 25, 5, 25, 5)
-            #sendItem QListWidgetItem
-            self.sendItem = QListWidgetItem(self.chatShow)
-            self.sendItem.setSizeHint(QSize(self.chatShow.width(), self.messageSendWidget.height() + 10))
-            self.chatShow.setItemWidget(self.sendItem, self.itemSendWidget)
-            #MessageWidget
-            self.messageSendWidget.toggleWidget()
-            #create thread
-            self.thread = messageThread(text, context=context)
-            self.thread.started.connect(self.messageStart)
-            self.thread.newMessage.connect(self.recvMessage)
-            self.thread.finished.connect(self.messageFinish)
-            self.thread.start()
-            #disable sendButton
-            self.chatInput.disableSendButton()
-            #clear text of TextEditFull
-            self.chatInput.clearText()
+            return """
+        if not self.isSending:
+            context = []
+            #get text from TextEditFull
+            text = self.chatInput.toPlainText()
+            if not text == '':
+                for i in range(0, len(self.messageWidgetList)):
+                    messageWidget = self.messageWidgetList[i]
+                    if messageWidget.getIsUser():
+                        context += [
+                            {
+                                "role": "user",
+                                "content": messageWidget.getText()
+                            }
+                        ]
+                    else:
+                        context += [
+                            {
+                                "role": "assistant",
+                                "content": messageWidget.getText()
+                            }
+                        ]
+                #MessageWidget
+                self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=True, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+                """ self.messageSendWidget.connectSetSizeFinished(self.messageWidgetResize) """
+                """ self.messageSendWidget.connectSetTexting(self.getSetTexting) """
+                self.messageWidgetList.append(self.messageSendWidget)
+                #itemSendWidget QWidget
+                self.itemSendWidget = ItemWidget(self)
+                self.itemSendHLayout = QHBoxLayout()
+                self.itemSendHLayout.addWidget(self.messageSendWidget)
+                self.itemSendWidget.setLayout(self.itemSendHLayout)
+                self.itemSendWidget.setFixedSize(self.chatShow.width(), self.messageSendWidget.height() + 10)
+                self.itemSendHLayout.setContentsMargins(self.itemSendWidget.width() - self.messageSendWidget.width() - 25, 5, 25, 5)
+                #sendItem QListWidgetItem
+                self.sendItem = QListWidgetItem(self.chatShow)
+                self.sendItem.setSizeHint(QSize(self.chatShow.width(), self.messageSendWidget.height() + 10))
+                self.chatShow.setItemWidget(self.sendItem, self.itemSendWidget)
+                #MessageWidget
+                self.messageSendWidget.toggleWidget()
+                #create thread
+                self.thread = messageThread(text, context=context)
+                self.thread.started.connect(self.messageStart)
+                self.thread.newMessage.connect(self.recvMessage)
+                self.thread.finished.connect(self.messageFinish)
+                self.thread.start()
+                """ #disable sendButton
+                self.chatInput.disableSendButton() """
+                #clear text of TextEditFull
+                self.chatInput.clearText()
+                self.chatInput.textEdit.isSending = True
+                self.chatInput.textEdit.textChanged.emit()
+            else:
+                #print emptyTextLabel
+                self.emptyTextLabel.printStart()
         else:
-            #print emptyTextLabel
-            self.emptyTextLabel.printStart()
+            self.thread.stop()
+        self.isSending = not self.isSending
 
     def messageStart(self):
         #message
@@ -4494,6 +4503,8 @@ class MainWindow(QMainWindow):
         self.recvItem.setSizeHint(QSize(self.chatShow.width(), self.messageRecvWidget.height() + 10))
 
     def messageFinish(self):
+        self.chatInput.textEdit.isSending = False
+        self.chatInput.textEdit.textChanged.emit()
         #messageRecvWidget
         self.messageRecvWidget.removeLoadingWidget()
         self.messageRecvWidget.toggleWidget()
@@ -4502,8 +4513,8 @@ class MainWindow(QMainWindow):
         self.itemRecvHLayout.setContentsMargins(0, 5, self.itemRecvWidget.width() - self.messageRecvWidget.width(), 5)
         #chatShow item adjust size
         self.recvItem.setSizeHint(QSize(self.chatShow.width(), self.messageRecvWidget.height() + 10))
-        #enable sendButton
-        self.chatInput.enableSendButton()
+        """ #enable sendButton
+        self.chatInput.enableSendButton() """
         #message renew response if message is empty
         if self.Message == '':
             del self.messageWidgetList[-1]
@@ -4548,8 +4559,8 @@ class MainWindow(QMainWindow):
                 self.thread.newMessage.connect(self.recvMessage)
                 self.thread.finished.connect(self.messageFinish)
                 self.thread.start()
-                #disable sendButton
-                self.chatInput.disableSendButton()
+                """ #disable sendButton
+                self.chatInput.disableSendButton() """
                 self.messageIsRenewResponse = True
                 break
             else:

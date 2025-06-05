@@ -8,7 +8,7 @@ Created on Tue Feb 13 18:31:44 2024
 import sys, os
 from enum import Enum
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QTextEdit, QMenu, QFrame, QGraphicsDropShadowEffect
-from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QRectF
+from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QTime
 from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextOption
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from pygments import highlight, token
@@ -54,9 +54,9 @@ textEditFullBGColor = QColor(224, 224, 224)
 textEditFullBGTColor = QColor(224, 224, 224, 0)
 textEditFullBColor = QColor(100, 100, 100)
 textEditFullBTColor = QColor(100, 100, 100, 0)
-fulBubbleColor = QColor(119, 221, 255)
+""" fulBubbleColor = QColor(119, 221, 255)
 userBubbleColor = QColor(16, 149, 222)
-aiBubbleColor = QColor(17, 173, 222)
+aiBubbleColor = QColor(17, 173, 222) """
 
 testText = '''<think>
 让我想一下两种方法。第一种方法更直观，适合新手理解。第二种方法效率更高，特别是当n很大的时候。那么对于这个问题来说，两种方式都行。我应该两种方法都写吗？可能问题只需要一种实现，但为了全面，我可以两种情况都考虑一下。
@@ -331,8 +331,8 @@ class messageThread(QThread):
     def run(self):
         self.contentOutput = testText
         if self.use_stream:
-            for i in range(0, len(self.contentOutput), 30):
-                self.newMessage.emit(self.contentOutput[i:i+30])
+            for i in range(0, len(self.contentOutput), 40):
+                self.newMessage.emit(self.contentOutput[i:i+40])
                 time.sleep(1)
         else:
             self.newMessage.emit(self.contentOutput)
@@ -877,9 +877,14 @@ class WebEngineView(QWebEngineView):
         # 获取滚动的像素值
         delta_y = event.angleDelta().y()
         # 获取当前的垂直滚动位置
-        current_scroll_value = self.parent().parent().parent().parent().listWidget.verticalScrollBar().value()
-        min_scroll_value = self.parent().parent().parent().parent().listWidget.verticalScrollBar().minimum()
-        max_scroll_value = self.parent().parent().parent().parent().listWidget.verticalScrollBar().maximum()
+        if isinstance(self.parent(), TextShow):
+            current_scroll_value = self.parent().parent().parent().parent().listWidget.verticalScrollBar().value()
+            min_scroll_value = self.parent().parent().parent().parent().listWidget.verticalScrollBar().minimum()
+            max_scroll_value = self.parent().parent().parent().parent().listWidget.verticalScrollBar().maximum()
+        else:
+            current_scroll_value = self.parent().parent().parent().parent().parent().listWidget.verticalScrollBar().value()
+            min_scroll_value = self.parent().parent().parent().parent().parent().listWidget.verticalScrollBar().minimum()
+            max_scroll_value = self.parent().parent().parent().parent().parent().listWidget.verticalScrollBar().maximum()
         # 计算新的滚动位置
         new_scroll_value = current_scroll_value - delta_y * 3
         if new_scroll_value < min_scroll_value:
@@ -887,7 +892,10 @@ class WebEngineView(QWebEngineView):
         elif new_scroll_value > max_scroll_value:
             new_scroll_value = max_scroll_value
         # 设置新的滚动位置
-        self.parent().parent().parent().parent().listWidget.verticalScrollBar().setValue(new_scroll_value)
+        if isinstance(self.parent(), TextShow):
+            self.parent().parent().parent().parent().listWidget.verticalScrollBar().setValue(new_scroll_value)
+        else:
+            self.parent().parent().parent().parent().parent().listWidget.verticalScrollBar().setValue(new_scroll_value)
         # 需要调用 accept() 来防止事件传递
         event.accept()
 
@@ -1374,21 +1382,27 @@ class ThinkingButton(QWidget):
 
     def __init__(self, parent=None):
         super(ThinkingButton, self).__init__(parent)
-        self.setFixedSize(250, 30)
-        self.isThinking = False
-        self.backgroundColor = QColor(224, 224, 224)
+        self.setFixedHeight(30)
+        self.setCursor(Qt.PointingHandCursor)
+        self.isShowThinkContent = False
+        self.backgroundColor = QColor(248, 248, 248)
         #leftIconLabel QLabel
         self.leftIconLabel = QLabel()
         self.thinking_icon_images_path = os.path.join(images_dir, 'thinking_icon.png').replace('\\', '/')
         self.leftIconLabel.setPixmap(QPixmap(f'{self.thinking_icon_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
+        self.leftIconLabel.setFixedSize(20, 20)
         #textLabel QLabel
-        self.textLabel = QLabel('思考中')
+        self.textLabel = QLabel('思考中...')
+        self.font = QFont()
+        self.font.setPixelSize(20)
+        self.textLabel.setFont(self.font)
         self.textLabel.adjustSize()
         #rightIconLabel QLabel
         self.rightIconLabel = QLabel()
         self.arrow_up_images_path = os.path.join(images_dir, 'arrow_up.png').replace('\\', '/')
         self.arrow_down_images_path = os.path.join(images_dir, 'arrow_down.png').replace('\\', '/')
         self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_up_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
+        self.rightIconLabel.setFixedSize(20, 20)
         #QHBoxLayout
         mainHLayout = QHBoxLayout()
         self.setLayout(mainHLayout)
@@ -1397,22 +1411,26 @@ class ThinkingButton(QWidget):
         mainHLayout.addWidget(self.rightIconLabel)
         mainHLayout.setContentsMargins(5, 5, 5, 5)
         mainHLayout.setSpacing(0)
+        self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
+        #thinkTime
+        self.thinkTimeLength = 0
+        self.startThinkTime = QTime.currentTime()
 
     def enterEvent(self, event):
-        self.backgroundColor = QColor(208, 208, 208)
+        self.backgroundColor = QColor(232, 232, 232)
         self.repaint()
 
     def leaveEvent(self, event):
-        self.backgroundColor = QColor(224, 224, 224)
+        self.backgroundColor = QColor(248, 248, 248)
         self.repaint()
 
-    """ def paintEvent(self, event):
+    def paintEvent(self, event):
         #QPainter create
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         #QPainterPath
         path = QPainterPath()
-        path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 5, 5)
+        path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 10, 10)
         #QBrush
         brush = QBrush(Qt.SolidPattern)
         brush.setColor(self.backgroundColor)
@@ -1421,21 +1439,26 @@ class ThinkingButton(QWidget):
         painter.setBrush(brush)
         painter.drawPath(path.simplified())
         #QPainter end
-        painter.end() """
+        painter.end()
 
     def mousePressEvent(self, event):
-        self.isThinking = not self.isThinking
-        if self.isThinking:
+        self.isShowThinkContent = not self.isShowThinkContent
+        if self.isShowThinkContent:
             self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_up_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
-            self.textLabel.setText("思考中")
         else:
             self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_down_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
-            self.textLabel.setText("已深度思考(用时21秒)")
         self.clicked.emit()
         QWidget.mousePressEvent(self, event)
 
     def connectButtonClick(self, fun):
         self.clicked.connect(fun)
+
+    def setThinkEnd(self):
+        endThinkTime = QTime.currentTime()
+        self.thinkTimeLength = self.startThinkTime.secsTo(endThinkTime)
+        self.textLabel.setText(f"已深度思考(用时{self.thinkTimeLength}秒)")
+        self.textLabel.adjustSize()
+        self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
 
 """ class ThinkLabel(QLabel):
     def __init__(self, text, maxWidth=650, parent=None):
@@ -1895,6 +1918,37 @@ class ThinkWidget(QWidget):
         else:
             return self.webEngineView.selectedText()
 
+class ThinkBackWidget(QWidget):
+    def __init__(self, parent=None):
+        super(ThinkBackWidget, self).__init__(parent)
+
+    def paintEvent(self, event):
+        #QPainter create
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        #backgroundPath QPainterPath
+        backgroundPath = QPainterPath()
+        backgroundPath.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 13, 13)
+        #backgroundBrush QBrush
+        backgroundBrush = QBrush(Qt.SolidPattern)
+        backgroundBrush.setColor(QColor(240, 240, 240))
+        #QPainter setting
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(backgroundBrush)
+        painter.drawPath(backgroundPath.simplified())
+        #QPainterPath
+        path = QPainterPath()
+        path.addRect(self.rect().x() + 4, self.rect().y() + 8, 2, self.rect().height() - 16)
+        #QBrush
+        brush = QBrush(Qt.SolidPattern)
+        brush.setColor(QColor(200, 200, 200))
+        #QPainter setting
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(brush)
+        painter.drawPath(path.simplified())
+        #QPainter end
+        painter.end()
+
 """ class LineNumberShow(QTextEdit):
     def __init__(self, parent=None):
         super(LineNumberShow, self).__init__(parent)
@@ -2096,14 +2150,14 @@ class MessageWidget(QWidget):
         self.isUser = isUser
         #ImageLabel
         self.imageLabel = ImageLabel(isUser=self.isUser)
-        #textWidget QWidget
+        #textWidget TextWidget
         self.textWidget = TextWidget(isUser=isUser)
-        #textLayout QHBoxLayout
+        #textLayout QVBoxLayout
         self.textLayout = QVBoxLayout()
         self.textWidget.setLayout(self.textLayout)
-        #textBox TextWidget
+        #textBoxWidget TextBoxWidget
         self.textBoxWidget = TextBoxWidget()
-        #textLayout QHBoxLayout
+        #textBoxLayout QVBoxLayout
         self.textBoxLayout = QVBoxLayout()
         self.textBoxWidget.setLayout(self.textBoxLayout)
         #thinkButtonHaveCreated
@@ -2114,6 +2168,13 @@ class MessageWidget(QWidget):
             self.thinkCodeShowList = []
             self.resultTextShowList = []
             self.resultCodeShowList = []
+            #thinkBackWidget ThinkBackWidget
+            self.thinkBackWidget = ThinkBackWidget(self)
+            #thinkBackVLayout QVBoxLayout
+            self.thinkBackVLayout = QVBoxLayout()
+            self.thinkBackWidget.setLayout(self.thinkBackVLayout)
+            self.thinkBackVLayout.setContentsMargins(10, 0, 0, 0)
+            self.thinkBackVLayout.setSpacing(0)
             #thinkIsExpand
             self.thinkIsExpand = thinkIsExpand
             """ #
@@ -2157,7 +2218,7 @@ class MessageWidget(QWidget):
                 """ print('thinkCodeBlocks:', thinkCodeBlocks) """
                 for CodeBlock in thinkCodeBlocks:
                     language, code = CodeBlock
-                    self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth, parent=self))
+                    self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth - 10, parent=self))
                     """ self.thinkCodeShowList[-1].hide() """
                     thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     thinkSplitTextList.append(thinkTempTextList[0])
@@ -2169,33 +2230,36 @@ class MessageWidget(QWidget):
                 self.thinkButton = ThinkingButton()
                 self.thinkButton.connectButtonClick(self.thinkButtonClicked)
                 self.thinkButtonHaveCreated = True
+                #textLayout
+                self.textLayout.addWidget(self.thinkButton)
                 #ThinkWidget
                 for splitText in thinkSplitTextList:
                     if splitText != '':
-                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=textMaxWidth, parent=self))
+                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=textMaxWidth - 10, parent=self))
                     """ print('init len:', splitText[-10:], len(self.thinkTextShowList), len(self.thinkCodeShowList), len(self.resultTextShowList), len(self.resultCodeShowList)) """
-                #textLayout
-                self.textLayout.addWidget(self.thinkButton)
                 j = 0
                 for i in range(len(self.thinkCodeShowList)):
                     if thinkSplitTextList[i] != '':
-                        self.textLayout.addWidget(self.thinkTextShowList[i - j])
+                        self.thinkBackVLayout.addWidget(self.thinkTextShowList[i - j])
                     else:
                         j += 1
-                    self.textLayout.addWidget(self.thinkCodeShowList[i])
+                    self.thinkBackVLayout.addWidget(self.thinkCodeShowList[i])
                     """ #set visible
                     self.thinkCodeShowList[i].setVisible(self.thinkIsExpand) """
                 """ if 0 < len(self.thinkTextShowList) - 1 - j and thinkSplitTextList[-1] != '': """
                 if thinkSplitTextList[-1] != '':
-                    self.textLayout.addWidget(self.thinkTextShowList[-1])
+                    self.thinkBackVLayout.addWidget(self.thinkTextShowList[-1])
+                self.textLayout.addWidget(self.thinkBackWidget)
                 #set visible
-                for thinkWidget in self.thinkTextShowList:
+                self.thinkBackWidget.setVisible(self.thinkIsExpand)
+                """ for thinkWidget in self.thinkTextShowList:
                     thinkWidget.setVisible(self.thinkIsExpand)
                 for codeShow in self.thinkCodeShowList:
-                    codeShow.setVisible(self.thinkIsExpand)
+                    codeShow.setVisible(self.thinkIsExpand) """
                 #
                 if self.thinkTextIsRecvEnd and self.isRecvFirst:
                     """ self.thinkTextRecvEnd.emit() """
+                    self.thinkButton.setThinkEnd()
                     self.isRecvFirst = False
                 """ for i in range(self.textLayout.count()):
                     print('init subwidget:', i, self.textLayout.itemAt(i).widget()) """
@@ -2343,11 +2407,14 @@ class MessageWidget(QWidget):
             self.subVLayout2.addWidget(self.imageLabel)
         else:
             self.subVLayout1.addWidget(self.imageLabel)
+            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0)
+            thinkBackHeight = sum([textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
+            self.thinkBackWidget.setFixedSize(thinkBackWidth, thinkBackHeight)
             self.textLayout.setSpacing(0)
             if self.thinkIsExpand:
                 if self.thinkText != '':
-                    thinkWidth = max([self.thinkButton.width()] + [textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList])
-                    thinkHeight = sum([self.thinkButton.height()] + [textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
+                    thinkWidth = max([self.thinkButton.width()] + [self.thinkBackWidget.width()])
+                    thinkHeight = sum([self.thinkButton.height()] + [self.thinkBackWidget.height()])
                 else:
                     thinkWidth = 0
                     thinkHeight = 0
@@ -2508,10 +2575,13 @@ class MessageWidget(QWidget):
             self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
             self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
         else:
+            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0)
+            thinkBackHeight = sum([textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
+            self.thinkBackWidget.setFixedSize(thinkBackWidth, thinkBackHeight)
             if self.thinkIsExpand:
                 if self.thinkText != '':
-                    thinkWidth = max([self.thinkButton.width()] + [textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList])
-                    thinkHeight = sum([self.thinkButton.height()] + [textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
+                    thinkWidth = max([self.thinkButton.width()] + [self.thinkBackWidget.width()])
+                    thinkHeight = sum([self.thinkButton.height()] + [self.thinkBackWidget.height()])
                 else:
                     thinkWidth = 0
                     thinkHeight = 0
@@ -2591,7 +2661,7 @@ class MessageWidget(QWidget):
                 for index, CodeBlock in enumerate(thinkCodeBlocks):
                     language, code = CodeBlock
                     if thinkCodeShowListLastLen < index:
-                        self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth, parent=self))
+                        self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth - 10, parent=self))
                         #set visible
                         self.thinkCodeShowList[-1].setVisible(self.thinkIsExpand)
                         """ self.thinkCodeShowList[-1].hide() """
@@ -2601,52 +2671,54 @@ class MessageWidget(QWidget):
                     thinkSplitTextList.append(thinkTempTextList[0])
                     thinkTempText = thinkTempTextList[1]
                 thinkSplitTextList.append(thinkTempText)
-            """ print('split:', len(thinkSplitTextList)) """
-            if not self.thinkButtonHaveCreated:
-                #ThinkingButton
-                self.thinkButton = ThinkingButton()
-                self.thinkButton.connectButtonClick(self.thinkButtonClicked)
-                self.thinkButtonHaveCreated = True
+                """ print('split:', len(thinkSplitTextList)) """
+                if not self.thinkButtonHaveCreated:
+                    #ThinkingButton
+                    self.thinkButton = ThinkingButton()
+                    self.thinkButton.connectButtonClick(self.thinkButtonClicked)
+                    self.thinkButtonHaveCreated = True
+                    #textLayout
+                    self.textLayout.addWidget(self.thinkButton)
+                    self.textLayout.addWidget(self.thinkBackWidget)
+                #ThinkWidget
+                i = 0
+                thinkTextShowListLastLen = len(self.thinkTextShowList) - 1
+                for splitText in thinkSplitTextList:
+                    if splitText != '':
+                        if thinkTextShowListLastLen < i:
+                            self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=self.textMaxWidth - 10, parent=self))
+                            #set visible
+                            self.thinkTextShowList[-1].setVisible(self.thinkIsExpand)
+                        else:
+                            """ print('i:', i, splitText[-10:]) """
+                            """ if self.isRecvFirst:
+                                self.thinkTextShowList[i].setText(splitText) """
+                            self.thinkTextShowList[i].setText(splitText)
+                        i += 1
                 #textLayout
-                self.textLayout.addWidget(self.thinkButton)
-            #ThinkWidget
-            i = 0
-            thinkTextShowListLastLen = len(self.thinkTextShowList) - 1
-            for splitText in thinkSplitTextList:
-                if splitText != '':
-                    if thinkTextShowListLastLen < i:
-                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=self.textMaxWidth, parent=self))
-                        #set visible
-                        self.thinkTextShowList[-1].setVisible(self.thinkIsExpand)
+                j = 0
+                for i in range(len(self.thinkCodeShowList)):
+                    if thinkSplitTextList[i] != '':
+                        if thinkTextShowListLastLen < i - j:
+                            self.thinkBackVLayout.addWidget(self.thinkTextShowList[i - j])
                     else:
-                        """ print('i:', i, splitText[-10:]) """
-                        """ if self.isRecvFirst:
-                            self.thinkTextShowList[i].setText(splitText) """
-                        self.thinkTextShowList[i].setText(splitText)
-                    i += 1
-            #textLayout
-            j = 0
-            for i in range(len(self.thinkCodeShowList)):
-                if thinkSplitTextList[i] != '':
-                    if thinkTextShowListLastLen < i - j:
-                        self.textLayout.addWidget(self.thinkTextShowList[i - j])
-                else:
-                    j += 1
-                if thinkCodeShowListLastLen < i:
-                    self.textLayout.addWidget(self.thinkCodeShowList[i])
-                    """ #set visible
-                    self.thinkCodeShowList[i].setVisible(self.thinkIsExpand) """
-            if thinkTextShowListLastLen < len(self.thinkTextShowList) - 1 - j and thinkSplitTextList[-1] != '':
-                self.textLayout.addWidget(self.thinkTextShowList[-1])
-            """ #set text
-            if not self.thinkTextIsRecvEnd:
-                self.thinkWidget.setText(self.thinkText) """
-            #
-            """ print('thinkTextIsRecvEnd:', self.thinkTextIsRecvEnd) """
-            if self.thinkTextIsRecvEnd and self.isRecvFirst:
-                """ print('isRecvFirst:', self.isRecvFirst)
-                self.thinkTextRecvEnd.emit() """
-                self.isRecvFirst = False
+                        j += 1
+                    if thinkCodeShowListLastLen < i:
+                        self.thinkBackVLayout.addWidget(self.thinkCodeShowList[i])
+                        """ #set visible
+                        self.thinkCodeShowList[i].setVisible(self.thinkIsExpand) """
+                if thinkTextShowListLastLen < len(self.thinkTextShowList) - 1 - j and thinkSplitTextList[-1] != '':
+                    self.thinkBackVLayout.addWidget(self.thinkTextShowList[-1])
+                """ #set text
+                if not self.thinkTextIsRecvEnd:
+                    self.thinkWidget.setText(self.thinkText) """
+                #
+                """ print('thinkTextIsRecvEnd:', self.thinkTextIsRecvEnd) """
+                if self.thinkTextIsRecvEnd and self.isRecvFirst:
+                    """ print('isRecvFirst:', self.isRecvFirst)
+                    self.thinkTextRecvEnd.emit() """
+                    self.thinkButton.setThinkEnd()
+                    self.isRecvFirst = False
             #TextShow
             resultSplitTextList = []
             resultTempTextList = []
@@ -2688,7 +2760,7 @@ class MessageWidget(QWidget):
                         """ self.resultCodeShowList[i].show() """
                 if resultTextShowListLastLen < len(self.resultTextShowList) - 1 - j and resultSplitTextList[-1] != '':
                     self.textLayout.addWidget(self.resultTextShowList[-1])
-            """ self.textShow.setText(self.resultText) """
+                """ self.textShow.setText(self.resultText) """
         else:
             self.textShow.setText(text)
 
@@ -2696,10 +2768,13 @@ class MessageWidget(QWidget):
             self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
             self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
         else:
+            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0)
+            thinkBackHeight = sum([textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
+            self.thinkBackWidget.setFixedSize(thinkBackWidth, thinkBackHeight)
             if self.thinkIsExpand:
                 if self.thinkText != '':
-                    thinkWidth = max([self.thinkButton.width()] + [textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList])
-                    thinkHeight = sum([self.thinkButton.height()] + [textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
+                    thinkWidth = max([self.thinkButton.width()] + [self.thinkBackWidget.width()])
+                    thinkHeight = sum([self.thinkButton.height()] + [self.thinkBackWidget.height()])
                 else:
                     thinkWidth = 0
                     thinkHeight = 0
@@ -2863,7 +2938,7 @@ class PrintLabel(QWidget):
         self.label.setFont(self.font)
         self.font_metrics = QFontMetricsF(self.font)
         self.palette = self.label.palette()
-        self.palette.setColor(QPalette.WindowText, QColor(23, 171, 227))
+        self.palette.setColor(QPalette.WindowText, QColor(76, 106, 246))
         self.label.setPalette(self.palette)
         self.label.setAlignment(Qt.AlignCenter)
         self.mainHLayout = QHBoxLayout()
@@ -3080,7 +3155,7 @@ class LineEdit(QLineEdit):
         self.searchButton.setFixedSize(30, 30)
         self.search_images_path = os.path.join(images_dir, 'search.png').replace('\\', '/')
         self.searchButton.setIcon(QIcon(f"{self.search_images_path}"))
-        self.searchButton.setIconSize(QSize(30, 30))
+        self.searchButton.setIconSize(QSize(24, 24))
         self.searchButton.move(0, 0)
         #LineEdit
         self.setStyleSheet('''
@@ -3091,7 +3166,7 @@ class LineEdit(QLineEdit):
             border: none;
             border-radius: 5px;
             background: #b8b8b8;
-            self.padding-left: 30px;
+            padding-left: 30px;
         }
         ''')
 
@@ -3534,12 +3609,12 @@ class MainWindow(QMainWindow):
         self.chatRecordsFoldButton.clicked.connect(self.chatRecordsFoldButtonClicked)
         #emptyTextLabel PrintLabel
         self.emptyTextLabel = PrintLabel('文本不能为空', self)
-        self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.emptyTextLabel.height() - 10)
+        self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() + 10)
         self.emptyTextLabel.raise_()
         self.emptyTextLabel.hide()
         #textCopyLabel PrintLabel
         self.textCopyLabel = PrintLabel('文本复制成功', self)
-        self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.textCopyLabel.height() - 10)
+        self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() + 10)
         self.textCopyLabel.raise_()
         self.textCopyLabel.hide()
         """ #resizeTimer
@@ -3832,8 +3907,10 @@ class MainWindow(QMainWindow):
             self.chatInputWidget.resize(self.mainWidget.width() * 2 // 3, self.chatInputWidget.height())
             self.splitter.resize(self.mainWidget.width() * 2 // 3, self.splitter.height())
             self.contentVLayout.setContentsMargins(self.mainWidget.width() // 3, 0, 0, 0)
+            self.settingFoldButton.move(self.settingWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.settingFoldButton.height()) // 2)
         else:
             self.settingWidget.move(-self.settingWidget.width(), self.titleWidget.height())
+            self.settingFoldButton.move(0, (self.mainWidget.height() + self.titleWidget.height() - self.settingFoldButton.height()) // 2)
         #chatRecords widget set geometry
         self.chatRecordsWidget.resetWidgetSize(self.mainWidget.width() // 3, self.mainWidget.height() - self.titleWidget.height())
         if self.chatRecordsWidgetIsOpen:
@@ -3844,14 +3921,16 @@ class MainWindow(QMainWindow):
             self.chatInputWidget.resize(self.mainWidget.width() * 2 // 3, self.chatInputWidget.height())
             self.splitter.resize(self.mainWidget.width() * 2 // 3, self.splitter.height())
             self.contentVLayout.setContentsMargins(self.mainWidget.width() // 3, 0, 0, 0)
+            self.chatRecordsFoldButton.move(self.chatRecordsWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.chatRecordsFoldButton.height()) // 2)
         else:
             self.chatRecordsWidget.move(-self.chatRecordsWidget.width(), self.titleWidget.height())
+            self.chatRecordsFoldButton.move(0, (self.mainWidget.height() + self.titleWidget.height() - self.chatRecordsFoldButton.height()) // 2)
         #TextEditFull adjust size
         self.chatInput.resetWidgetSize()
         #move emptyTextLabel
-        self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.emptyTextLabel.height() - 10)
+        self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() + 10)
         #move textCopyLabel
-        self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() - self.textCopyLabel.height() - 10)
+        self.textCopyLabel.move((self.width() - self.textCopyLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() + 10)
         """ #resizeTimer
         self.resizeTimer.start(150) """
         #isRegenerate
@@ -4604,12 +4683,14 @@ class MainWindow(QMainWindow):
                 self.chatInput.clearText()
                 self.chatInput.textEdit.isSending = True
                 self.chatInput.textEdit.textChanged.emit()
+                self.isSending = True
             else:
                 #print emptyTextLabel
                 self.emptyTextLabel.printStart()
         else:
             self.thread.stop()
-        self.isSending = not self.isSending
+            self.isSending = False
+        """ self.isSending = not self.isSending """
 
     def messageStart(self):
         #message
@@ -4683,6 +4764,7 @@ class MainWindow(QMainWindow):
             lastItem = self.chatShow.takeItem(last)
             del lastItem
             self.messageRenewResponse()
+        self.isSending = False
 
     def textCopy(self):
         #print textCopyLabel

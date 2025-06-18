@@ -9,7 +9,7 @@ import sys, os
 from enum import Enum
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QTextEdit, QMenu, QFrame, QGraphicsDropShadowEffect
 from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QTime
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextOption
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextCursor
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from pygments import highlight, token
 from pygments.lexers import CLexer, CppLexer, PythonLexer, JavaLexer, JavascriptLexer
@@ -70,6 +70,126 @@ for (int i = 1; i <= 100; i++) {
     sum += i;
 }
 System.out.println(sum);
+import sys
+from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
+from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
+from PyQt5.QtCore import Qt, QRect
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
+
+class LineNumberArea(QWidget):
+    def __init__(self, editor):
+        super().__init__(editor)
+        self.editor = editor
+        self.editor.document().blockCountChanged.connect(self.update_width)
+        """ self.editor.updateRequest.connect(self.update) """
+        print(self.editor.document())
+
+    def update_width(self, block_count):
+        # 计算行号区域宽度
+        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * len(str(block_count)) + 20)
+        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
+import sys
+from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
+from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
+from PyQt5.QtCore import Qt, QRect
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
+
+class LineNumberArea(QWidget):
+    def __init__(self, editor):
+        super().__init__(editor)
+        self.editor = editor
+        self.editor.document().blockCountChanged.connect(self.update_width)
+        """ self.editor.updateRequest.connect(self.update) """
+        print(self.editor.document())
+
+    def update_width(self, block_count):
+        # 计算行号区域宽度
+        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * len(str(block_count)) + 20)
+        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
+import sys
+from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
+from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
+from PyQt5.QtCore import Qt, QRect
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
+
+class LineNumberArea(QWidget):
+    def __init__(self, editor):
+        super().__init__(editor)
+        self.editor = editor
+        self.editor.document().blockCountChanged.connect(self.update_width)
+        """ self.editor.updateRequest.connect(self.update) """
+        print(self.editor.document())
+
+    def update_width(self, block_count):
+        # 计算行号区域宽度
+        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * len(str(block_count)) + 20)
+        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
+import sys
+from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
+from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
+from PyQt5.QtCore import Qt, QRect
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
+
+class LineNumberArea(QWidget):
+    def __init__(self, editor):
+        super().__init__(editor)
+        self.editor = editor
+        self.editor.document().blockCountChanged.connect(self.update_width)
+        """ self.editor.updateRequest.connect(self.update) """
+        print(self.editor.document())
+
+    def update_width(self, block_count):
+        # 计算行号区域宽度
+        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * len(str(block_count)) + 20)
+        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
+import sys
+from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
+from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
+from PyQt5.QtCore import Qt, QRect
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
+
+class LineNumberArea(QWidget):
+    def __init__(self, editor):
+        super().__init__(editor)
+        self.editor = editor
+        self.editor.document().blockCountChanged.connect(self.update_width)
+        """ self.editor.updateRequest.connect(self.update) """
+        print(self.editor.document())
+
+    def update_width(self, block_count):
+        # 计算行号区域宽度
+        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * len(str(block_count)) + 20)
+        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
+import sys
+from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
+from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
+from PyQt5.QtCore import Qt, QRect
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
+
+class LineNumberArea(QWidget):
+    def __init__(self, editor):
+        super().__init__(editor)
+        self.editor = editor
+        self.editor.document().blockCountChanged.connect(self.update_width)
+        """ self.editor.updateRequest.connect(self.update) """
+        print(self.editor.document())
+
+    def update_width(self, block_count):
+        # 计算行号区域宽度
+        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * len(str(block_count)) + 20)
+        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
 ```
 
 这样应该就能得到结果了。或者直接用公式的话，可能更简洁：
@@ -919,13 +1039,13 @@ class TextShow(QWidget):
     setSizeFinished = pyqtSignal()
     """ setTexting = pyqtSignal(bool) """
 
-    def __init__(self, text, isUser=True, maxWidth=650, parent=None):
+    def __init__(self, text, isUser=True, maxWidth=810, parent=None):
         super(TextShow, self).__init__(parent)
         self.text = text.strip('\n')
         self.label = CustomLabel()
         self.label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.label.setWordWrap(True)
-        self.maxWidth = maxWidth
+        self.maxWidth = maxWidth - 10
         self.label.setMaximumWidth(self.maxWidth)
         self.font = QFont()
         self.font.setPointSize(windowFontPointSize)
@@ -961,15 +1081,15 @@ class TextShow(QWidget):
             self.label.setText(self.text)
             self.label.setFixedSize(labelWidth, labelHeight)
             self.mainHLayout.addWidget(self.label)
-            self.mainHLayout.setContentsMargins(5, 5, 5, 5)
+            self.mainHLayout.setContentsMargins(5, 0, 5, 0)
             self.setLayout(self.mainHLayout)
-            self.setFixedSize(labelWidth + 10, labelHeight + 10)
+            self.setFixedSize(labelWidth + 10, labelHeight)
         else:
             self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
             self.mainHLayout.addWidget(self.label)
-            self.mainHLayout.setContentsMargins(5, 5, 5, 5)
+            self.mainHLayout.setContentsMargins(5, 0, 5, 0)
             self.setLayout(self.mainHLayout)
-            self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
+            self.setFixedSize(self.label.width() + 10, self.label.height())
         self.isUser = isUser
         self.isColorful = False
 
@@ -1029,10 +1149,10 @@ class TextShow(QWidget):
                 labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
             self.label.setText(self.text)
             self.label.setFixedSize(labelWidth, labelHeight)
-            self.setFixedSize(labelWidth + 10, labelHeight + 10)
+            self.setFixedSize(labelWidth + 10, labelHeight)
         else:
             self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
-            self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
+            self.setFixedSize(self.label.width() + 10, self.label.height())
 
     def onPageLoadFinished(self, success):
         js = """
@@ -1060,7 +1180,7 @@ class TextShow(QWidget):
         width, height = result
         if width != 0 and height != 0:
             self.webEngineView.setFixedSize(width, height)
-            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
+            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height())
             self.setSizeFinished.emit()
 
     def getAlignmentClass(self, format_string):
@@ -1263,7 +1383,7 @@ class TextShow(QWidget):
                 self.mainHLayout.removeWidget(self.label)
                 self.label.deleteLater()
                 self.mainHLayout.addWidget(self.webEngineView)
-            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
+            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height())
             self.setSizeFinished.emit()
             self.isLabel = False
             """ self.setTexting.emit(self.isLabel) """
@@ -1461,7 +1581,7 @@ class ThinkingButton(QWidget):
         self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
 
 """ class ThinkLabel(QLabel):
-    def __init__(self, text, maxWidth=650, parent=None):
+    def __init__(self, text, maxWidth=765, parent=None):
         super().__init__(parent)
         self.text = text.strip('\n')
         self.label = CustomLabel()
@@ -1560,7 +1680,7 @@ class ThinkingButton(QWidget):
 class ThinkWidget(QWidget):
     setSizeFinished = pyqtSignal()
 
-    def __init__(self, text, maxWidth=650, parent=None):
+    def __init__(self, text, maxWidth=765, parent=None):
         super(ThinkWidget, self).__init__(parent)
         self.text = text.strip('\n')
         self.label = CustomLabel()
@@ -1602,17 +1722,17 @@ class ThinkWidget(QWidget):
             self.label.setText(self.text)
             self.label.setFixedSize(labelWidth, labelHeight)
             self.mainHLayout.addWidget(self.label)
-            self.mainHLayout.setContentsMargins(15, 5, 5, 5)
+            self.mainHLayout.setContentsMargins(0, 0, 0, 0)
             self.setLayout(self.mainHLayout)
-            self.setFixedSize(labelWidth + 20, labelHeight + 10)
+            self.setFixedSize(labelWidth, labelHeight)
         else:
             self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
             self.mainHLayout.addWidget(self.label)
-            self.mainHLayout.setContentsMargins(15, 5, 5, 5)
+            self.mainHLayout.setContentsMargins(0, 0, 0, 0)
             self.setLayout(self.mainHLayout)
-            self.setFixedSize(self.label.width() + 20, self.label.height() + 10)
+            self.setFixedSize(self.label.width(), self.label.height())
 
-    def paintEvent(self, event):
+    """ def paintEvent(self, event):
         #QPainter create
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
@@ -1621,7 +1741,7 @@ class ThinkWidget(QWidget):
         backgroundPath.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 13, 13)
         #backgroundBrush QBrush
         backgroundBrush = QBrush(Qt.SolidPattern)
-        backgroundBrush.setColor(QColor(240, 240, 240))
+        backgroundBrush.setColor(QColor(Qt.green))
         #QPainter setting
         painter.setPen(Qt.NoPen)
         painter.setBrush(backgroundBrush)
@@ -1637,7 +1757,7 @@ class ThinkWidget(QWidget):
         painter.setBrush(brush)
         painter.drawPath(path.simplified())
         #QPainter end
-        painter.end()
+        painter.end() """
 
     def setText(self, text):
         self.text = text.strip('\n')
@@ -1665,10 +1785,10 @@ class ThinkWidget(QWidget):
                 labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
             self.label.setText(self.text)
             self.label.setFixedSize(labelWidth, labelHeight)
-            self.setFixedSize(labelWidth + 20, labelHeight + 10)
+            self.setFixedSize(labelWidth, labelHeight)
         else:
             self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
-            self.setFixedSize(self.label.width() + 20, self.label.height() + 10)
+            self.setFixedSize(self.label.width(), self.label.height())
 
     def onPageLoadFinished(self, success):
         js = """
@@ -1696,7 +1816,7 @@ class ThinkWidget(QWidget):
         width, height = result
         if width != 0 and height != 0:
             self.webEngineView.setFixedSize(width, height)
-            self.setFixedSize(self.webEngineView.width() + 15, self.webEngineView.height() + 10)
+            self.setFixedSize(self.webEngineView.width(), self.webEngineView.height())
             self.setSizeFinished.emit()
 
     def getAlignmentClass(self, format_string):
@@ -1899,7 +2019,7 @@ class ThinkWidget(QWidget):
                 self.mainHLayout.removeWidget(self.label)
                 self.label.deleteLater()
                 self.mainHLayout.addWidget(self.webEngineView)
-            self.setFixedSize(self.webEngineView.width() + 15, self.webEngineView.height() + 10)
+            self.setFixedSize(self.webEngineView.width(), self.webEngineView.height())
             self.setSizeFinished.emit()
             self.isLabel = False
 
@@ -1931,17 +2051,17 @@ class ThinkBackWidget(QWidget):
         backgroundPath.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 13, 13)
         #backgroundBrush QBrush
         backgroundBrush = QBrush(Qt.SolidPattern)
-        backgroundBrush.setColor(QColor(240, 240, 240))
+        backgroundBrush.setColor(QColor(244, 244, 252))
         #QPainter setting
         painter.setPen(Qt.NoPen)
         painter.setBrush(backgroundBrush)
         painter.drawPath(backgroundPath.simplified())
         #QPainterPath
         path = QPainterPath()
-        path.addRect(self.rect().x() + 4, self.rect().y() + 8, 2, self.rect().height() - 16)
+        path.addRect(self.rect().x() + 14, self.rect().y() + 12, 2, self.rect().height() - 24)
         #QBrush
         brush = QBrush(Qt.SolidPattern)
-        brush.setColor(QColor(200, 200, 200))
+        brush.setColor(QColor(172, 188, 220))
         #QPainter setting
         painter.setPen(Qt.NoPen)
         painter.setBrush(brush)
@@ -1949,26 +2069,45 @@ class ThinkBackWidget(QWidget):
         #QPainter end
         painter.end()
 
-""" class LineNumberShow(QTextEdit):
+class LineNumberArea(QWidget):
     def __init__(self, parent=None):
-        super(LineNumberShow, self).__init__(parent)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setFont(QFont("Courier New", 12))
-        palette = self.palette()
-        palette.setColor(QPalette.Text, QColor(178, 170, 164))
-        self.setPalette(palette) """
+        super(LineNumberArea, self).__init__(parent)
+        self.editor = parent
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.fillRect(event.rect(), QColor(20, 20, 28))
+        """ painter.fillRect(event.rect(), QColor(Qt.red)) """
+        pen = QPen(QColor(178, 170, 164))
+        painter.setPen(pen)
+        painter.setFont(self.editor.font())
+        hAdvance = self.editor.fontMetrics().horizontalAdvance('9')
+        blockNumber = self.editor.getFirstVisibleBlock()
+        block       = self.editor.document().findBlockByNumber(blockNumber)
+        top         = int(self.editor.document().documentLayout().blockBoundingRect(block).translated(0, -self.editor.verticalScrollBar().value()).top())
+        bottom      = top + int(self.editor.document().documentLayout().blockBoundingRect(block).height())
+        while(block.isValid() and top <= event.rect().bottom()):
+            if (block.isVisible() and bottom >= event.rect().top()):
+                painter.drawText(int((2 - len(str(self.editor.document().blockCount()))) * 0.275 * hAdvance), top, self.width() - hAdvance, bottom - top, Qt.AlignRight | Qt.AlignVCenter, str(blockNumber + 1))
+            block = block.next()
+            top = int(self.editor.document().documentLayout().blockBoundingRect(block).translated(0, -self.editor.verticalScrollBar().value()).top())
+            bottom = top + int(self.editor.document().documentLayout().blockBoundingRect(block).height())
+            blockNumber += 1
+        painter.end()
 
 class CodeEdit(QTextEdit):
     setSizeFinished = pyqtSignal()
 
     def __init__(self, parent=None):
         super(CodeEdit, self).__init__(parent)
-        self.setFont(QFont("Courier New", 12))
         self.horizontalScrollBar().setCursor(Qt.PointingHandCursor)
         self.setStyleSheet('''
         QTextEdit {
+            border: none;
             background-color: #14141c;
+            border-bottom-left-radius: 7px;
+            border-bottom-right-radius: 7px;
         }
         QScrollBar:horizontal {
             background: transparent;
@@ -1990,11 +2129,29 @@ class CodeEdit(QTextEdit):
             width: 0px;
         }
         ''')
-        """ #
-        self.lineNumberWidget = LineNumberShow(self)
-        self.lineNumberWidget.move(0, 1) """
+        #LineNumberArea
+        self.lineNumberArea = LineNumberArea(self)
+        self.lineNumberArea.move(0, 0)
+        self.updateLineNumberAreaWidth()
         #textChanged
         self.textChanged.connect(self.adjustSize)
+        #valueChanged
+        self.verticalScrollBar().valueChanged.connect(self.on_scroll)
+
+    def on_scroll(self, value):
+        self.lineNumberArea.repaint()
+
+    def getFirstVisibleBlock(self):
+        curs = QTextCursor(self.document())
+        curs.movePosition(QTextCursor.Start)
+        r1 = self.viewport().geometry()
+        for i in range(self.document().blockCount()):
+            block = curs.block()
+            r2 = self.document().documentLayout().blockBoundingRect(block).translated(self.viewport().geometry().x(), self.viewport().geometry().y() - self.verticalScrollBar().sliderPosition()).toRect()
+            if r1.intersects(r2):
+                return i
+            curs.movePosition(QTextCursor.NextBlock)
+        return 0
 
     def highlightCode(self, text, lexerName='python'):
         match lexerName:
@@ -2010,13 +2167,13 @@ class CodeEdit(QTextEdit):
                 lexer = JavascriptLexer()
             case _:
                 lexer = PythonLexer()
-        text = self.add_line_numbers(text)
+        """ text = self.add_line_numbers(text) """
         formatter = HtmlFormatter(style=CustomStyle, noclasses=True)
         html = highlight(text, lexer, formatter)
         """ html = html.replace('<pre style="line-height: 125%;">', '<pre style="line-height: 100%;">') """
         self.setHtml(html)
 
-    def add_line_numbers(self, text):
+    """ def add_line_numbers(self, text):
         # 根据 '\n' 分割字符串成多行
         lines = text.split('\n')
         
@@ -2028,33 +2185,25 @@ class CodeEdit(QTextEdit):
         
         # 将处理后的行重新组合成字符串
         result = '\n'.join(numbered_lines)
-        return result
+        return result """
 
-    """ def updateLineNumberAreaWidth(self):
-        self.setViewportMargins(self.lineNumberWidget.width(), 0, 0, 0) """
-
-    """ def onTextChanged(self):
-        self.adjustSize()
-        QTimer.singleShot(1, self.adjustSize) """
+    def updateLineNumberAreaWidth(self):
+        self.lineNumberArea.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().blockCount())) + 1), self.viewport().height())
+        self.setViewportMargins(self.lineNumberArea.width(), 0, 0, 0)
 
     def adjustSize(self):
-        """ lineNumberText = '' """
         height = int(self.document().size().height())
         self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
-        """ self.lineNumberWidget.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().lineCount())) + 2), self.height())
-        print('lineNumberWidget.size():', self.lineNumberWidget.size())
         self.updateLineNumberAreaWidth()
-        for i in range(self.document().lineCount()):
-            lineNumberText += ' ' + str(i + 1) + ' \n'
-        self.lineNumberWidget.setText(lineNumberText) """
+        self.lineNumberArea.repaint()
         self.setSizeFinished.emit()
 
     def resizeEvent(self, event):
         QTextEdit.resizeEvent(self, event)
-        """ self.lineNumberWidget.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().lineCount())) + 2), self.height())
-        self.updateLineNumberAreaWidth() """
         height = int(self.document().size().height())
         self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
+        self.updateLineNumberAreaWidth()
+        self.lineNumberArea.repaint()
         self.setSizeFinished.emit()
 
 class CustomStyle(Style):
@@ -2071,17 +2220,25 @@ class CustomStyle(Style):
     }
 
 class CodeShow(QWidget):
-    def __init__(self, codeText, lexerName='python', maxWidth=650, parent=None):
+    def __init__(self, codeText, lexerName='python', maxWidth=810, parent=None):
         super(CodeShow, self).__init__(parent)
         self.maxWidth = maxWidth
         self.mainVLayout = QVBoxLayout()
         self.setLayout(self.mainVLayout)
+        self.setObjectName('CodeShow')
+        self.setStyleSheet('''
+        #CodeShow {
+            border-radius: 13px;
+        }
+        ''')
         #
         self.topWidget = QWidget()
         """ self.topWidget.setFixedHeight(20) """
         self.topWidget.setStyleSheet('''
         QWidget {
-            background-color: #14141c;
+            background-color: #34343c;
+            border-top-left-radius: 7px;
+            border-top-right-radius: 7px;
         }
         ''')
         self.topSubHLayout = QHBoxLayout()
@@ -2092,7 +2249,8 @@ class CodeShow(QWidget):
         font.setPointSize(windowFontPointSize)
         self.label.setFont(font)
         self.palette = self.label.palette()
-        self.palette.setColor(QPalette.Text, QColor(178, 170, 164))
+        """ self.palette.setColor(QPalette.Text, QColor(178, 170, 164)) """
+        self.palette.setColor(QPalette.Text, QColor(Qt.white))
         self.label.setPalette(self.palette)
         self.label.adjustSize()
         #
@@ -2110,7 +2268,7 @@ class CodeShow(QWidget):
         #
         self.topSubHLayout.addWidget(self.label, 0, Qt.AlignLeft)
         self.topSubHLayout.addWidget(self.codeCopyButton, 0, Qt.AlignRight)
-        self.topSubHLayout.setContentsMargins(0, 0, 0, 0)
+        self.topSubHLayout.setContentsMargins(10, 0, 10, 0)
         self.topWidget.setFixedHeight(self.label.height())
         #
         self.codeEdit = CodeEdit()
@@ -2142,7 +2300,7 @@ class MessageWidget(QWidget):
     resizeFinished = pyqtSignal()
     setTexting = pyqtSignal(bool)
 
-    def __init__(self, text, copyFun, renewResponseFun, listWidget, isUser=True, thinkIsExpand=True, textMaxWidth=780, parent=None):
+    def __init__(self, text, copyFun, renewResponseFun, listWidget, isUser=True, thinkIsExpand=True, textMaxWidth=877, parent=None):
         super(MessageWidget, self).__init__(parent)
         self.listWidget = listWidget
         self.text = text
@@ -2173,7 +2331,7 @@ class MessageWidget(QWidget):
             #thinkBackVLayout QVBoxLayout
             self.thinkBackVLayout = QVBoxLayout()
             self.thinkBackWidget.setLayout(self.thinkBackVLayout)
-            self.thinkBackVLayout.setContentsMargins(10, 0, 0, 0)
+            self.thinkBackVLayout.setContentsMargins(30, 0, 15, 0)
             self.thinkBackVLayout.setSpacing(0)
             #thinkIsExpand
             self.thinkIsExpand = thinkIsExpand
@@ -2218,7 +2376,7 @@ class MessageWidget(QWidget):
                 """ print('thinkCodeBlocks:', thinkCodeBlocks) """
                 for CodeBlock in thinkCodeBlocks:
                     language, code = CodeBlock
-                    self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth - 10, parent=self))
+                    self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth - self.imageLabel.width() - 80, parent=self))
                     """ self.thinkCodeShowList[-1].hide() """
                     thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     thinkSplitTextList.append(thinkTempTextList[0])
@@ -2235,7 +2393,7 @@ class MessageWidget(QWidget):
                 #ThinkWidget
                 for splitText in thinkSplitTextList:
                     if splitText != '':
-                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=textMaxWidth - 10, parent=self))
+                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=textMaxWidth - self.imageLabel.width() - 80, parent=self))
                     """ print('init len:', splitText[-10:], len(self.thinkTextShowList), len(self.thinkCodeShowList), len(self.resultTextShowList), len(self.resultCodeShowList)) """
                 j = 0
                 for i in range(len(self.thinkCodeShowList)):
@@ -2271,7 +2429,7 @@ class MessageWidget(QWidget):
                 resultCodeBlocks = self.extract_code_blocks(self.resultText)
                 for CodeBlock in resultCodeBlocks:
                     language, code = CodeBlock
-                    self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth, parent=self))
+                    self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth - self.imageLabel.width() - 35, parent=self))
                     """ self.resultCodeShowList[-1].hide() """
                     resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     resultSplitTextList.append(resultTempTextList[0])
@@ -2280,7 +2438,7 @@ class MessageWidget(QWidget):
                 #TextShow
                 for splitText in resultSplitTextList:
                     if splitText != '':
-                        self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=textMaxWidth, parent=self))
+                        self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=textMaxWidth - self.imageLabel.width() - 35, parent=self))
                 #textLayout
                 j = 0
                 for i in range(len(self.resultCodeShowList)):
@@ -2295,7 +2453,7 @@ class MessageWidget(QWidget):
                     self.textLayout.addWidget(self.resultTextShowList[-1])
                 """ for i in range(self.textLayout.count()):
                     print('init subwidget1:', i, self.textLayout.itemAt(i).widget()) """
-            self.textLayout.setContentsMargins(5, 5, 5, 5)
+            self.textLayout.setContentsMargins(15, 5, 15, 5)
             """ #TextShow
             for splitText in splitTextList:
                 if splitText != '':
@@ -2319,9 +2477,9 @@ class MessageWidget(QWidget):
                 self.isRecvFirst = False """
         else:
             #TextShow
-            self.textShow = TextShow(text, isUser=self.isUser, maxWidth=textMaxWidth)
+            self.textShow = TextShow(text, isUser=self.isUser, maxWidth=textMaxWidth - self.imageLabel.width() - 15)
             self.textLayout.addWidget(self.textShow)
-            self.textLayout.setContentsMargins(5, 5, 5, 5)
+            self.textLayout.setContentsMargins(5, 0, 5, 0)
         """ if self.isUser:
             self.textLayout.addWidget(self.textShow)
             self.textLayout.setContentsMargins(5, 5, 5, 5)
@@ -2397,7 +2555,7 @@ class MessageWidget(QWidget):
         if self.isUser:
             """ self.textLayout.addWidget(self.funWidget)
             self.textLayout.setSpacing(0) """
-            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
+            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height())
             self.textBoxLayout.addWidget(self.textWidget)
             self.textBoxLayout.addWidget(self.funWidget)
             self.textBoxLayout.setContentsMargins(0, 0, 0, 0)
@@ -2407,7 +2565,7 @@ class MessageWidget(QWidget):
             self.subVLayout2.addWidget(self.imageLabel)
         else:
             self.subVLayout1.addWidget(self.imageLabel)
-            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0)
+            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0) + 45
             thinkBackHeight = sum([textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
             self.thinkBackWidget.setFixedSize(thinkBackWidth, thinkBackHeight)
             self.textLayout.setSpacing(0)
@@ -2449,7 +2607,7 @@ class MessageWidget(QWidget):
                 codeShowHeights = sum([codeShow.height() for codeShow in self.codeShowList]) """
                 """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + textShowHeights + codeShowHeights + 10) """
                 """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10) """
-            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 10, thinkHeight + resultHeight + 10)
+            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 30, thinkHeight + resultHeight + 10)
             self.loadingWidget = LoadingWidget()
             """ self.textLayout.addWidget(self.loadingWidget)
             self.textLayout.setSpacing(0) """
@@ -2572,10 +2730,10 @@ class MessageWidget(QWidget):
 
     def setSize(self):
         if self.isUser:
-            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
+            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height())
             self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
         else:
-            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0)
+            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0) + 45
             thinkBackHeight = sum([textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
             self.thinkBackWidget.setFixedSize(thinkBackWidth, thinkBackHeight)
             if self.thinkIsExpand:
@@ -2616,7 +2774,7 @@ class MessageWidget(QWidget):
                 codeShowHeights = sum([codeShow.height() for codeShow in self.codeShowList]) """
                 """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + textShowHeights + codeShowHeights + 10) """
                 """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10) """
-            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 10, thinkHeight + resultHeight + 10)
+            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 30, thinkHeight + resultHeight + 10)
             if self.loadingWidgetIsRemove:
                 self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
             else:
@@ -2661,7 +2819,7 @@ class MessageWidget(QWidget):
                 for index, CodeBlock in enumerate(thinkCodeBlocks):
                     language, code = CodeBlock
                     if thinkCodeShowListLastLen < index:
-                        self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth - 10, parent=self))
+                        self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth - self.imageLabel.width() - 80, parent=self))
                         #set visible
                         self.thinkCodeShowList[-1].setVisible(self.thinkIsExpand)
                         """ self.thinkCodeShowList[-1].hide() """
@@ -2686,7 +2844,7 @@ class MessageWidget(QWidget):
                 for splitText in thinkSplitTextList:
                     if splitText != '':
                         if thinkTextShowListLastLen < i:
-                            self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=self.textMaxWidth - 10, parent=self))
+                            self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=self.textMaxWidth - self.imageLabel.width() - 80, parent=self))
                             #set visible
                             self.thinkTextShowList[-1].setVisible(self.thinkIsExpand)
                         else:
@@ -2729,7 +2887,7 @@ class MessageWidget(QWidget):
                 for index, CodeBlock in enumerate(resultCodeBlocks):
                     language, code = CodeBlock
                     if resultCodeShowListLastLen < index:
-                        self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth, parent=self))
+                        self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth - self.imageLabel.width() - 35, parent=self))
                         """ self.resultCodeShowList[-1].hide() """
                     else:
                         self.resultCodeShowList[index].setText(code.strip(), lexerName=language)
@@ -2743,7 +2901,7 @@ class MessageWidget(QWidget):
                 for splitText in resultSplitTextList:
                     if splitText != '':
                         if resultTextShowListLastLen < i:
-                            self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=self.textMaxWidth, parent=self))
+                            self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=self.textMaxWidth - self.imageLabel.width() - 35, parent=self))
                         else:
                             self.resultTextShowList[i].setText(splitText)
                         i += 1
@@ -2765,10 +2923,10 @@ class MessageWidget(QWidget):
             self.textShow.setText(text)
 
         if self.isUser:
-            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
+            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height())
             self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
         else:
-            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0)
+            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0) + 45
             thinkBackHeight = sum([textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
             self.thinkBackWidget.setFixedSize(thinkBackWidth, thinkBackHeight)
             if self.thinkIsExpand:
@@ -2779,6 +2937,7 @@ class MessageWidget(QWidget):
                     thinkWidth = 0
                     thinkHeight = 0
                 if self.resultText != '':
+                    """ print('width list:', [textShow.width() for textShow in self.resultTextShowList] + [codeShow.width() for codeShow in self.resultCodeShowList]) """
                     resultWidth = max([textShow.width() for textShow in self.resultTextShowList] + [codeShow.width() for codeShow in self.resultCodeShowList])
                     resultHeight = sum([textShow.height() for textShow in self.resultTextShowList] + [codeShow.height() for codeShow in self.resultCodeShowList])
                 else:
@@ -2810,7 +2969,8 @@ class MessageWidget(QWidget):
                 """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + textShowHeights + codeShowHeights + 10) """
                 """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10) """
             """ print('textWidget:', thinkWidth, thinkHeight, resultWidth, resultHeight) """
-            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 10, thinkHeight + resultHeight + 10)
+            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 30, thinkHeight + resultHeight + 10)
+            """ print('thinkWidth resultWidth textWidget:', thinkWidth, resultWidth, self.textWidget.width()) """
             """ print(self.textWidget.size()) """
             if self.loadingWidgetIsRemove:
                 self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
@@ -4653,7 +4813,7 @@ class MainWindow(QMainWindow):
                             }
                         ]
                 #MessageWidget
-                self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=True, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+                self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=True, textMaxWidth=self.chatShow.width() * 3 // 4)
                 """ self.messageSendWidget.connectSetSizeFinished(self.messageWidgetResize) """
                 self.messageSendWidget.connectResizeFinished(self.messageWidgetResize)
                 self.messageSendWidget.connectSetTexting(self.getSetTexting)
@@ -4703,7 +4863,7 @@ class MainWindow(QMainWindow):
             else:
                 self.messageWidgetList[i].removeRenewResponseButton()
         #MessageWidget
-        self.messageRecvWidget = MessageWidget(self.Message, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=False, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+        self.messageRecvWidget = MessageWidget(self.Message, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=False, textMaxWidth=self.chatShow.width() * 3 // 4)
         """ self.messageRecvWidget.connectSetSizeFinished(self.messageWidgetResize) """
         self.messageRecvWidget.connectResizeFinished(self.messageWidgetResize)
         self.messageRecvWidget.connectSetTexting(self.getSetTexting)
@@ -4925,11 +5085,11 @@ class MainWindow(QMainWindow):
                 #MessageWidget
                 if useThinkExpandList:
                     if not isUser:
-                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=self.thinkExpandedList[expandIndex], textMaxWidth=self.chatShow.width() * 2 // 3)
+                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=self.thinkExpandedList[expandIndex], textMaxWidth=self.chatShow.width() * 3 // 4)
                     else:
-                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, textMaxWidth=self.chatShow.width() * 2 // 3)
+                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, textMaxWidth=self.chatShow.width() * 3 // 4)
                 else:
-                    self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=False, textMaxWidth=self.chatShow.width() * 2 // 3)
+                    self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=False, textMaxWidth=self.chatShow.width() * 3 // 4)
                 """ self.messageWidget.connectSetSizeFinished(self.messageWidgetResize) """
                 self.messageWidget.connectResizeFinished(self.messageWidgetResize)
                 self.messageWidget.connectSetTexting(self.getSetTexting)

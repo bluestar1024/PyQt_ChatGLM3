@@ -7,14 +7,14 @@ Created on Tue Feb 13 18:31:44 2024
 
 import sys, os
 from enum import Enum
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QTextEdit, QMenu, QFrame, QGraphicsDropShadowEffect
-from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QTime
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextCursor
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QMenu, QFrame, QGraphicsDropShadowEffect, QPlainTextEdit
+from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QTime, QObject, QXmlStreamReader, QFile, QIODevice, QRegularExpression, QDir
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextCursor, QTextCharFormat, QTextDocument, QSyntaxHighlighter
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
-from pygments import highlight, token
+""" from pygments import highlight, token
 from pygments.lexers import CLexer, CppLexer, PythonLexer, JavaLexer, JavascriptLexer
 from pygments.formatters import HtmlFormatter
-from pygments.style import Style
+from pygments.style import Style """
 from openai import OpenAI
 import math
 import re
@@ -63,146 +63,6 @@ testText = '''<think>
 
 那我先写出循环的方法。Java中，for循环从1到100，每次加i。代码结构大概是：
 
-```java
-int sum = 0;
-for (int i = 1; i <= 100; i++) {
-    #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-    sum += i;
-}
-System.out.println(sum);
-import sys
-from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
-from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
-from PyQt5.QtCore import Qt, QRect
-from pygments import highlight
-from pygments.lexers import PythonLexer
-from pygments.formatters import HtmlFormatter
-
-class LineNumberArea(QWidget):
-    def __init__(self, editor):
-        super().__init__(editor)
-        self.editor = editor
-        self.editor.document().blockCountChanged.connect(self.update_width)
-        """ self.editor.updateRequest.connect(self.update) """
-        print(self.editor.document())
-
-    def update_width(self, block_count):
-        # 计算行号区域宽度
-        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * len(str(block_count)) + 20)
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-import sys
-from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
-from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
-from PyQt5.QtCore import Qt, QRect
-from pygments import highlight
-from pygments.lexers import PythonLexer
-from pygments.formatters import HtmlFormatter
-
-class LineNumberArea(QWidget):
-    def __init__(self, editor):
-        super().__init__(editor)
-        self.editor = editor
-        self.editor.document().blockCountChanged.connect(self.update_width)
-        """ self.editor.updateRequest.connect(self.update) """
-        print(self.editor.document())
-
-    def update_width(self, block_count):
-        # 计算行号区域宽度
-        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * len(str(block_count)) + 20)
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-import sys
-from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
-from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
-from PyQt5.QtCore import Qt, QRect
-from pygments import highlight
-from pygments.lexers import PythonLexer
-from pygments.formatters import HtmlFormatter
-
-class LineNumberArea(QWidget):
-    def __init__(self, editor):
-        super().__init__(editor)
-        self.editor = editor
-        self.editor.document().blockCountChanged.connect(self.update_width)
-        """ self.editor.updateRequest.connect(self.update) """
-        print(self.editor.document())
-
-    def update_width(self, block_count):
-        # 计算行号区域宽度
-        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * len(str(block_count)) + 20)
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-import sys
-from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
-from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
-from PyQt5.QtCore import Qt, QRect
-from pygments import highlight
-from pygments.lexers import PythonLexer
-from pygments.formatters import HtmlFormatter
-
-class LineNumberArea(QWidget):
-    def __init__(self, editor):
-        super().__init__(editor)
-        self.editor = editor
-        self.editor.document().blockCountChanged.connect(self.update_width)
-        """ self.editor.updateRequest.connect(self.update) """
-        print(self.editor.document())
-
-    def update_width(self, block_count):
-        # 计算行号区域宽度
-        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * len(str(block_count)) + 20)
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-import sys
-from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
-from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
-from PyQt5.QtCore import Qt, QRect
-from pygments import highlight
-from pygments.lexers import PythonLexer
-from pygments.formatters import HtmlFormatter
-
-class LineNumberArea(QWidget):
-    def __init__(self, editor):
-        super().__init__(editor)
-        self.editor = editor
-        self.editor.document().blockCountChanged.connect(self.update_width)
-        """ self.editor.updateRequest.connect(self.update) """
-        print(self.editor.document())
-
-    def update_width(self, block_count):
-        # 计算行号区域宽度
-        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * len(str(block_count)) + 20)
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-import sys
-from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
-from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
-from PyQt5.QtCore import Qt, QRect
-from pygments import highlight
-from pygments.lexers import PythonLexer
-from pygments.formatters import HtmlFormatter
-
-class LineNumberArea(QWidget):
-    def __init__(self, editor):
-        super().__init__(editor)
-        self.editor = editor
-        self.editor.document().blockCountChanged.connect(self.update_width)
-        """ self.editor.updateRequest.connect(self.update) """
-        print(self.editor.document())
-
-    def update_width(self, block_count):
-        # 计算行号区域宽度
-        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * len(str(block_count)) + 20)
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-```
-
-这样应该就能得到结果了。或者直接用公式的话，可能更简洁：
-
-```java
-int n = 100;
-int sum = n * (n + 1) / 2;
-#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-System.out.println(sum);
-```
-
-这两种方法都可行，我觉得第二种更好，因为效率更高而且代码更简洁。
-
 ```cpp
 int sum = 0;
 for (int i = 1; i <= 100; ++i) {
@@ -210,6 +70,58 @@ for (int i = 1; i <= 100; ++i) {
     sum += i;
 }
 std::cout << sum << std::endl;
+
+#include <iostream>
+#include <QDebug>
+
+#sdfgs	"fdgdf"
+#cfdsf	546
+
+int main()
+{
+    int n, sum = 0;
+
+    std::cout << "Enter a positive integer: ";
+    std::cin >> n;
+
+    for (int i = 1; i <= n; ++i)
+    {
+        sum += i;
+    }
+
+    std::cout << "Sum = " << sum;
+    return 0;
+}
+int fun()
+fun()
+std:: fun()
+int std::fun ()
+float std::std::fun()
+fun
+
+// sdassadfsa sda
+
+// sada
+
+/* jkhj
+jkk
+gjh */
+
+int xf;
+int ydsf = 1;
+int sdy=0
+int xv + =1
+int xvbd+ =1
+int xf+=1
+int xfddd - =1
+int fvdx * =1
+int xfg / =1
+int xh % =1
+int xnb , y ;
+int xdgf = 1,
+
+a.b.fun()
+12.3
 ```
 
 或者用公式：
@@ -231,6 +143,81 @@ for i in range(1, 101):
     sum += i
 #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
 print(sum)
+
+import sys
+from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
+from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
+from PyQt5.QtCore import Qt, QRect
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
+
+class LineNumberArea(QWidget):
+    def __init__(self, editor):
+        super().__init__(editor)
+        self.editor = editor
+        xd - = 8
+        fy += 6
+        ztrh *= 7
+        xr /= 7
+        yrte % = 9
+        self.editor.document().blockCountChanged.connect(self.update_width)
+        """ self.editor.updateRequest.connect(self.update) """
+        print(self.editor.document())
+
+    def update_width(self, block_count):
+        # 计算行号区域宽度
+        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * 
+        len(str(block_count)) + 20)
+        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, 
+        # self.rect().width() - 2, self.rect().height() - 2, 16, 16)
+
+    def paintEvent(self, event):
+        """ painter = QPainter(self)
+        painter.fillRect(event.rect(), QColor(240, 240, 240))
+        block = self.editor.document().begin()
+        while block and block.isValid():
+            line_number = block.blockNumber() + 1
+            painter.drawText(0, block.position() - 
+            self.editor.contentOffset().y(), str(line_number))
+            block = block.next() """
+        painter = QPainter(self)
+        painter.fillRect(event.rect(), QColor(240, 240, 240))
+        """ for count in range(0, self.editor.document().blockCount()): """
+        block = self.editor.document().begin()
+        while block and block.isValid():
+            line_number = block.blockNumber() + 1
+            painter.drawText(0, block.position(), str(line_number))
+            block = block.next()
+        painter.end()
+
+class CodeEditor(QTextEdit):
+    def __init__(self):
+        super().__init__()
+        self.setTabStopWidth(4)
+        self.lineNumberArea = LineNumberArea(self)
+        
+    def highlight_code(self, text):
+        print('highlight_code')
+        lexer = PythonLexer()
+        formatter = HtmlFormatter(style='colorful', noclasses=True)
+        html = highlight(text, lexer, formatter)
+        self.setHtml(html)
+        # 调整行号区域宽度
+        self.lineNumberArea.update_width(self.document().blockCount())
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        # 更新行号区域位置
+        cr = self.contentsRect()
+        self.lineNumberArea.setGeometry(QRect(cr.left(), cr.top(), 
+        self.lineNumberArea.width(), cr.height()))
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = CodeEditor()
+    window.show()
+    sys.exit(app.exec_())
 ```
 
 或者，直接用公式：
@@ -241,47 +228,331 @@ total = n * (n + 1) // 2
 #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
 print(total)
 ```
+glsl 示例
+```glsl
+precision mediump float;
+
+uniform vec2 resolution;
+uniform float time;
+ 
+vec3 trans(vec3 p)
+{
+    return mod(p, 8.0)-4.0;
+}
+
+float distanceFunction(vec3 pos)
+{
+    return length(trans(pos)) - 1.5;
+}
+ 
+vec3 getNormal(vec3 p)
+{
+    const float d = 0.0001;
+    return
+      normalize
+      (
+        vec3
+        (
+          distanceFunction(p+vec3(d,   0.0, 0))-distanceFunction(p+vec3(-d,0.0,0.0)),
+          distanceFunction(p+vec3(0.0, d,   0.0))-distanceFunction(p+vec3(0.0,-d,0.0)),
+          distanceFunction(p+vec3(0.0, 0.0, d))-distanceFunction(p+vec3(0.0,0.0,-d))
+        )
+      );
+}
+ 
+void main() {
+    vec2 pos = (gl_FragCoord.xy*2.0 -resolution) / resolution.y;
+ 
+    vec3 camPos = vec3(0.0, 0.0, 3.0);
+    vec3 camDir = vec3(0.0, 0.0, -1.0);
+    vec3 camUp = vec3(0.0, 1.0, 0.0);
+    vec3 camSide = cross(camDir, camUp);
+    float focus = sin(time)*1.5+4.0;
+ 
+    mat3 lense = mat3(1.,0.,0.,
+		        0.,888989898989898989,0.,
+		        0.,0.,1.);
+	vec3 pos3 = vec3(pos,camDir.z*10.);
+	camDir = vec3(
+		camDir.x,
+		camDir.y,
+		camDir.z);
+	camDir*=normalize(dot(camDir,pos3));
+    vec3 rayDir = normalize(camSide*pos.x + camUp*pos.y + camDir*focus);
+
+    float t = 0.0, d;
+    vec3 posOnRay = camPos;
+ 
+    for(int i=0; i<64; ++i)
+    {
+        d = distanceFunction(posOnRay);
+        t += d;
+        posOnRay = camPos + t*rayDir;
+    }
+ 
+    vec3 normal = getNormal(posOnRay);
+    if(abs(d) < 0.001)
+    {
+        gl_FragColor = vec4(normal, 1.0);
+    }else
+    {
+        gl_FragColor = vec4(0.0);
+    }
+}
+```
+
+lua 示例
+```lua
+----------------------------------------------------
+-- 1. Variables and flow control.
+----------------------------------------------------
+
+num = 42
+
+s = 'walternate'  -- Immutable strings like Python.
+t = "double-quotes are also fine"
+u = [[ Double brackets
+     start and end
+     multi-line strings.]]
+t = nil  -- Undefines t; Lua has garbage collection.
+
+-- Blocks are denoted with keywords like do/end:
+while num < 50 do
+num = num + 1  -- No ++ or += type operators.
+end
+
+-- If clauses:
+if num > 40 then
+print('over 40')
+elseif s ~= 'walternate' then  -- ~= is not equals.
+-- Equality check is == like Python; ok for strs.
+io.write('not over 40\n')  -- Defaults to stdout.
+else
+-- Variables are global by default.
+thisIsGlobal = 5  -- Camel case is common.
+
+-- How to make a variable local:
+local line = io.read()  -- Reads next stdin line.
+
+-- String concatenation uses the .. operator:
+print('Winter is coming, ' .. line)
+end
+
+-- Undefined variables return nil.
+-- This is not an error:
+foo = anUnknownVariable  -- Now foo = nil.
+
+aBoolValue = false
+
+-- Only nil and false are falsy; 0 and '' are true!
+if not aBoolValue then print('twas false') end
+
+-- 'or' and 'and' are short-circuited.
+-- This is similar to the a?b:c operator in C/js:
+ans = aBoolValue and 'yes' or 'no'  --> 'no'
+
+karlSum = 0
+for i = 1, 100 do  -- The range includes both ends.
+karlSum = karlSum + i
+end
+
+-- Use "100, 1, -1" as the range to count down:
+fredSum = 0
+for j = 100, 1, -1 do fredSum = fredSum + j end
+
+-- In general, the range is begin, end[, step].
+
+-- Another loop construct:
+repeat
+print('the way of the future')
+num = num - 1
+until num == 0
+
+
+----------------------------------------------------
+-- 2. Functions.
+----------------------------------------------------
+
+function fib(n)
+if n < 2 then return 1 end
+return fib(n - 2) + fib(n - 1)
+end
+
+-- Closures and anonymous functions are ok:
+function adder(x)
+-- The returned function is created when adder is
+-- called, and remembers the value of x:
+return function (y) return x + y end
+end
+a1 = adder(9)
+a2 = adder(36)
+print(a1(16))  --> 25
+print(a2(64))  --> 100
+
+-- Returns, func calls, and assignments all work
+-- with lists that may be mismatched in length.
+-- Unmatched receivers are nil;
+-- unmatched senders are discarded.
+
+x, y, z = 1, 2, 3, 4
+-- Now x = 1, y = 2, z = 3, and 4 is thrown away.
+
+function bar(a, b, c)
+print(a, b, c)
+return 4, 8, 15, 16, 23, 42
+end
+
+x, y = bar('zaphod')  --> print zaphod  nil nil
+-- Now x = 4, y = 8, values 15..42 are discarded.
+
+-- Functions are first-class, may be local/global.
+-- These are the same:
+function f(x) return x * x end
+f = function (x) return x * x end
+
+-- And so are these:
+local function g(x) return math.sin(x) end
+local g; g  = function (x) return math.sin(x) end
+-- the 'local g' decl makes g-self-references ok.
+
+-- Trig funcs work in radians, by the way.
+
+-- Calls with one string param don't need parens:
+print 'hello'  -- Works fine.
+
+
+----------------------------------------------------
+-- 3. Tables.
+----------------------------------------------------
+t = {key1 = 'value1', key2 = false}
+
+-- String keys can use js-like dot notation:
+print(t.key1)  -- Prints 'value1'.
+t.newKey = {}  -- Adds a new key/value pair.
+t.key2 = nil   -- Removes key2 from the table.
+
+-- Literal notation for any (non-nil) value as key:
+u = {['@!#'] = 'qbert', [{}] = 1729, [6.28] = 'tau'}
+print(u[6.28])  -- prints tau
+
+-- Key matching is basically by value for numbers
+-- and strings, but by identity for tables.
+a = u['@!#']  -- Now a = 'qbert'.
+b = u[{}]     -- We might expect 1729, but it's nil:
+
+function h(x) print(x.key1) end
+h{key1 = 'Sonmi~451'}  -- Prints 'Sonmi~451'.
+
+for key, val in pairs(u) do  -- Table iteration.
+print(key, val)
+end
+
+-- _G is a special table of all globals.
+print(_G['_G'] == _G)  -- Prints 'true'.
+
+-- Using tables as lists / arrays:
+
+-- List literals implicitly set up int keys:
+v = {'value1', 'value2', 1.21, 'gigawatts'}
+for i = 1, #v do  -- #v is the size of v for lists.
+print(v[i])  -- Indices start at 1 !! SO CRAZY!
+end
+-- A 'list' is not a real type. v is just a table
+-- with consecutive integer keys, treated as a list.
+
+----------------------------------------------------
+-- 3.1 Metatables and metamethods.
+----------------------------------------------------
+
+-- A table can have a metatable that gives the table
+-- operator-overloadish behavior. Later we'll see
+-- how metatables support js-prototypey behavior.
+
+f1 = {a = 1, b = 2}  -- Represents the fraction a/b.
+f2 = {a = 2, b = 3}
+
+-- This would fail:
+-- s = f1 + f2
+
+metafraction = {}
+function metafraction.__add(f1, f2)
+sum = {}
+sum.b = f1.b * f2.b
+sum.a = f1.a * f2.b + f2.a * f1.b
+return sum
+end
+
+setmetatable(f1, metafraction)
+setmetatable(f2, metafraction)
+
+s = f1 + f2  -- call __add(f1, f2) on f1's metatable
+
+-- f1, f2 have no key for their metatable, unlike
+-- prototypes in js, so you must retrieve it as in
+-- getmetatable(f1). The metatable is a normal table
+-- with keys that Lua knows about, like __add.
+
+-- But the next line fails since s has no metatable:
+-- t = s + s
+-- Class-like patterns given below would fix this.
+
+-- An __index on a metatable overloads dot lookups:
+defaultFavs = {animal = 'gru', food = 'donuts'}
+myFavs = {food = 'pizza'}
+setmetatable(myFavs, {__index = defaultFavs})
+eatenBy = myFavs.animal  -- works! thanks, metatable
+
+----------------------------------------------------
+-- 3.2 Class-like tables and inheritance.
+----------------------------------------------------
+
+Dog = {}                                   -- 1.
+
+function Dog:new()                         -- 2.
+newObj = {sound = 'woof'}                -- 3.
+self.__index = self                      -- 4.
+return setmetatable(newObj, self)        -- 5.
+end
+
+function Dog:makeSound()                   -- 6.
+print('I say ' .. self.sound)
+end
+
+mrDog = Dog:new()                          -- 7.
+mrDog:makeSound()  -- 'I say woof'         -- 8.
+
+----------------------------------------------------
+
+-- Inheritance example:
+
+LoudDog = Dog:new()                           -- 1.
+
+function LoudDog:makeSound()
+s = self.sound .. ' '                       -- 2.
+print(s .. s .. s)
+end
+
+seymour = LoudDog:new()                       -- 3.
+seymour:makeSound()  -- 'woof woof woof'      -- 4.
+
+-- If needed, a subclass's new() is like the base's:
+function LoudDog:new()
+newObj = {}
+-- set up newObj
+self.__index = self
+return setmetatable(newObj, self)
+end
+
+----------------------------------------------------
+-- 4. Modules.
+----------------------------------------------------
+```
+
+这样应该就能得到结果了。或者直接用公式的话，可能更简洁：
+
+这两种方法都可行，我觉得第二种更好，因为效率更高而且代码更简洁。
 
 现在整理一下：
-
-Java：
-使用公式：n=100，sum = 100*101/2。
-或者用循环累加。
-
-C++：
-同样，两种方法都可以。
-
-Python：
-可以用循环、公式，或者生成一个range然后求和。
-
-那现在我来写出这三种语言的代码：
-
-Java：
-```java
-public class Sum {
-    public static void main(String[] args) {
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-        int n = 100;
-        int sum = n * (n + 1) / 2;
-        System.out.println(sum);
-    }
-}
-```
-
-或者，如果用循环的话：
-
-```java
-public class Sum {
-    public static void main(String[] args) {
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-        int sum = 0;
-        for (int i = 1; i <= 100; i++) {
-            sum += i;
-        }
-        System.out.println(sum);
-    }
-}
-```
 
 C++：
 ```cpp
@@ -343,19 +614,7 @@ print(sum(range(1, 101)))
 总结一下，每个语言可以有两种实现方式，但问题可能只需要一种，所以我可以选择其中一种，比如公式的方法，这样更简洁高效。
 </think>
 
-以下是使用 Java、C++ 和 Python 分别计算整数 1 到 100 的和的代码示例：
-
-### Java
-```java
-public class Sum {
-    public static void main(String[] args) {
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-        int n = 100;
-        int sum = n * (n + 1) / 2;
-        System.out.println(sum);
-    }
-}
-```
+以下是分别计算整数 1 到 100 的和的代码示例：
 
 ### C++
 ```cpp
@@ -2129,6 +2388,15 @@ class CodeEdit(QTextEdit):
             width: 0px;
         }
         ''')
+        #
+        font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
+        font.setFixedPitch(True)
+        font.setPixelSize(14)
+        self.setFont(font)
+        print('font pitch:', font.fixedPitch(), self.font().fixedPitch())
+        palette = self.palette()
+        palette.setColor(QPalette.Text, QColor(178, 170, 164))
+        self.setPalette(palette)
         #LineNumberArea
         self.lineNumberArea = LineNumberArea(self)
         self.lineNumberArea.move(0, 0)
@@ -2137,6 +2405,19 @@ class CodeEdit(QTextEdit):
         self.textChanged.connect(self.adjustSize)
         #valueChanged
         self.verticalScrollBar().valueChanged.connect(self.on_scroll)
+        """ {"C++",  QCXXHighlighter()},
+            {"GLSL", QGLSLHighlighter()},
+            {"XML",  QXMLHighlighter()},
+            {"JSON", QJSONHighlighter()},
+            {"LUA",  QLuaHighlighter()}, """
+        self.m_highlighters = {
+            "None": None,
+            "Python": QPythonHighlighter(),
+            "C++": QCXXHighlighter(),
+            "GLSL": QGLSLHighlighter(),
+            "LUA": QLuaHighlighter()
+        }
+        self.m_highlighter = self.m_highlighters["None"]
 
     def on_scroll(self, value):
         self.lineNumberArea.repaint()
@@ -2155,23 +2436,32 @@ class CodeEdit(QTextEdit):
 
     def highlightCode(self, text, lexerName='python'):
         match lexerName:
-            case 'c':
-                lexer = CLexer()
             case 'cpp':
-                lexer = CppLexer()
+                self.setHighlighter(self.m_highlighters["C++"])
             case 'python':
-                lexer = PythonLexer()
-            case 'java':
-                lexer = JavaLexer()
-            case 'javascript':
-                lexer = JavascriptLexer()
+                self.setHighlighter(self.m_highlighters["Python"])
+            case 'glsl':
+                self.setHighlighter(self.m_highlighters["GLSL"])
+            case 'lua':
+                self.setHighlighter(self.m_highlighters["LUA"])
             case _:
-                lexer = PythonLexer()
+                self.setHighlighter(self.m_highlighters["Python"])
         """ text = self.add_line_numbers(text) """
-        formatter = HtmlFormatter(style=CustomStyle, noclasses=True)
-        html = highlight(text, lexer, formatter)
+        """ formatter = HtmlFormatter(style=CustomStyle, noclasses=True)
+        html = highlight(text, lexer, formatter) """
         """ html = html.replace('<pre style="line-height: 125%;">', '<pre style="line-height: 100%;">') """
-        self.setHtml(html)
+        """ self.setHtml(html) """
+        self.setText(text)
+        """ self.setPlainText(text) """
+
+    def setHighlighter(self, highlighter):
+        if self.m_highlighter:
+            self.m_highlighter.setDocument(None)
+        self.m_highlighter = highlighter
+        if self.m_highlighter:
+            """ print('m_highlighter:', self.m_highlighter) """
+            self.m_highlighter.setSyntaxStyle(QSyntaxStyle.defaultStyle())
+            self.m_highlighter.setDocument(self.document())
 
     """ def add_line_numbers(self, text):
         # 根据 '\n' 分割字符串成多行
@@ -2192,6 +2482,7 @@ class CodeEdit(QTextEdit):
         self.setViewportMargins(self.lineNumberArea.width(), 0, 0, 0)
 
     def adjustSize(self):
+        print('height:', int(self.document().size().height()))
         height = int(self.document().size().height())
         self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
         self.updateLineNumberAreaWidth()
@@ -2206,18 +2497,1016 @@ class CodeEdit(QTextEdit):
         self.lineNumberArea.repaint()
         self.setSizeFinished.emit()
 
-class CustomStyle(Style):
+""" class CustomStyle(Style):
     default_style = ""
     background_color = '#14141c'
     styles = {
         token.Token: "#b2aaa4",
-        token.Keyword: "#a6538c",  # 关键字为紫色
+        token.Keyword: "#a6538c",  # 关键字为紫色   #a45c74, #fc6447
         token.Name.Class: "#6dae59",  # 类型名为绿色
-        token.Name.Function: "#6dae59",  # 类型名为绿色
+        token.Name.Function: "#6dae59",  # 函数名为绿色
         token.Comment: "#aaa676",  # 注释为灰色
         token.String: "#399cc6",  # 字符串为蓝色
         token.Number: "#d2bd48",  # 数字为黄色
-    }
+    } """
+
+class QSyntaxStyle(QObject):
+    def __init__(self, parent=None):
+        super(QSyntaxStyle, self).__init__(parent)
+        self.m_name = ""
+        self.m_data = {}
+        self.m_loaded = False
+
+    def load(self, fl):
+        reader = QXmlStreamReader(fl)
+
+        while not reader.atEnd() and not reader.hasError():
+            token = reader.readNext()
+
+            if token == QXmlStreamReader.StartElement:
+                if reader.name() == "style-scheme":
+                    if reader.attributes().hasAttribute("name"):
+                        self.m_name = reader.attributes().value("name")
+                elif reader.name() == "style":
+                    attributes = reader.attributes()
+                    name = attributes.value("name")
+
+                    format = QTextCharFormat()
+
+                    if attributes.hasAttribute("background"):
+                        format.setBackground(QColor(attributes.value("background")))
+
+                    if attributes.hasAttribute("foreground"):
+                        format.setForeground(QColor(attributes.value("foreground")))
+
+                    if attributes.hasAttribute("bold") and attributes.value("bold") == "true":
+                        format.setFontWeight(QFont.Bold)
+
+                    if attributes.hasAttribute("italic") and attributes.value("italic") == "true":
+                        format.setFontItalic(True)
+
+                    if attributes.hasAttribute("underlineStyle"):
+                        underline = attributes.value("underlineStyle")
+                        s = QTextCharFormat.NoUnderline
+
+                        if underline == "SingleUnderline":
+                            s = QTextCharFormat.SingleUnderline
+                        elif underline == "DashUnderline":
+                            s = QTextCharFormat.DashUnderline
+                        elif underline == "DotLine":
+                            s = QTextCharFormat.DotLine
+                        elif underline == "DashDotLine":
+                            s = QTextCharFormat.DashDotLine
+                        elif underline == "DashDotDotLine":
+                            s = QTextCharFormat.DashDotDotLine
+                        elif underline == "WaveUnderline":
+                            s = QTextCharFormat.WaveUnderline
+                        elif underline == "SpellCheckUnderline":
+                            s = QTextCharFormat.SpellCheckUnderline
+                        else:
+                            print(f"Unknown underline value {underline}")
+
+                        format.setUnderlineStyle(s)
+
+                    self.m_data[name] = format
+
+        self.m_loaded = not reader.hasError()
+        return self.m_loaded
+
+    def name(self):
+        return self.m_name
+
+    def getFormat(self, name):
+        return self.m_data.get(name, QTextCharFormat())
+
+    def isLoaded(self):
+        return self.m_loaded
+
+    @staticmethod
+    def defaultStyle():
+        if not hasattr(QSyntaxStyle.defaultStyle, "style"):
+            QSyntaxStyle.defaultStyle.style = QSyntaxStyle()
+            if not QSyntaxStyle.defaultStyle.style.isLoaded():
+                # 初始化资源文件
+                # Q_INIT_RESOURCE(qcodeeditor_resources)
+                fl = QFile("test/default_style.xml")
+
+                if not fl.open(QIODevice.ReadOnly):
+                    print("Can't open default style file.")
+                    return QSyntaxStyle.defaultStyle.style
+
+                data = fl.readAll().data().decode('utf-8')
+                if not QSyntaxStyle.defaultStyle.style.load(data):
+                    print("Can't load default style.")
+        return QSyntaxStyle.defaultStyle.style
+
+class QStyleSyntaxHighlighter(QSyntaxHighlighter):
+    def __init__(self, document: QTextDocument = None):
+        super(QStyleSyntaxHighlighter, self).__init__(document)
+        self.m_syntaxStyle = None
+
+    def setSyntaxStyle(self, style: QSyntaxStyle):
+        self.m_syntaxStyle = style
+
+    def syntaxStyle(self) -> QSyntaxStyle:
+        return self.m_syntaxStyle
+
+class QCXXHighlighter(QStyleSyntaxHighlighter):
+    def __init__(self, document: QTextDocument = None):
+        super(QCXXHighlighter, self).__init__(document)
+        self.highlight_rules = []  # 存储高亮规则的列表
+        self.m_highlightDotRules = []
+        
+        # 初始化正则表达式模式：
+        self.include_pattern = QRegularExpression(r'(^\s*#\s*include\s*([<"][^:?"<>\|]+[">]))')  # #include 语句
+        self.function_pattern = QRegularExpression(r'(\b([_a-zA-Z][_a-zA-Z0-9]*\s+)?((?:[_a-zA-Z][_a-zA-Z0-9]*\s*::\s*)*[_a-zA-Z][_a-zA-Z0-9]*)(?=\s*\())')  # 函数声明
+        self.m_functionPattern = QRegularExpression(r"(\b([A-Za-z0-9_]+(?:\.))*([A-Za-z0-9_]+)(?=\s*\())")
+        """ self.def_type_pattern = QRegularExpression(r'(\b([_a-zA-Z][_a-zA-Z0-9]*)\s+[_a-zA-Z][_a-zA-Z0-9]*\s*[;=])') """  # 类型定义
+        self.def_type_pattern = QRegularExpression(r'(\b([_a-zA-Z][_a-zA-Z0-9]*)\s+([_a-zA-Z][_a-zA-Z0-9]*)\s*(?=[;=]))')
+        self.m_variPattern = QRegularExpression(r"(\b[A-Za-z_][A-Za-z0-9_]*\b)")
+        self.comment_start_pattern = QRegularExpression(r'/\*')  # 多行注释开始 /*
+        self.comment_end_pattern = QRegularExpression(r'\*/')    # 多行注释结束 */
+        
+        # 从 XML 文件加载语法规则
+        fl = QFile("config/cpp.xml")
+        if not fl.open(QFile.ReadOnly):
+            return
+        
+        language = QLanguage(fl)
+        if not language.isLoaded():
+            return
+        
+        # 解析语言规则并添加到高亮规则中
+        keys = language.keys()
+        for key in keys:
+            names = language.names(key)
+            for name in names:
+                self.highlight_rules.append({
+                    'pattern': QRegularExpression(rf'\b{name}\b'),  # 匹配单词边界
+                    'format': key  # 对应的格式类型
+                })
+        
+        # 添加数字的高亮规则
+        self.highlight_rules.append({
+            'pattern': QRegularExpression(r'(?<=\b|\s|^)(?i)(?:(?:(?:(?:(?:\d+(?:\'\d+)*)?\.(?:\d+(?:\'\d+)*)(?:e[+-]?(?:\d+(?:\'\d+)*))?)|(?:(?:\d+(?:\'\d+)*)\.(?:e[+-]?(?:\d+(?:\'\d+)*))?)|(?:(?:\d+(?:\'\d+)*)(?:e[+-]?(?:\d+(?:\'\d+)*)))|(?:0x(?:[0-9a-f]+(?:\'[0-9a-f]+)*)?\.(?:[0-9a-f]+(?:\'[0-9a-f]+)*)(?:p[+-]?(?:\d+(?:\'\d+)*)))|(?:0x(?:[0-9a-f]+(?:\'[0-9a-f]+)*)\.?(?:p[+-]?(?:\d+(?:\'\d+)*))))[lf]?)|(?:(?:(?:[1-9]\d*(?:\'\d+)*)|(?:0[0-7]*(?:\'[0-7]+)*)|(?:0x[0-9a-f]+(?:\'[0-9a-f]+)*)|(?:0b[01]+(?:\'[01]+)*))(?:u?l{0,2}|l{0,2}u?)))(?=\b|\s|$)'),
+            'format': 'Number'
+        })
+
+        self.m_highlightDotRules.append((
+            QRegularExpression(r"((?<!\d)\.(?!\d))"),
+            "Dot"
+        ))
+
+        # 添加字符串的高亮规则
+        self.highlight_rules.append({
+            'pattern': QRegularExpression(r'("[^\n"]*")'),  # 匹配双引号内的内容
+            'format': 'String'
+        })
+        
+        # 添加预处理指令的高亮规则（如 #define）
+        self.highlight_rules.append({
+            'pattern': QRegularExpression(r'(#[a-zA-Z_]+)'),
+            'format': 'Preprocessor'
+        })
+        
+        # 添加单行注释的高亮规则
+        self.highlight_rules.append({
+            'pattern': QRegularExpression(r'(//[^\n]*)'),  # 从 // 到行尾
+            'format': 'Comment'
+        })
+
+    def highlightBlock(self, text):
+        match_iterator = self.m_variPattern.globalMatch(text)
+        
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Vari")
+            )
+
+        match_iterator = self.function_pattern.globalMatch(text)
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            # 高亮返回类型部分
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Type")
+            )
+            # 高亮函数名部分
+            self.setFormat(
+                match.capturedStart(3),
+                match.capturedLength(3),
+                self.syntaxStyle().getFormat("Function")
+            )
+
+        match_iterator = self.m_functionPattern.globalMatch(text)
+        
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Type")
+            )
+            self.setFormat(
+                match.capturedStart(3),
+                match.capturedLength(3),
+                self.syntaxStyle().getFormat("Function")
+            )
+
+        match_iterator = self.def_type_pattern.globalMatch(text)
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            # 高亮类型名部分
+            self.setFormat(
+                match.capturedStart(3),
+                match.capturedLength(3),
+                self.syntaxStyle().getFormat("DefType")
+            )
+
+        for rule in self.m_highlightDotRules:
+            pattern, format_name = rule
+            match_iterator = pattern.globalMatch(text)
+            
+            while match_iterator.hasNext():
+                match = match_iterator.next()
+                self.setFormat(
+                    match.capturedStart(),
+                    match.capturedLength(),
+                    self.syntaxStyle().getFormat(format_name)
+                )
+
+        match_iterator = self.include_pattern.globalMatch(text)
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            # 高亮整个 #include 指令
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Preprocessor")
+            )
+            # 高亮包含的文件名部分
+            self.setFormat(
+                match.capturedStart(2),
+                match.capturedLength(2),
+                self.syntaxStyle().getFormat("String")
+            )
+
+        for rule in self.highlight_rules:
+            match_iterator = rule['pattern'].globalMatch(text)
+            while match_iterator.hasNext():
+                match = match_iterator.next()
+                self.setFormat(
+                    match.capturedStart(),
+                    match.capturedLength(),
+                    self.syntaxStyle().getFormat(rule['format'])
+                )
+
+        self.setCurrentBlockState(0)  # 初始状态
+        
+        start_index = 0
+        if self.previousBlockState() != 1:  # 如果前一个块不在注释中
+            start_match = self.comment_start_pattern.match(text)
+            start_index = start_match.capturedStart()
+        
+        while start_index >= 0:
+            end_match = self.comment_end_pattern.match(text, start_index)
+            end_index = end_match.capturedStart()
+            comment_length = 0
+            
+            if end_index == -1:  # 没有找到注释结束
+                self.setCurrentBlockState(1)  # 设置状态为"在注释中"
+                comment_length = len(text) - start_index
+            else:
+                comment_length = end_index - start_index + end_match.capturedLength()
+            
+            self.setFormat(
+                start_index,
+                comment_length,
+                self.syntaxStyle().getFormat("Comment")
+            )
+            
+            # 查找下一个注释开始
+            next_match = self.comment_start_pattern.match(text, start_index + comment_length)
+            start_index = next_match.capturedStart()
+
+class QPythonHighlighter(QStyleSyntaxHighlighter):
+    def __init__(self, document: QTextDocument = None):
+        super(QPythonHighlighter, self).__init__(document)
+        self.m_highlightRules = []
+        self.m_highlightDotRules = []
+        self.m_highlightStringRules = []
+        self.m_highlightBlockRules = []
+        """ self.m_includePattern = QRegularExpression(r"(import \w+)") """
+        self.m_includePattern = QRegularExpression(r"(?:from\s+(\w+(?:\.\w+)*)\s+)?import\s+((?:\w+(?:\s+as\s+\w+)?)(?:\s*,\s*\w+(?:\s+as\s+\w+)?)*|\*)")
+        """ self.m_functionPattern = QRegularExpression(r"(\b([A-Za-z0-9_]+(?:\.))*([A-Za-z0-9_]+)(?=\())") """
+        self.m_functionPattern = QRegularExpression(r"(\b([A-Za-z0-9_]+(?:\.))*([A-Za-z0-9_]+)(?=\s*\())")
+        """ self.m_defTypePattern = QRegularExpression(r"(\b([A-Za-z0-9_]+)\s+[A-Za-z]{1}[A-Za-z0-9_]+\s*[;=])") """
+        self.m_defTypePattern = QRegularExpression(r"(\b[A-Za-z_][A-Za-z0-9_]*\s*(?=\+?\s*=))")
+        self.m_variPattern = QRegularExpression(r"(\b[A-Za-z_][A-Za-z0-9_]*\b)")
+
+        """ current_dir = QDir.currentPath() """
+        """ print("当前工作目录:", current_dir) """
+        # Load the language definitions from the XML file
+        fl = QFile("config/python.xml")
+        if not fl.open(QFile.ReadOnly):
+            """ print("Can't open python style file") """
+            return
+
+        # Assuming QLanguage is a custom class you've implemented
+        language = QLanguage(fl)
+        if not language.isLoaded():
+            return
+
+        keys = language.keys()
+        for key in keys:
+            names = language.names(key)
+            for name in names:
+                self.m_highlightRules.append((
+                    QRegularExpression(fr"(\b{name}\b)"),
+                    key
+                ))
+
+        # Following rules have higher priority to display
+        # than language specific keys
+        # So they must be applied at last.
+
+        # Numbers
+        """ QRegularExpression(r"(\b(0b|0x){0,1}[\d.']+\b)"), """
+        self.m_highlightRules.append((
+            QRegularExpression(r"(\b(0b|0x)?(\d{1,3}(_?\d{3})*(\.\d+)?)\b)"),
+            "Number"
+        ))
+
+        self.m_highlightDotRules.append((
+            QRegularExpression(r"((?<!\d)\.(?!\d))"),
+            "Dot"
+        ))
+        
+        # Strings
+        self.m_highlightStringRules.append((
+            QRegularExpression(r'("[^\n"]*")'),
+            "String"
+        ))
+        self.m_highlightStringRules.append((
+            QRegularExpression(r"('[^\n']*')"),
+            "String"
+        ))
+        
+        # Single line comment
+        self.m_highlightRules.append((
+            QRegularExpression(r"#[^\n]*"),
+            "Comment"
+        ))
+        
+        # Multiline string
+        self.m_highlightBlockRules.append((
+            QRegularExpression(r'(""")'),
+            QRegularExpression(r'(""")'),
+            "String"
+        ))
+        self.m_highlightBlockRules.append((
+            QRegularExpression(r"(''')"),
+            QRegularExpression(r"(''')"),
+            "String"
+        ))
+        #
+        """ self.hCount = 0 """
+
+    def highlightBlock(self, text: str) -> None:
+        match_iterator = self.m_variPattern.globalMatch(text)
+        
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Vari")
+            )
+
+        # Checking for function
+        match_iterator = self.m_functionPattern.globalMatch(text)
+        
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Type")
+            )
+            self.setFormat(
+                match.capturedStart(3),
+                match.capturedLength(3),
+                self.syntaxStyle().getFormat("Function")
+            )
+        
+        match_iterator = self.m_defTypePattern.globalMatch(text)
+        
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("DefType")
+            )
+
+        for rule in self.m_highlightDotRules:
+            pattern, format_name = rule
+            match_iterator = pattern.globalMatch(text)
+            
+            while match_iterator.hasNext():
+                match = match_iterator.next()
+                self.setFormat(
+                    match.capturedStart(),
+                    match.capturedLength(),
+                    self.syntaxStyle().getFormat(format_name)
+                )
+
+        match_iterator = self.m_includePattern.globalMatch(text)
+        
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Module")
+            )
+
+        # Apply regular highlighting rules
+        for rule in self.m_highlightRules:
+            pattern, format_name = rule
+            match_iterator = pattern.globalMatch(text)
+            
+            while match_iterator.hasNext():
+                match = match_iterator.next()
+                self.setFormat(
+                    match.capturedStart(),
+                    match.capturedLength(),
+                    self.syntaxStyle().getFormat(format_name)
+                )
+        
+        # Handle multi-line highlighting rules (like triple-quoted strings)
+        self.setCurrentBlockState(0)
+        start_index = 0
+        """ self.hCount += 1 """
+        """ print('hCount:', self.hCount) """
+        """ print('1 currentBlockState:', self.currentBlock(), self.currentBlockState()) """
+        highlight_rule_id = self.previousBlockState()
+        """ print('2 previousBlockState:', self.currentBlock(), highlight_rule_id) """
+        
+        start_index = 0
+        block_start_index_list = []
+
+        if highlight_rule_id < 1 or highlight_rule_id > len(self.m_highlightBlockRules):
+            for i, block_rule in enumerate(self.m_highlightBlockRules):
+                start_pattern_tmp, _, _ = block_rule
+                """ start_index_tmp = text.indexOf(start_pattern_tmp) """
+                start_match_tmp = start_pattern_tmp.match(text)  # 执行正则匹配
+                start_index_tmp = start_match_tmp.capturedStart()
+                block_start_index_list.append(start_index_tmp)
+
+                """ highlight_rule_id = i + 1
+                while start_index >= 0:
+
+                    # Should be + length of start pattern
+                    end_match = end_pattern.match(text, start_index + start_match.capturedLength())
+                    end_index = end_match.capturedStart()
+                    match_length = 0
+
+                    if end_index == -1:
+                        print('3:', self.currentBlock())
+                        self.setCurrentBlockState(highlight_rule_id)
+                        match_length = len(text) - start_index
+                    else:
+                        match_length = end_index - start_index + end_match.capturedLength()
+
+                    self.setFormat(
+                        start_index,
+                        match_length,
+                        self.syntaxStyle().getFormat(format_name)
+                    )
+
+                    start_match = start_pattern.match(text, start_index + match_length)  # 执行正则匹配
+                    start_index = start_match.capturedStart() """
+                
+                """ if start_index >= 0:
+                    highlight_rule_id = i + 1
+                    break """
+
+            block_start_min_index = -1
+            for start_index_tmp in block_start_index_list:
+                if start_index_tmp >= 0:
+                    if block_start_min_index == -1:
+                        block_start_min_index = start_index_tmp
+                    elif start_index_tmp < block_start_min_index:
+                        block_start_min_index = start_index_tmp
+            if block_start_min_index != -1:
+                for i, start_index_tmp in enumerate(block_start_index_list):
+                    if start_index_tmp == block_start_min_index:
+                        highlight_rule_id = i + 1
+                        break
+            start_index = block_start_min_index
+
+        """ print('start_index, start list:', start_index, block_start_index_list) """
+        if start_index >= 0:
+            block_rule = self.m_highlightBlockRules[highlight_rule_id - 1]
+            start_pattern, end_pattern, format_name = block_rule
+            if self.previousBlockState() < 1:
+                start_match = start_pattern.match(text)
+            """ print('get block_rule index:', highlight_rule_id - 1) """
+
+        if len(text) != 0 and start_index != 0:
+            """ for rule in self.m_highlightStringRules:
+                string_pattern, string_format_name = rule
+                if start_index == -1:
+                    match_iterator = string_pattern.globalMatch(text)
+                else:
+                    match_iterator = string_pattern.globalMatch(text[:start_index])
+
+                while match_iterator.hasNext():
+                    match = match_iterator.next()
+                    self.setFormat(
+                        match.capturedStart(),
+                        match.capturedLength(),
+                        self.syntaxStyle().getFormat(string_format_name)
+                    )
+                print('stringPatternStart0') """
+
+            self.singleLineStrHighlight(text, 0, start_index)
+
+        while start_index >= 0:
+            """ print('highlight_rule_id start_index:', highlight_rule_id, start_index)
+            if highlight_rule_id == 0:
+                print('highlight_rule_id:')
+                print(self.m_highlightBlockRules[highlight_rule_id - 1]) """
+
+            # Should be + length of start pattern
+            if self.previousBlockState() > 0 and start_index == 0:
+                end_match = end_pattern.match(text)
+            else:
+                end_match = end_pattern.match(text, start_index + start_match.capturedLength())
+                """ print('start capturedLength:', start_match.capturedLength()) """
+            end_index = end_match.capturedStart()
+            """ print('end_index:', end_index) """
+            match_length = 0
+
+            if end_index == -1:
+                """ print('3:', self.currentBlock()) """
+                self.setCurrentBlockState(highlight_rule_id)
+                match_length = len(text) - start_index
+                """ print('len(text), start_index, match_length:', len(text), start_index, match_length) """
+            else:
+                match_length = end_index - start_index + end_match.capturedLength()
+                """ print('end capturedLength, end_index, match_length:', end_match.capturedLength(), end_index, match_length) """
+
+            self.setFormat(
+                start_index,
+                match_length,
+                self.syntaxStyle().getFormat(format_name)
+            )
+            """ print('start_index, match_length:', start_index, match_length) """
+            stringPatternStart = start_index + match_length
+
+            """ start_index = text.indexOf(start_pattern, start_index + match_length) """
+            """ start_match = start_pattern.match(text, start_index + match_length)  # 执行正则匹配
+            start_index = start_match.capturedStart()
+            print('match_length, start_index:', match_length, start_index) """
+
+            block_start_index_list = []
+            for i, block_rule in enumerate(self.m_highlightBlockRules):
+                start_pattern_tmp, _, _ = block_rule
+                """ start_index_tmp = text.indexOf(start_pattern_tmp) """
+                start_match_tmp = start_pattern_tmp.match(text, start_index + match_length)  # 执行正则匹配
+                """ print('start_index, match_length, start_match:', start_index, match_length, start_match_tmp) """
+                start_index_tmp = start_match_tmp.capturedStart()
+                block_start_index_list.append(start_index_tmp)
+
+            block_start_min_index = -1
+            for start_index_tmp in block_start_index_list:
+                if start_index_tmp >= 0:
+                    if block_start_min_index == -1:
+                        block_start_min_index = start_index_tmp
+                    elif start_index_tmp < block_start_min_index:
+                        block_start_min_index = start_index_tmp
+            if block_start_min_index != -1:
+                for i, start_index_tmp in enumerate(block_start_index_list):
+                    if start_index_tmp == block_start_min_index:
+                        highlight_rule_id = i + 1
+                        break
+
+            """ print('start_index, start list:', start_index, block_start_index_list) """
+            if block_start_min_index >= 0:
+                block_rule = self.m_highlightBlockRules[highlight_rule_id - 1]
+                start_pattern, end_pattern, format_name = block_rule
+                start_match = start_pattern.match(text, start_index + match_length)
+                """ print('start capturedLength, start_index, match_length:', start_match.capturedLength(), start_index, match_length)
+                print('get block_rule index:', highlight_rule_id - 1) """
+            start_index = block_start_min_index
+            """ print('start_index', start_index) """
+
+            if not (stringPatternStart == len(text) or stringPatternStart == start_index):
+                """ for rule in self.m_highlightStringRules:
+                    string_pattern, string_format_name = rule
+                    if start_index == -1:
+                        match_iterator = string_pattern.globalMatch(text[stringPatternStart:])
+                    else:
+                        match_iterator = string_pattern.globalMatch(text[stringPatternStart:start_index])
+
+                    while match_iterator.hasNext():
+                        match = match_iterator.next()
+                        self.setFormat(
+                            match.capturedStart() + stringPatternStart,
+                            match.capturedLength(),
+                            self.syntaxStyle().getFormat(string_format_name)
+                        )
+                    print('stringPatternStart1') """
+
+                self.singleLineStrHighlight(text, stringPatternStart, start_index)
+
+    def singleLineStrHighlight(self, text, stringPatternStart, stringPatternEnd):
+        string_index = 0
+        string_length = 0
+        string_rule_id = 0
+
+        string_index_list = []
+        for rule in self.m_highlightStringRules:
+            string_pattern_tmp, _ = rule
+            if stringPatternEnd == -1:
+                string_match_tmp = string_pattern_tmp.match(text[stringPatternStart:])
+            else:
+                string_match_tmp = string_pattern_tmp.match(text[stringPatternStart:stringPatternEnd])
+            string_index_tmp = string_match_tmp.capturedStart()
+            string_index_list.append(string_index_tmp)
+
+        string_min_index = -1
+        for string_index_tmp in string_index_list:
+            if string_index_tmp >= 0:
+                if string_min_index == -1:
+                    string_min_index = string_index_tmp
+                elif string_index_tmp < string_min_index:
+                    string_min_index = string_index_tmp
+        if string_min_index != -1:
+            for i, string_index_tmp in enumerate(string_index_list):
+                if string_index_tmp == string_min_index:
+                    string_rule_id = i + 1
+                    break
+
+        while(string_min_index >= 0):
+            rule = self.m_highlightStringRules[string_rule_id - 1]
+            string_pattern, string_format_name = rule
+            """ if self.previousBlockState() < 1: """
+            if stringPatternEnd == -1:
+                string_match = string_pattern.match(text[stringPatternStart:], string_index + string_length)
+            else:
+                string_match = string_pattern.match(text[stringPatternStart:stringPatternEnd], string_index + string_length)
+            string_index = string_min_index
+            string_length = string_match.capturedLength()
+            self.setFormat(
+                string_index + stringPatternStart,
+                string_length,
+                self.syntaxStyle().getFormat(string_format_name)
+            )
+
+            string_index_list = []
+            for rule in self.m_highlightStringRules:
+                string_pattern_tmp, _ = rule
+                if stringPatternEnd == -1:
+                    string_match_tmp = string_pattern_tmp.match(text[stringPatternStart:], string_index + string_length)
+                else:
+                    string_match_tmp = string_pattern_tmp.match(text[stringPatternStart:stringPatternEnd], string_index + string_length)
+                string_index_tmp = string_match_tmp.capturedStart()
+                string_index_list.append(string_index_tmp)
+
+            string_min_index = -1
+            for string_index_tmp in string_index_list:
+                if string_index_tmp >= 0:
+                    if string_min_index == -1:
+                        string_min_index = string_index_tmp
+                    elif string_index_tmp < string_min_index:
+                        string_min_index = string_index_tmp
+            if string_min_index != -1:
+                for i, string_index_tmp in enumerate(string_index_list):
+                    if string_index_tmp == string_min_index:
+                        string_rule_id = i + 1
+                        break
+
+class QGLSLHighlighter(QStyleSyntaxHighlighter):
+    def __init__(self, document: QTextDocument = None):
+        super(QGLSLHighlighter, self).__init__(document)
+        
+        self.m_highlightRules = []
+        
+        # 初始化正则表达式模式
+        self.m_includePattern = QRegularExpression(r'(#include\s+([<"][a-zA-Z0-9*._]+[">]))')
+        self.m_functionPattern = QRegularExpression(r'(\b([A-Za-z0-9_]+(?:\s+|::))*([A-Za-z0-9_]+)(?=\())')
+        self.m_defTypePattern = QRegularExpression(r'(\b([A-Za-z0-9_]+)\s+[A-Za-z]{1}[A-Za-z0-9_]+\s*[;=])')
+        self.m_commentStartPattern = QRegularExpression(r'(/\*)')
+        self.m_commentEndPattern = QRegularExpression(r'(\*/)')
+        
+        # 加载语法高亮规则
+        self.loadHighlightRules()
+        
+    def loadHighlightRules(self):
+        # Load the language definitions from the XML file
+        fl = QFile("config/glsl.xml")
+        if not fl.open(QFile.ReadOnly):
+            """ print("Can't open glsl style file") """
+            return
+
+        # Assuming QLanguage is a custom class you've implemented
+        language = QLanguage(fl)
+        if not language.isLoaded():
+            return
+
+        keys = language.keys()
+        for key in keys:
+            names = language.names(key)
+            for name in names:
+                self.m_highlightRules.append((
+                    QRegularExpression(fr"(\b{name}\b)"),
+                    key
+                ))
+
+        # 数字
+        self.m_highlightRules.append((
+            QRegularExpression(r'\b(0b|0x){0,1}[\d\']+\b'),
+            "Number"
+        ))
+        
+        # 预处理指令
+        self.m_highlightRules.append((
+            QRegularExpression(r'#[a-zA-Z_]+'),
+            "Preprocessor"
+        ))
+        
+        # 单行注释
+        self.m_highlightRules.append((
+            QRegularExpression('//[^\n]*'),
+            "Comment"
+        ))
+        
+        # 这里可以添加更多GLSL特定的关键字规则
+        
+    def highlightBlock(self, text: str) -> None:
+        # 处理#include指令
+        matchIterator = self.m_includePattern.globalMatch(text)
+        while matchIterator.hasNext():
+            match = matchIterator.next()
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Preprocessor")
+            )
+            self.setFormat(
+                match.capturedStart(2),
+                match.capturedLength(2),
+                self.syntaxStyle().getFormat("String")
+            )
+        
+        # 处理函数
+        matchIterator = self.m_functionPattern.globalMatch(text)
+        while matchIterator.hasNext():
+            match = matchIterator.next()
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Type")
+            )
+            self.setFormat(
+                match.capturedStart(3),
+                match.capturedLength(3),
+                self.syntaxStyle().getFormat("Function")
+            )
+        
+        # 应用常规高亮规则
+        for rule in self.m_highlightRules:
+            pattern, formatName = rule
+            matchIterator = pattern.globalMatch(text)
+            while matchIterator.hasNext():
+                match = matchIterator.next()
+                self.setFormat(
+                    match.capturedStart(),
+                    match.capturedLength(),
+                    self.syntaxStyle().getFormat(formatName)
+                )
+        
+        # 处理多行注释
+        self.setCurrentBlockState(0)
+        startIndex = 0
+        if self.previousBlockState() != 1:
+            match = self.m_commentStartPattern.match(text)
+            startIndex = match.capturedStart()
+        
+        while startIndex >= 0:
+            match = self.m_commentEndPattern.match(text, startIndex)
+            endIndex = match.capturedStart()
+            commentLength = 0
+            
+            if endIndex == -1:
+                self.setCurrentBlockState(1)
+                commentLength = len(text) - startIndex
+            else:
+                commentLength = endIndex - startIndex + match.capturedLength()
+            
+            self.setFormat(
+                startIndex,
+                commentLength,
+                self.syntaxStyle().getFormat("Comment")
+            )
+            match = self.m_commentStartPattern.match(text, startIndex + commentLength)
+            startIndex = match.capturedStart()
+
+class QLuaHighlighter(QStyleSyntaxHighlighter):
+    def __init__(self, document: QTextDocument = None):
+        super(QLuaHighlighter, self).__init__(document)
+        # 初始化高亮规则
+        self.highlight_rules = []
+        self.highlight_block_rules = []
+        
+        # 正则表达式模式
+        self.require_pattern = QRegularExpression(r"(require\s*([(\"'][a-zA-Z0-9*._]+['\")]))")
+        self.function_pattern = QRegularExpression(r"(\b([A-Za-z0-9_]+(?:\s+|::))*([A-Za-z0-9_]+)(?=\())")
+        self.def_type_pattern = QRegularExpression(r"(\b([A-Za-z0-9_]+)\s+([A-Za-z]{1}[A-Za-z0-9_]+)\s*[=])")
+        
+        # Load the language definitions from the XML file
+        fl = QFile("config/lua.xml")
+        if not fl.open(QFile.ReadOnly):
+            """ print("Can't open lua style file") """
+            return
+
+        # Assuming QLanguage is a custom class you've implemented
+        language = QLanguage(fl)
+        if not language.isLoaded():
+            return
+
+        keys = language.keys()
+        for key in keys:
+            names = language.names(key)
+            for name in names:
+                self.highlight_rules.append((
+                    QRegularExpression(fr"(\b\s{0,1}{name}\s{0,1}\b)"),
+                    key
+                ))
+
+        # 数字
+        self.highlight_rules.append((
+            QRegularExpression(r"\b(0b|0x){0,1}[\d.']+\b"),
+            "Number"
+        ))
+        
+        # 字符串
+        self.highlight_rules.append((
+            QRegularExpression(r"[\"][^\n\"]*[\"]|['][^\n']*[']"),
+            "String"
+        ))
+        
+        # 预处理器
+        self.highlight_rules.append((
+            QRegularExpression(r"#\![a-zA-Z_]+"),
+            "Preprocessor"
+        ))
+        
+        # 单行注释
+        self.highlight_rules.append((
+            QRegularExpression(r"--[^\n]*"),
+            "Comment"
+        ))
+        
+        # 多行规则
+        # 多行注释
+        self.highlight_block_rules.append({
+            "start": QRegularExpression(r"--\[\["),
+            "end": QRegularExpression(r"--\]\]"),
+            "format": "Comment"
+        })
+        
+        # 多行字符串
+        self.highlight_block_rules.append({
+            "start": QRegularExpression(r"\[\["),
+            "end": QRegularExpression(r"\]\]"),
+            "format": "String"
+        })
+
+    def highlightBlock(self, text):
+        """高亮文本块"""
+        # 检查require语句
+        it = self.require_pattern.globalMatch(text)
+        while it.hasNext():
+            match = it.next()
+            self.setFormat(match.capturedStart(), match.capturedLength(), 
+                          self.syntaxStyle().getFormat("Preprocessor"))
+            self.setFormat(match.capturedStart(2), match.capturedLength(2),
+                          self.syntaxStyle().getFormat("String"))
+        
+        # 检查函数定义
+        it = self.function_pattern.globalMatch(text)
+        while it.hasNext():
+            match = it.next()
+            self.setFormat(match.capturedStart(), match.capturedLength(),
+                          self.syntaxStyle().getFormat("Type"))
+            self.setFormat(match.capturedStart(3), match.capturedLength(3),
+                          self.syntaxStyle().getFormat("Function"))
+        
+        # 检查类型定义
+        it = self.def_type_pattern.globalMatch(text)
+        while it.hasNext():
+            match = it.next()
+            self.setFormat(match.capturedStart(3), match.capturedLength(3),
+                          self.syntaxStyle().getFormat("Type"))
+        
+        # 应用基础高亮规则
+        for pattern, format_name in self.highlight_rules:
+            it = pattern.globalMatch(text)
+            while it.hasNext():
+                match = it.next()
+                self.setFormat(match.capturedStart(), match.capturedLength(),
+                              self.syntaxStyle().getFormat(format_name))
+        
+        # 处理多行规则
+        current_state = self.previousBlockState()
+        start_index = 0
+        
+        if current_state < 1 or current_state > len(self.highlight_block_rules):
+            for i, rule in enumerate(self.highlight_block_rules):
+                match = rule["start"].match(text)
+                start_index = match.capturedStart()
+                if start_index >= 0:
+                    current_state = i + 1
+                    break
+        
+        while start_index >= 0:
+            rule = self.highlight_block_rules[current_state - 1]
+            match = rule["end"].match(text, start_index)
+            end_index = match.capturedStart()
+            match_length = 0
+            
+            if end_index == -1:
+                self.setCurrentBlockState(current_state)
+                match_length = len(text) - start_index
+            else:
+                match_length = end_index - start_index + match.capturedLength()
+            
+            self.setFormat(start_index, match_length, self.syntaxStyle().getFormat(rule["format"]))
+            match = rule["start"].match(text, start_index + match_length)
+            start_index = match.capturedStart()
+
+class QLanguage(QObject):
+    def __init__(self, device, parent=None):
+        super(QLanguage, self).__init__(parent)
+        self._loaded = False
+        self._list = {}
+        self.load(device)
+
+    def load(self, device):
+        if device is None:
+            return False
+
+        reader = QXmlStreamReader(device)
+
+        name = ""
+        string_list = []
+        read_text = False
+
+        while not reader.atEnd() and not reader.hasError():
+            token_type = reader.readNext()
+
+            if token_type == QXmlStreamReader.StartElement:
+                if reader.name() == "section":
+                    if string_list:
+                        self._list[name] = string_list
+                        string_list = []
+
+                    name = reader.attributes().value("name")
+                elif reader.name() == "name":
+                    read_text = True
+
+            elif token_type == QXmlStreamReader.Characters and read_text:
+                string_list.append(reader.text())
+                read_text = False
+
+        if string_list:
+            self._list[name] = string_list
+
+        self._loaded = not reader.hasError()
+        return self._loaded
+
+    def keys(self):
+        return list(self._list.keys())
+
+    def names(self, key):
+        return self._list.get(key, [])
+
+    def isLoaded(self):
+        return self._loaded
 
 class CodeShow(QWidget):
     def __init__(self, codeText, lexerName='python', maxWidth=810, parent=None):
@@ -2655,7 +3944,7 @@ class MessageWidget(QWidget):
         # 使用 re.DOTALL 让 . 匹配换行符
         matches = re.findall(pattern, text, re.DOTALL)
         # 过滤出指定语言的代码块
-        supported_languages = {"c", "cpp", "python", "java", "javascript"}
+        supported_languages = {"cpp", "python", "glsl", "lua"}
         code_blocks = []
         for language, code in matches:
             if language.lower() in supported_languages:

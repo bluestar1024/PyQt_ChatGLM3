@@ -9,7 +9,7 @@ import sys, os
 from enum import Enum
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QMenu, QFrame, QGraphicsDropShadowEffect, QPlainTextEdit
 from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QTime, QObject, QXmlStreamReader, QFile, QIODevice, QRegularExpression, QDir
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextCursor, QTextCharFormat, QTextDocument, QSyntaxHighlighter
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextCursor, QTextCharFormat, QTextDocument, QSyntaxHighlighter, QTextOption
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 """ from pygments import highlight, token
 from pygments.lexers import CLexer, CppLexer, PythonLexer, JavaLexer, JavascriptLexer
@@ -29,6 +29,7 @@ images_dir = os.path.normpath(os.path.join(current_dir, '..', 'images')).replace
 config_file_path = os.path.normpath(os.path.join(current_dir, '..', 'config', 'config.txt'))
 mathjax_script_path = os.path.normpath(os.path.join(current_dir, '..', 'mathjax/es5/tex-mml-chtml.js')).replace('\\', '/')
 chat_records_dir = os.path.normpath(os.path.join(current_dir, '..', 'chatrecords'))
+code_theme_file_path = os.path.normpath(os.path.join(current_dir, '..', 'config', 'dark_theme.xml'))
 
 init_base_url = "http://7613907zg6.vicp.fun:45861/v1"
 init_api_key = "EMPTY"
@@ -124,17 +125,6 @@ a.b.fun()
 12.3
 ```
 
-或者用公式：
-
-```cpp
-int n = 100;
-int sum = n * (n + 1) / 2;
-#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-std::cout << sum << std::endl;
-```
-
-同样，两种方法都适用。可能用公式更好。
-
 然后是Python的部分。Python的语法更简单，循环的话：
 
 ```python
@@ -218,334 +208,6 @@ if __name__ == "__main__":
     window = CodeEditor()
     window.show()
     sys.exit(app.exec_())
-```
-
-或者，直接用公式：
-
-```python
-n = 100
-total = n * (n + 1) // 2
-#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-print(total)
-```
-glsl 示例
-```glsl
-precision mediump float;
-
-uniform vec2 resolution;
-uniform float time;
- 
-vec3 trans(vec3 p)
-{
-    return mod(p, 8.0)-4.0;
-}
-
-float distanceFunction(vec3 pos)
-{
-    return length(trans(pos)) - 1.5;
-}
- 
-vec3 getNormal(vec3 p)
-{
-    const float d = 0.0001;
-    return
-      normalize
-      (
-        vec3
-        (
-          distanceFunction(p+vec3(d,   0.0, 0))-distanceFunction(p+vec3(-d,0.0,0.0)),
-          distanceFunction(p+vec3(0.0, d,   0.0))-distanceFunction(p+vec3(0.0,-d,0.0)),
-          distanceFunction(p+vec3(0.0, 0.0, d))-distanceFunction(p+vec3(0.0,0.0,-d))
-        )
-      );
-}
- 
-void main() {
-    vec2 pos = (gl_FragCoord.xy*2.0 -resolution) / resolution.y;
- 
-    vec3 camPos = vec3(0.0, 0.0, 3.0);
-    vec3 camDir = vec3(0.0, 0.0, -1.0);
-    vec3 camUp = vec3(0.0, 1.0, 0.0);
-    vec3 camSide = cross(camDir, camUp);
-    float focus = sin(time)*1.5+4.0;
- 
-    mat3 lense = mat3(1.,0.,0.,
-		        0.,888989898989898989,0.,
-		        0.,0.,1.);
-	vec3 pos3 = vec3(pos,camDir.z*10.);
-	camDir = vec3(
-		camDir.x,
-		camDir.y,
-		camDir.z);
-	camDir*=normalize(dot(camDir,pos3));
-    vec3 rayDir = normalize(camSide*pos.x + camUp*pos.y + camDir*focus);
-
-    float t = 0.0, d;
-    vec3 posOnRay = camPos;
- 
-    for(int i=0; i<64; ++i)
-    {
-        d = distanceFunction(posOnRay);
-        t += d;
-        posOnRay = camPos + t*rayDir;
-    }
- 
-    vec3 normal = getNormal(posOnRay);
-    if(abs(d) < 0.001)
-    {
-        gl_FragColor = vec4(normal, 1.0);
-    }else
-    {
-        gl_FragColor = vec4(0.0);
-    }
-}
-```
-
-lua 示例
-```lua
-----------------------------------------------------
--- 1. Variables and flow control.
-----------------------------------------------------
-
-num = 42
-
-s = 'walternate'  -- Immutable strings like Python.
-t = "double-quotes are also fine"
-u = [[ Double brackets
-     start and end
-     multi-line strings.]]
-t = nil  -- Undefines t; Lua has garbage collection.
-
--- Blocks are denoted with keywords like do/end:
-while num < 50 do
-num = num + 1  -- No ++ or += type operators.
-end
-
--- If clauses:
-if num > 40 then
-print('over 40')
-elseif s ~= 'walternate' then  -- ~= is not equals.
--- Equality check is == like Python; ok for strs.
-io.write('not over 40\n')  -- Defaults to stdout.
-else
--- Variables are global by default.
-thisIsGlobal = 5  -- Camel case is common.
-
--- How to make a variable local:
-local line = io.read()  -- Reads next stdin line.
-
--- String concatenation uses the .. operator:
-print('Winter is coming, ' .. line)
-end
-
--- Undefined variables return nil.
--- This is not an error:
-foo = anUnknownVariable  -- Now foo = nil.
-
-aBoolValue = false
-
--- Only nil and false are falsy; 0 and '' are true!
-if not aBoolValue then print('twas false') end
-
--- 'or' and 'and' are short-circuited.
--- This is similar to the a?b:c operator in C/js:
-ans = aBoolValue and 'yes' or 'no'  --> 'no'
-
-karlSum = 0
-for i = 1, 100 do  -- The range includes both ends.
-karlSum = karlSum + i
-end
-
--- Use "100, 1, -1" as the range to count down:
-fredSum = 0
-for j = 100, 1, -1 do fredSum = fredSum + j end
-
--- In general, the range is begin, end[, step].
-
--- Another loop construct:
-repeat
-print('the way of the future')
-num = num - 1
-until num == 0
-
-
-----------------------------------------------------
--- 2. Functions.
-----------------------------------------------------
-
-function fib(n)
-if n < 2 then return 1 end
-return fib(n - 2) + fib(n - 1)
-end
-
--- Closures and anonymous functions are ok:
-function adder(x)
--- The returned function is created when adder is
--- called, and remembers the value of x:
-return function (y) return x + y end
-end
-a1 = adder(9)
-a2 = adder(36)
-print(a1(16))  --> 25
-print(a2(64))  --> 100
-
--- Returns, func calls, and assignments all work
--- with lists that may be mismatched in length.
--- Unmatched receivers are nil;
--- unmatched senders are discarded.
-
-x, y, z = 1, 2, 3, 4
--- Now x = 1, y = 2, z = 3, and 4 is thrown away.
-
-function bar(a, b, c)
-print(a, b, c)
-return 4, 8, 15, 16, 23, 42
-end
-
-x, y = bar('zaphod')  --> print zaphod  nil nil
--- Now x = 4, y = 8, values 15..42 are discarded.
-
--- Functions are first-class, may be local/global.
--- These are the same:
-function f(x) return x * x end
-f = function (x) return x * x end
-
--- And so are these:
-local function g(x) return math.sin(x) end
-local g; g  = function (x) return math.sin(x) end
--- the 'local g' decl makes g-self-references ok.
-
--- Trig funcs work in radians, by the way.
-
--- Calls with one string param don't need parens:
-print 'hello'  -- Works fine.
-
-
-----------------------------------------------------
--- 3. Tables.
-----------------------------------------------------
-t = {key1 = 'value1', key2 = false}
-
--- String keys can use js-like dot notation:
-print(t.key1)  -- Prints 'value1'.
-t.newKey = {}  -- Adds a new key/value pair.
-t.key2 = nil   -- Removes key2 from the table.
-
--- Literal notation for any (non-nil) value as key:
-u = {['@!#'] = 'qbert', [{}] = 1729, [6.28] = 'tau'}
-print(u[6.28])  -- prints tau
-
--- Key matching is basically by value for numbers
--- and strings, but by identity for tables.
-a = u['@!#']  -- Now a = 'qbert'.
-b = u[{}]     -- We might expect 1729, but it's nil:
-
-function h(x) print(x.key1) end
-h{key1 = 'Sonmi~451'}  -- Prints 'Sonmi~451'.
-
-for key, val in pairs(u) do  -- Table iteration.
-print(key, val)
-end
-
--- _G is a special table of all globals.
-print(_G['_G'] == _G)  -- Prints 'true'.
-
--- Using tables as lists / arrays:
-
--- List literals implicitly set up int keys:
-v = {'value1', 'value2', 1.21, 'gigawatts'}
-for i = 1, #v do  -- #v is the size of v for lists.
-print(v[i])  -- Indices start at 1 !! SO CRAZY!
-end
--- A 'list' is not a real type. v is just a table
--- with consecutive integer keys, treated as a list.
-
-----------------------------------------------------
--- 3.1 Metatables and metamethods.
-----------------------------------------------------
-
--- A table can have a metatable that gives the table
--- operator-overloadish behavior. Later we'll see
--- how metatables support js-prototypey behavior.
-
-f1 = {a = 1, b = 2}  -- Represents the fraction a/b.
-f2 = {a = 2, b = 3}
-
--- This would fail:
--- s = f1 + f2
-
-metafraction = {}
-function metafraction.__add(f1, f2)
-sum = {}
-sum.b = f1.b * f2.b
-sum.a = f1.a * f2.b + f2.a * f1.b
-return sum
-end
-
-setmetatable(f1, metafraction)
-setmetatable(f2, metafraction)
-
-s = f1 + f2  -- call __add(f1, f2) on f1's metatable
-
--- f1, f2 have no key for their metatable, unlike
--- prototypes in js, so you must retrieve it as in
--- getmetatable(f1). The metatable is a normal table
--- with keys that Lua knows about, like __add.
-
--- But the next line fails since s has no metatable:
--- t = s + s
--- Class-like patterns given below would fix this.
-
--- An __index on a metatable overloads dot lookups:
-defaultFavs = {animal = 'gru', food = 'donuts'}
-myFavs = {food = 'pizza'}
-setmetatable(myFavs, {__index = defaultFavs})
-eatenBy = myFavs.animal  -- works! thanks, metatable
-
-----------------------------------------------------
--- 3.2 Class-like tables and inheritance.
-----------------------------------------------------
-
-Dog = {}                                   -- 1.
-
-function Dog:new()                         -- 2.
-newObj = {sound = 'woof'}                -- 3.
-self.__index = self                      -- 4.
-return setmetatable(newObj, self)        -- 5.
-end
-
-function Dog:makeSound()                   -- 6.
-print('I say ' .. self.sound)
-end
-
-mrDog = Dog:new()                          -- 7.
-mrDog:makeSound()  -- 'I say woof'         -- 8.
-
-----------------------------------------------------
-
--- Inheritance example:
-
-LoudDog = Dog:new()                           -- 1.
-
-function LoudDog:makeSound()
-s = self.sound .. ' '                       -- 2.
-print(s .. s .. s)
-end
-
-seymour = LoudDog:new()                       -- 3.
-seymour:makeSound()  -- 'woof woof woof'      -- 4.
-
--- If needed, a subclass's new() is like the base's:
-function LoudDog:new()
-newObj = {}
--- set up newObj
-self.__index = self
-return setmetatable(newObj, self)
-end
-
-----------------------------------------------------
--- 4. Modules.
-----------------------------------------------------
 ```
 
 这样应该就能得到结果了。或者直接用公式的话，可能更简洁：
@@ -2332,13 +1994,15 @@ class LineNumberArea(QWidget):
     def __init__(self, parent=None):
         super(LineNumberArea, self).__init__(parent)
         self.editor = parent
+        self.backgroundColor = QColor(20, 20, 28)
+        self.numberColor = QColor(178, 170, 164)
 
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.fillRect(event.rect(), QColor(20, 20, 28))
+        painter.fillRect(event.rect(), self.backgroundColor)
         """ painter.fillRect(event.rect(), QColor(Qt.red)) """
-        pen = QPen(QColor(178, 170, 164))
+        pen = QPen(self.numberColor)
         painter.setPen(pen)
         painter.setFont(self.editor.font())
         hAdvance = self.editor.fontMetrics().horizontalAdvance('9')
@@ -2348,18 +2012,30 @@ class LineNumberArea(QWidget):
         bottom      = top + int(self.editor.document().documentLayout().blockBoundingRect(block).height())
         while(block.isValid() and top <= event.rect().bottom()):
             if (block.isVisible() and bottom >= event.rect().top()):
-                painter.drawText(int((2 - len(str(self.editor.document().blockCount()))) * 0.275 * hAdvance), top, self.width() - hAdvance, bottom - top, Qt.AlignRight | Qt.AlignVCenter, str(blockNumber + 1))
+                """ print('naturalTextRect:', block.layout().lineAt(0).naturalTextRect())
+                print('rect:', block.layout().lineAt(0).rect()) """
+                painter.drawText(int((2 - len(str(self.editor.document().blockCount()))) * 0.275 * hAdvance), top, self.width() - hAdvance, int(block.layout().lineAt(0).rect().height()), Qt.AlignRight | Qt.AlignVCenter, str(blockNumber + 1))
             block = block.next()
             top = int(self.editor.document().documentLayout().blockBoundingRect(block).translated(0, -self.editor.verticalScrollBar().value()).top())
             bottom = top + int(self.editor.document().documentLayout().blockBoundingRect(block).height())
             blockNumber += 1
         painter.end()
 
+    def setLightBackgroundColor(self):
+        self.backgroundColor = QColor(236, 236, 228)
+        self.numberColor = QColor(78, 86, 92)
+
+    def setDarkBackgroundColor(self):
+        self.backgroundColor = QColor(20, 20, 28)
+        self.numberColor = QColor(178, 170, 164)
+
 class CodeEdit(QTextEdit):
     setSizeFinished = pyqtSignal()
 
     def __init__(self, parent=None):
         super(CodeEdit, self).__init__(parent)
+        self.text = ''
+        self.lexerName = ''
         self.horizontalScrollBar().setCursor(Qt.PointingHandCursor)
         self.setStyleSheet('''
         QTextEdit {
@@ -2393,7 +2069,7 @@ class CodeEdit(QTextEdit):
         font.setFixedPitch(True)
         font.setPixelSize(14)
         self.setFont(font)
-        print('font pitch:', font.fixedPitch(), self.font().fixedPitch())
+        """ print('font pitch:', font.fixedPitch(), self.font().fixedPitch()) """
         palette = self.palette()
         palette.setColor(QPalette.Text, QColor(178, 170, 164))
         self.setPalette(palette)
@@ -2405,11 +2081,6 @@ class CodeEdit(QTextEdit):
         self.textChanged.connect(self.adjustSize)
         #valueChanged
         self.verticalScrollBar().valueChanged.connect(self.on_scroll)
-        """ {"C++",  QCXXHighlighter()},
-            {"GLSL", QGLSLHighlighter()},
-            {"XML",  QXMLHighlighter()},
-            {"JSON", QJSONHighlighter()},
-            {"LUA",  QLuaHighlighter()}, """
         self.m_highlighters = {
             "None": None,
             "Python": QPythonHighlighter(),
@@ -2418,6 +2089,76 @@ class CodeEdit(QTextEdit):
             "LUA": QLuaHighlighter()
         }
         self.m_highlighter = self.m_highlighters["None"]
+
+    def setThemeStyle(self, isLightThemeStyle=False):
+        global code_theme_file_path
+        if isLightThemeStyle:
+            self.setStyleSheet('''
+            QTextEdit {
+                border: none;
+                background-color: #ecece4;
+                border-bottom-left-radius: 7px;
+                border-bottom-right-radius: 7px;
+            }
+            QScrollBar:horizontal {
+                background: transparent;
+                height: 10px;
+                padding: 0px 0px 4px 0px;
+            }
+            QScrollBar::handle:horizontal {
+                background: #bcbcb4;
+                height: 6px;
+                border-radius: 3px; /* 设置滑块为圆角矩形 */
+            }
+            QScrollBar::handle:horizontal:hover {
+                background: #8c8c8c;
+            }
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                background: transparent;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                width: 0px;
+            }
+            ''')
+            palette = self.palette()
+            palette.setColor(QPalette.Text, QColor(78, 86, 92))
+            self.setPalette(palette)
+            self.lineNumberArea.setLightBackgroundColor()
+            code_theme_file_path = os.path.normpath(os.path.join(current_dir, '..', 'config', 'light_theme.xml'))
+        else:
+            self.setStyleSheet('''
+            QTextEdit {
+                border: none;
+                background-color: #14141c;
+                border-bottom-left-radius: 7px;
+                border-bottom-right-radius: 7px;
+            }
+            QScrollBar:horizontal {
+                background: transparent;
+                height: 10px;
+                padding: 0px 0px 4px 0px;
+            }
+            QScrollBar::handle:horizontal {
+                background: #44444c;
+                height: 6px;
+                border-radius: 3px; /* 设置滑块为圆角矩形 */
+            }
+            QScrollBar::handle:horizontal:hover {
+                background: #747474;
+            }
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                background: transparent;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                width: 0px;
+            }
+            ''')
+            palette = self.palette()
+            palette.setColor(QPalette.Text, QColor(178, 170, 164))
+            self.setPalette(palette)
+            self.lineNumberArea.setDarkBackgroundColor()
+            code_theme_file_path = os.path.normpath(os.path.join(current_dir, '..', 'config', 'dark_theme.xml'))
+        self.highlightCode(self.text, self.lexerName)
 
     def on_scroll(self, value):
         self.lineNumberArea.repaint()
@@ -2435,6 +2176,9 @@ class CodeEdit(QTextEdit):
         return 0
 
     def highlightCode(self, text, lexerName='python'):
+        self.text = text
+        self.lexerName = lexerName
+
         match lexerName:
             case 'cpp':
                 self.setHighlighter(self.m_highlighters["C++"])
@@ -2482,7 +2226,7 @@ class CodeEdit(QTextEdit):
         self.setViewportMargins(self.lineNumberArea.width(), 0, 0, 0)
 
     def adjustSize(self):
-        print('height:', int(self.document().size().height()))
+        """ print('height:', int(self.document().size().height())) """
         height = int(self.document().size().height())
         self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
         self.updateLineNumberAreaWidth()
@@ -2589,7 +2333,7 @@ class QSyntaxStyle(QObject):
             if not QSyntaxStyle.defaultStyle.style.isLoaded():
                 # 初始化资源文件
                 # Q_INIT_RESOURCE(qcodeeditor_resources)
-                fl = QFile("test/default_style.xml")
+                fl = QFile(code_theme_file_path)
 
                 if not fl.open(QIODevice.ReadOnly):
                     print("Can't open default style file.")
@@ -3511,16 +3255,15 @@ class QLanguage(QObject):
 class CodeShow(QWidget):
     def __init__(self, codeText, lexerName='python', maxWidth=810, parent=None):
         super(CodeShow, self).__init__(parent)
+        self.codeText = codeText
         self.maxWidth = maxWidth
-        self.mainVLayout = QVBoxLayout()
-        self.setLayout(self.mainVLayout)
         self.setObjectName('CodeShow')
         self.setStyleSheet('''
         #CodeShow {
-            border-radius: 13px;
+            border-radius: 7px;
         }
         ''')
-        #
+        #topWidget QWidget
         self.topWidget = QWidget()
         """ self.topWidget.setFixedHeight(20) """
         self.topWidget.setStyleSheet('''
@@ -3530,9 +3273,7 @@ class CodeShow(QWidget):
             border-top-right-radius: 7px;
         }
         ''')
-        self.topSubHLayout = QHBoxLayout()
-        self.topWidget.setLayout(self.topSubHLayout)
-        #
+        #label QLabel
         self.label = QLabel(lexerName)
         font = QFont()
         font.setPointSize(windowFontPointSize)
@@ -3542,11 +3283,44 @@ class CodeShow(QWidget):
         self.palette.setColor(QPalette.Text, QColor(Qt.white))
         self.label.setPalette(self.palette)
         self.label.adjustSize()
-        #
+        #toggleThemeButton PushButton
+        self.toggleThemeButton = PushButton(tipText='日间主题', tipOffsetX=15, tipOffsetY=35)
+        self.toggleThemeButton.setFixedSize(self.label.height(), self.label.height())
+        self.light_theme_images_path = os.path.join(images_dir, 'light_theme.png').replace('\\', '/')
+        self.dark_theme_images_path = os.path.join(images_dir, 'dark_theme.png').replace('\\', '/')
+        self.toggleThemeButton.setIcon(QIcon(f"{self.light_theme_images_path}"))
+        self.toggleThemeButton.setIconSize(QSize(20, 20))
+        self.toggleThemeButton.setStyleSheet('''
+        QPushButton{
+            border: none;
+            background: transparent;
+        }
+        ''')
+        self.toggleThemeButton.clicked.connect(self.toggleThemeStyle)
+        self.isLightThemeStyle = False
+        #wordWrapButton PushButton
+        self.wordWrapButton = PushButton(tipText='折叠成单行', tipOffsetX=15, tipOffsetY=35)
+        self.wordWrapButton.setFixedSize(self.label.height(), self.label.height())
+        self.light_word_wrap_images_path = os.path.join(images_dir, 'light_word_wrap.png').replace('\\', '/')
+        self.light_single_line_images_path = os.path.join(images_dir, 'light_single_line.png').replace('\\', '/')
+        self.dark_word_wrap_images_path = os.path.join(images_dir, 'dark_word_wrap.png').replace('\\', '/')
+        self.dark_single_line_images_path = os.path.join(images_dir, 'dark_single_line.png').replace('\\', '/')
+        self.wordWrapButton.setIcon(QIcon(f"{self.light_single_line_images_path}"))
+        self.wordWrapButton.setIconSize(QSize(20, 20))
+        self.wordWrapButton.setStyleSheet('''
+        QPushButton{
+            border: none;
+            background: transparent;
+        }
+        ''')
+        self.wordWrapButton.clicked.connect(self.setLineWordWrapMode)
+        self.isWordWrap = True
+        #codeCopyButton PushButton
         self.codeCopyButton = PushButton(tipText='复制代码', tipOffsetX=15, tipOffsetY=35)
         self.codeCopyButton.setFixedSize(self.label.height(), self.label.height())
-        self.code_copy_images_path = os.path.join(images_dir, 'code_copy.png').replace('\\', '/')
-        self.codeCopyButton.setIcon(QIcon(f"{self.code_copy_images_path}"))
+        self.light_code_copy_images_path = os.path.join(images_dir, 'light_code_copy.png').replace('\\', '/')
+        self.dark_code_copy_images_path = os.path.join(images_dir, 'dark_code_copy.png').replace('\\', '/')
+        self.codeCopyButton.setIcon(QIcon(f"{self.light_code_copy_images_path}"))
         self.codeCopyButton.setIconSize(QSize(20, 20))
         self.codeCopyButton.setStyleSheet('''
         QPushButton{
@@ -3554,17 +3328,43 @@ class CodeShow(QWidget):
             background: transparent;
         }
         ''')
-        #
-        self.topSubHLayout.addWidget(self.label, 0, Qt.AlignLeft)
-        self.topSubHLayout.addWidget(self.codeCopyButton, 0, Qt.AlignRight)
-        self.topSubHLayout.setContentsMargins(10, 0, 10, 0)
+        self.codeCopyButton.clicked.connect(self.copyCode)
+        #QClipboard
+        self.clip = QApplication.clipboard()
+        #topSubLeftWidget QWidget
+        self.topSubLeftWidget = QWidget()
+        self.topSubLeftWidget.setFixedHeight(self.label.height())
+        self.topSubLeftHLayout = QHBoxLayout()
+        self.topSubLeftWidget.setLayout(self.topSubLeftHLayout)
+        self.topSubLeftHLayout.setAlignment(Qt.AlignLeft)
+        self.topSubLeftHLayout.setContentsMargins(0, 0, 0, 0)
+        self.topSubLeftHLayout.addWidget(self.label)
+        #topSubRightWidget QWidget
+        self.topSubRightWidget = QWidget()
+        self.topSubRightWidget.setFixedHeight(self.label.height())
+        self.topSubRightHLayout = QHBoxLayout()
+        self.topSubRightWidget.setLayout(self.topSubRightHLayout)
+        self.topSubRightHLayout.setAlignment(Qt.AlignRight)
+        self.topSubRightHLayout.setContentsMargins(0, 0, 0, 0)
+        self.topSubRightHLayout.setSpacing(0)
+        self.topSubRightHLayout.addWidget(self.toggleThemeButton)
+        self.topSubRightHLayout.addWidget(self.wordWrapButton)
+        self.topSubRightHLayout.addWidget(self.codeCopyButton)
+        #topHLayout QHBoxLayout
+        self.topHLayout = QHBoxLayout()
+        self.topWidget.setLayout(self.topHLayout)
+        self.topHLayout.addWidget(self.topSubLeftWidget, 0, Qt.AlignLeft)
+        self.topHLayout.addWidget(self.topSubRightWidget, 0, Qt.AlignRight)
+        self.topHLayout.setContentsMargins(10, 0, 10, 0)
         self.topWidget.setFixedHeight(self.label.height())
-        #
+        #CodeEdit
         self.codeEdit = CodeEdit()
         self.codeEdit.setSizeFinished.connect(self.OnSizeFinished)
         self.codeEdit.highlightCode(codeText, lexerName=lexerName)
         self.codeEdit.setFixedWidth(self.maxWidth)
-        #
+        #mainVLayout QVBoxLayout
+        self.mainVLayout = QVBoxLayout()
+        self.setLayout(self.mainVLayout)
         self.mainVLayout.addWidget(self.topWidget)
         self.mainVLayout.addWidget(self.codeEdit)
         self.mainVLayout.setContentsMargins(0, 0, 0, 0)
@@ -3578,11 +3378,76 @@ class CodeShow(QWidget):
         self.setFixedSize(self.maxWidth, self.codeEdit.height() + self.topWidget.height())
         """ print('CodeEdit:', self.codeEdit.width(), self.codeEdit.height()) """
 
+    def connectCodeCopyButtonClick(self, fun):
+        self.codeCopyButton.clicked.connect(fun)
+
     def hasSelectedText(self):
         return self.codeEdit.textCursor().hasSelection()
 
     def getSelectedText(self):
         return self.codeEdit.textCursor().selectedText()
+
+    def toggleThemeStyle(self):
+        self.isLightThemeStyle = not self.isLightThemeStyle
+        if self.isLightThemeStyle:
+            self.topWidget.setStyleSheet('''
+            QWidget {
+                background-color: #ccccc4;
+                border-top-left-radius: 7px;
+                border-top-right-radius: 7px;
+            }
+            ''')
+            self.palette = self.label.palette()
+            self.palette.setColor(QPalette.Text, QColor(Qt.black))
+            self.label.setPalette(self.palette)
+            self.toggleThemeButton.setIcon(QIcon(f"{self.dark_theme_images_path}"))
+            self.toggleThemeButton.tipText = '夜间主题'
+            if self.isWordWrap:
+                self.wordWrapButton.setIcon(QIcon(f"{self.dark_single_line_images_path}"))
+            else:
+                self.wordWrapButton.setIcon(QIcon(f"{self.dark_word_wrap_images_path}"))
+            self.codeCopyButton.setIcon(QIcon(f"{self.dark_code_copy_images_path}"))
+        else:
+            self.topWidget.setStyleSheet('''
+            QWidget {
+                background-color: #34343c;
+                border-top-left-radius: 7px;
+                border-top-right-radius: 7px;
+            }
+            ''')
+            self.palette = self.label.palette()
+            self.palette.setColor(QPalette.Text, QColor(Qt.white))
+            self.label.setPalette(self.palette)
+            self.toggleThemeButton.setIcon(QIcon(f"{self.light_theme_images_path}"))
+            self.toggleThemeButton.tipText = '日间主题'
+            if self.isWordWrap:
+                self.wordWrapButton.setIcon(QIcon(f"{self.light_single_line_images_path}"))
+            else:
+                self.wordWrapButton.setIcon(QIcon(f"{self.light_word_wrap_images_path}"))
+            self.codeCopyButton.setIcon(QIcon(f"{self.light_code_copy_images_path}"))
+        self.codeEdit.setThemeStyle(self.isLightThemeStyle)
+
+    def setLineWordWrapMode(self):
+        self.isWordWrap = not self.isWordWrap
+        if self.isWordWrap:
+            self.codeEdit.setWordWrapMode(QTextOption.WordWrap)
+            self.codeEdit.setLineWrapMode(QTextEdit.WidgetWidth)
+            if self.isLightThemeStyle:
+                self.wordWrapButton.setIcon(QIcon(f"{self.dark_single_line_images_path}"))
+            else:
+                self.wordWrapButton.setIcon(QIcon(f"{self.light_single_line_images_path}"))
+            self.wordWrapButton.tipText = '折叠成单行'
+        else:
+            self.codeEdit.setWordWrapMode(QTextOption.NoWrap)
+            self.codeEdit.setLineWrapMode(QTextEdit.NoWrap)
+            if self.isLightThemeStyle:
+                self.wordWrapButton.setIcon(QIcon(f"{self.dark_word_wrap_images_path}"))
+            else:
+                self.wordWrapButton.setIcon(QIcon(f"{self.light_word_wrap_images_path}"))
+            self.wordWrapButton.tipText = '自动换行'
+
+    def copyCode(self):
+        self.clip.setText(self.codeText)
 
 class MessageWidget(QWidget):
     """ thinkTextRecvEnd = pyqtSignal() """
@@ -3595,6 +3460,7 @@ class MessageWidget(QWidget):
         self.text = text
         self.textMaxWidth = textMaxWidth
         self.isUser = isUser
+        self.copyFun = copyFun
         #ImageLabel
         self.imageLabel = ImageLabel(isUser=self.isUser)
         #textWidget TextWidget
@@ -3667,6 +3533,7 @@ class MessageWidget(QWidget):
                     language, code = CodeBlock
                     self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth - self.imageLabel.width() - 80, parent=self))
                     """ self.thinkCodeShowList[-1].hide() """
+                    self.thinkCodeShowList[-1].connectCodeCopyButtonClick(copyFun)
                     thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     thinkSplitTextList.append(thinkTempTextList[0])
                     thinkTempText = thinkTempTextList[1]
@@ -3720,6 +3587,7 @@ class MessageWidget(QWidget):
                     language, code = CodeBlock
                     self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth - self.imageLabel.width() - 35, parent=self))
                     """ self.resultCodeShowList[-1].hide() """
+                    self.resultCodeShowList[-1].connectCodeCopyButtonClick(copyFun)
                     resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     resultSplitTextList.append(resultTempTextList[0])
                     resultTempText = resultTempTextList[1]
@@ -4112,6 +3980,8 @@ class MessageWidget(QWidget):
                         #set visible
                         self.thinkCodeShowList[-1].setVisible(self.thinkIsExpand)
                         """ self.thinkCodeShowList[-1].hide() """
+                        #connect codeCopyButton Click
+                        self.thinkCodeShowList[-1].connectCodeCopyButtonClick(self.copyFun)
                     else:
                         self.thinkCodeShowList[index].setText(code.strip(), lexerName=language)
                     thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
@@ -4178,6 +4048,8 @@ class MessageWidget(QWidget):
                     if resultCodeShowListLastLen < index:
                         self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth - self.imageLabel.width() - 35, parent=self))
                         """ self.resultCodeShowList[-1].hide() """
+                        #connect codeCopyButton Click
+                        self.resultCodeShowList[-1].connectCodeCopyButtonClick(self.copyFun)
                     else:
                         self.resultCodeShowList[index].setText(code.strip(), lexerName=language)
                     resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)

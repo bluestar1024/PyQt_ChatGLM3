@@ -7,14 +7,14 @@ Created on Tue Feb 13 18:31:44 2024
 
 import sys, os
 from enum import Enum
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QTextEdit, QMenu, QFrame, QGraphicsDropShadowEffect
-from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QTime
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextOption
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QMenu, QFrame, QGraphicsDropShadowEffect, QPlainTextEdit
+from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QTime, QObject, QXmlStreamReader, QFile, QIODevice, QRegularExpression, QDir
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextCursor, QTextCharFormat, QTextDocument, QSyntaxHighlighter, QTextOption
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
-from pygments import highlight, token
+""" from pygments import highlight, token
 from pygments.lexers import CLexer, CppLexer, PythonLexer, JavaLexer, JavascriptLexer
 from pygments.formatters import HtmlFormatter
-from pygments.style import Style
+from pygments.style import Style """
 from openai import OpenAI
 import math
 import re
@@ -29,6 +29,7 @@ images_dir = os.path.normpath(os.path.join(current_dir, '..', 'images')).replace
 config_file_path = os.path.normpath(os.path.join(current_dir, '..', 'config', 'config.txt'))
 mathjax_script_path = os.path.normpath(os.path.join(current_dir, '..', 'mathjax/es5/tex-mml-chtml.js')).replace('\\', '/')
 chat_records_dir = os.path.normpath(os.path.join(current_dir, '..', 'chatrecords'))
+code_theme_file_path = os.path.normpath(os.path.join(current_dir, '..', 'config', 'dark_theme.xml'))
 
 init_base_url = "http://7613907zg6.vicp.fun:45861/v1"
 init_api_key = "EMPTY"
@@ -63,26 +64,6 @@ testText = '''<think>
 
 那我先写出循环的方法。Java中，for循环从1到100，每次加i。代码结构大概是：
 
-```java
-int sum = 0;
-for (int i = 1; i <= 100; i++) {
-    #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-    sum += i;
-}
-System.out.println(sum);
-```
-
-这样应该就能得到结果了。或者直接用公式的话，可能更简洁：
-
-```java
-int n = 100;
-int sum = n * (n + 1) / 2;
-#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-System.out.println(sum);
-```
-
-这两种方法都可行，我觉得第二种更好，因为效率更高而且代码更简洁。
-
 ```cpp
 int sum = 0;
 for (int i = 1; i <= 100; ++i) {
@@ -90,18 +71,59 @@ for (int i = 1; i <= 100; ++i) {
     sum += i;
 }
 std::cout << sum << std::endl;
+
+#include <iostream>
+#include <QDebug>
+
+#sdfgs	"fdgdf"
+#cfdsf	546
+
+int main()
+{
+    int n, sum = 0;
+
+    std::cout << "Enter a positive integer: ";
+    std::cin >> n;
+
+    for (int i = 1; i <= n; ++i)
+    {
+        sum += i;
+    }
+
+    std::cout << "Sum = " << sum;
+    return 0;
+}
+int fun()
+fun()
+std:: fun()
+int std::fun ()
+float std::std::fun()
+fun
+
+// sdassadfsa sda
+
+// sada
+
+/* jkhj
+jkk
+gjh */
+
+int xf;
+int ydsf = 1;
+int sdy=0
+int xv + =1
+int xvbd+ =1
+int xf+=1
+int xfddd - =1
+int fvdx * =1
+int xfg / =1
+int xh % =1
+int xnb , y ;
+int xdgf = 1,
+
+a.b.fun()
+12.3
 ```
-
-或者用公式：
-
-```cpp
-int n = 100;
-int sum = n * (n + 1) / 2;
-#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-std::cout << sum << std::endl;
-```
-
-同样，两种方法都适用。可能用公式更好。
 
 然后是Python的部分。Python的语法更简单，循环的话：
 
@@ -111,57 +133,88 @@ for i in range(1, 101):
     sum += i
 #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
 print(sum)
+
+import sys
+from PyQt5.QtWidgets import QTextEdit, QApplication, QWidget
+from PyQt5.QtGui import QTextCharFormat, QColor, QPainter, QFont
+from PyQt5.QtCore import Qt, QRect
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
+
+class LineNumberArea(QWidget):
+    def __init__(self, editor):
+        super().__init__(editor)
+        self.editor = editor
+        xd - = 8
+        fy += 6
+        ztrh *= 7
+        xr /= 7
+        yrte % = 9
+        self.editor.document().blockCountChanged.connect(self.update_width)
+        """ self.editor.updateRequest.connect(self.update) """
+        print(self.editor.document())
+
+    def update_width(self, block_count):
+        # 计算行号区域宽度
+        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * 
+        len(str(block_count)) + 20)
+        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, 
+        # self.rect().width() - 2, self.rect().height() - 2, 16, 16)
+
+    def paintEvent(self, event):
+        """ painter = QPainter(self)
+        painter.fillRect(event.rect(), QColor(240, 240, 240))
+        block = self.editor.document().begin()
+        while block and block.isValid():
+            line_number = block.blockNumber() + 1
+            painter.drawText(0, block.position() - 
+            self.editor.contentOffset().y(), str(line_number))
+            block = block.next() """
+        painter = QPainter(self)
+        painter.fillRect(event.rect(), QColor(240, 240, 240))
+        """ for count in range(0, self.editor.document().blockCount()): """
+        block = self.editor.document().begin()
+        while block and block.isValid():
+            line_number = block.blockNumber() + 1
+            painter.drawText(0, block.position(), str(line_number))
+            block = block.next()
+        painter.end()
+
+class CodeEditor(QTextEdit):
+    def __init__(self):
+        super().__init__()
+        self.setTabStopWidth(4)
+        self.lineNumberArea = LineNumberArea(self)
+        
+    def highlight_code(self, text):
+        print('highlight_code')
+        lexer = PythonLexer()
+        formatter = HtmlFormatter(style='colorful', noclasses=True)
+        html = highlight(text, lexer, formatter)
+        self.setHtml(html)
+        # 调整行号区域宽度
+        self.lineNumberArea.update_width(self.document().blockCount())
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        # 更新行号区域位置
+        cr = self.contentsRect()
+        self.lineNumberArea.setGeometry(QRect(cr.left(), cr.top(), 
+        self.lineNumberArea.width(), cr.height()))
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = CodeEditor()
+    window.show()
+    sys.exit(app.exec_())
 ```
 
-或者，直接用公式：
+这样应该就能得到结果了。或者直接用公式的话，可能更简洁：
 
-```python
-n = 100
-total = n * (n + 1) // 2
-#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-print(total)
-```
+这两种方法都可行，我觉得第二种更好，因为效率更高而且代码更简洁。
 
 现在整理一下：
-
-Java：
-使用公式：n=100，sum = 100*101/2。
-或者用循环累加。
-
-C++：
-同样，两种方法都可以。
-
-Python：
-可以用循环、公式，或者生成一个range然后求和。
-
-那现在我来写出这三种语言的代码：
-
-Java：
-```java
-public class Sum {
-    public static void main(String[] args) {
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-        int n = 100;
-        int sum = n * (n + 1) / 2;
-        System.out.println(sum);
-    }
-}
-```
-
-或者，如果用循环的话：
-
-```java
-public class Sum {
-    public static void main(String[] args) {
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-        int sum = 0;
-        for (int i = 1; i <= 100; i++) {
-            sum += i;
-        }
-        System.out.println(sum);
-    }
-}
-```
 
 C++：
 ```cpp
@@ -223,19 +276,7 @@ print(sum(range(1, 101)))
 总结一下，每个语言可以有两种实现方式，但问题可能只需要一种，所以我可以选择其中一种，比如公式的方法，这样更简洁高效。
 </think>
 
-以下是使用 Java、C++ 和 Python 分别计算整数 1 到 100 的和的代码示例：
-
-### Java
-```java
-public class Sum {
-    public static void main(String[] args) {
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-        int n = 100;
-        int sum = n * (n + 1) / 2;
-        System.out.println(sum);
-    }
-}
-```
+以下是分别计算整数 1 到 100 的和的代码示例：
 
 ### C++
 ```cpp
@@ -919,13 +960,13 @@ class TextShow(QWidget):
     setSizeFinished = pyqtSignal()
     """ setTexting = pyqtSignal(bool) """
 
-    def __init__(self, text, isUser=True, maxWidth=650, parent=None):
+    def __init__(self, text, isUser=True, maxWidth=810, parent=None):
         super(TextShow, self).__init__(parent)
         self.text = text.strip('\n')
         self.label = CustomLabel()
         self.label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.label.setWordWrap(True)
-        self.maxWidth = maxWidth
+        self.maxWidth = maxWidth - 10
         self.label.setMaximumWidth(self.maxWidth)
         self.font = QFont()
         self.font.setPointSize(windowFontPointSize)
@@ -961,15 +1002,15 @@ class TextShow(QWidget):
             self.label.setText(self.text)
             self.label.setFixedSize(labelWidth, labelHeight)
             self.mainHLayout.addWidget(self.label)
-            self.mainHLayout.setContentsMargins(5, 5, 5, 5)
+            self.mainHLayout.setContentsMargins(5, 0, 5, 0)
             self.setLayout(self.mainHLayout)
-            self.setFixedSize(labelWidth + 10, labelHeight + 10)
+            self.setFixedSize(labelWidth + 10, labelHeight)
         else:
             self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
             self.mainHLayout.addWidget(self.label)
-            self.mainHLayout.setContentsMargins(5, 5, 5, 5)
+            self.mainHLayout.setContentsMargins(5, 0, 5, 0)
             self.setLayout(self.mainHLayout)
-            self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
+            self.setFixedSize(self.label.width() + 10, self.label.height())
         self.isUser = isUser
         self.isColorful = False
 
@@ -1029,10 +1070,10 @@ class TextShow(QWidget):
                 labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
             self.label.setText(self.text)
             self.label.setFixedSize(labelWidth, labelHeight)
-            self.setFixedSize(labelWidth + 10, labelHeight + 10)
+            self.setFixedSize(labelWidth + 10, labelHeight)
         else:
             self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
-            self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
+            self.setFixedSize(self.label.width() + 10, self.label.height())
 
     def onPageLoadFinished(self, success):
         js = """
@@ -1060,7 +1101,7 @@ class TextShow(QWidget):
         width, height = result
         if width != 0 and height != 0:
             self.webEngineView.setFixedSize(width, height)
-            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
+            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height())
             self.setSizeFinished.emit()
 
     def getAlignmentClass(self, format_string):
@@ -1263,7 +1304,7 @@ class TextShow(QWidget):
                 self.mainHLayout.removeWidget(self.label)
                 self.label.deleteLater()
                 self.mainHLayout.addWidget(self.webEngineView)
-            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height() + 10)
+            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height())
             self.setSizeFinished.emit()
             self.isLabel = False
             """ self.setTexting.emit(self.isLabel) """
@@ -1461,7 +1502,7 @@ class ThinkingButton(QWidget):
         self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
 
 """ class ThinkLabel(QLabel):
-    def __init__(self, text, maxWidth=650, parent=None):
+    def __init__(self, text, maxWidth=765, parent=None):
         super().__init__(parent)
         self.text = text.strip('\n')
         self.label = CustomLabel()
@@ -1560,7 +1601,7 @@ class ThinkingButton(QWidget):
 class ThinkWidget(QWidget):
     setSizeFinished = pyqtSignal()
 
-    def __init__(self, text, maxWidth=650, parent=None):
+    def __init__(self, text, maxWidth=765, parent=None):
         super(ThinkWidget, self).__init__(parent)
         self.text = text.strip('\n')
         self.label = CustomLabel()
@@ -1602,17 +1643,17 @@ class ThinkWidget(QWidget):
             self.label.setText(self.text)
             self.label.setFixedSize(labelWidth, labelHeight)
             self.mainHLayout.addWidget(self.label)
-            self.mainHLayout.setContentsMargins(15, 5, 5, 5)
+            self.mainHLayout.setContentsMargins(0, 0, 0, 0)
             self.setLayout(self.mainHLayout)
-            self.setFixedSize(labelWidth + 20, labelHeight + 10)
+            self.setFixedSize(labelWidth, labelHeight)
         else:
             self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
             self.mainHLayout.addWidget(self.label)
-            self.mainHLayout.setContentsMargins(15, 5, 5, 5)
+            self.mainHLayout.setContentsMargins(0, 0, 0, 0)
             self.setLayout(self.mainHLayout)
-            self.setFixedSize(self.label.width() + 20, self.label.height() + 10)
+            self.setFixedSize(self.label.width(), self.label.height())
 
-    def paintEvent(self, event):
+    """ def paintEvent(self, event):
         #QPainter create
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
@@ -1621,7 +1662,7 @@ class ThinkWidget(QWidget):
         backgroundPath.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 13, 13)
         #backgroundBrush QBrush
         backgroundBrush = QBrush(Qt.SolidPattern)
-        backgroundBrush.setColor(QColor(240, 240, 240))
+        backgroundBrush.setColor(QColor(Qt.green))
         #QPainter setting
         painter.setPen(Qt.NoPen)
         painter.setBrush(backgroundBrush)
@@ -1637,7 +1678,7 @@ class ThinkWidget(QWidget):
         painter.setBrush(brush)
         painter.drawPath(path.simplified())
         #QPainter end
-        painter.end()
+        painter.end() """
 
     def setText(self, text):
         self.text = text.strip('\n')
@@ -1665,10 +1706,10 @@ class ThinkWidget(QWidget):
                 labelHeight = int(math.ceil(textWidth / (self.maxWidth - 24)) * (textHeight + 3) - 3)
             self.label.setText(self.text)
             self.label.setFixedSize(labelWidth, labelHeight)
-            self.setFixedSize(labelWidth + 20, labelHeight + 10)
+            self.setFixedSize(labelWidth, labelHeight)
         else:
             self.label.setFixedSize(int(self.font_metrics.height()), int(self.font_metrics.height()))
-            self.setFixedSize(self.label.width() + 20, self.label.height() + 10)
+            self.setFixedSize(self.label.width(), self.label.height())
 
     def onPageLoadFinished(self, success):
         js = """
@@ -1696,7 +1737,7 @@ class ThinkWidget(QWidget):
         width, height = result
         if width != 0 and height != 0:
             self.webEngineView.setFixedSize(width, height)
-            self.setFixedSize(self.webEngineView.width() + 15, self.webEngineView.height() + 10)
+            self.setFixedSize(self.webEngineView.width(), self.webEngineView.height())
             self.setSizeFinished.emit()
 
     def getAlignmentClass(self, format_string):
@@ -1899,7 +1940,7 @@ class ThinkWidget(QWidget):
                 self.mainHLayout.removeWidget(self.label)
                 self.label.deleteLater()
                 self.mainHLayout.addWidget(self.webEngineView)
-            self.setFixedSize(self.webEngineView.width() + 15, self.webEngineView.height() + 10)
+            self.setFixedSize(self.webEngineView.width(), self.webEngineView.height())
             self.setSizeFinished.emit()
             self.isLabel = False
 
@@ -1931,17 +1972,17 @@ class ThinkBackWidget(QWidget):
         backgroundPath.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 13, 13)
         #backgroundBrush QBrush
         backgroundBrush = QBrush(Qt.SolidPattern)
-        backgroundBrush.setColor(QColor(240, 240, 240))
+        backgroundBrush.setColor(QColor(244, 244, 252))
         #QPainter setting
         painter.setPen(Qt.NoPen)
         painter.setBrush(backgroundBrush)
         painter.drawPath(backgroundPath.simplified())
         #QPainterPath
         path = QPainterPath()
-        path.addRect(self.rect().x() + 4, self.rect().y() + 8, 2, self.rect().height() - 16)
+        path.addRect(self.rect().x() + 14, self.rect().y() + 12, 2, self.rect().height() - 24)
         #QBrush
         brush = QBrush(Qt.SolidPattern)
-        brush.setColor(QColor(200, 200, 200))
+        brush.setColor(QColor(172, 188, 220))
         #QPainter setting
         painter.setPen(Qt.NoPen)
         painter.setBrush(brush)
@@ -1949,26 +1990,59 @@ class ThinkBackWidget(QWidget):
         #QPainter end
         painter.end()
 
-""" class LineNumberShow(QTextEdit):
+class LineNumberArea(QWidget):
     def __init__(self, parent=None):
-        super(LineNumberShow, self).__init__(parent)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setFont(QFont("Courier New", 12))
-        palette = self.palette()
-        palette.setColor(QPalette.Text, QColor(178, 170, 164))
-        self.setPalette(palette) """
+        super(LineNumberArea, self).__init__(parent)
+        self.editor = parent
+        self.backgroundColor = QColor(20, 20, 28)
+        self.numberColor = QColor(178, 170, 164)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.fillRect(event.rect(), self.backgroundColor)
+        """ painter.fillRect(event.rect(), QColor(Qt.red)) """
+        pen = QPen(self.numberColor)
+        painter.setPen(pen)
+        painter.setFont(self.editor.font())
+        hAdvance = self.editor.fontMetrics().horizontalAdvance('9')
+        blockNumber = self.editor.getFirstVisibleBlock()
+        block       = self.editor.document().findBlockByNumber(blockNumber)
+        top         = int(self.editor.document().documentLayout().blockBoundingRect(block).translated(0, -self.editor.verticalScrollBar().value()).top())
+        bottom      = top + int(self.editor.document().documentLayout().blockBoundingRect(block).height())
+        while(block.isValid() and top <= event.rect().bottom()):
+            if (block.isVisible() and bottom >= event.rect().top()):
+                """ print('naturalTextRect:', block.layout().lineAt(0).naturalTextRect())
+                print('rect:', block.layout().lineAt(0).rect()) """
+                painter.drawText(int((2 - len(str(self.editor.document().blockCount()))) * 0.275 * hAdvance), top, self.width() - hAdvance, int(block.layout().lineAt(0).rect().height()), Qt.AlignRight | Qt.AlignVCenter, str(blockNumber + 1))
+            block = block.next()
+            top = int(self.editor.document().documentLayout().blockBoundingRect(block).translated(0, -self.editor.verticalScrollBar().value()).top())
+            bottom = top + int(self.editor.document().documentLayout().blockBoundingRect(block).height())
+            blockNumber += 1
+        painter.end()
+
+    def setLightBackgroundColor(self):
+        self.backgroundColor = QColor(236, 236, 228)
+        self.numberColor = QColor(78, 86, 92)
+
+    def setDarkBackgroundColor(self):
+        self.backgroundColor = QColor(20, 20, 28)
+        self.numberColor = QColor(178, 170, 164)
 
 class CodeEdit(QTextEdit):
     setSizeFinished = pyqtSignal()
 
     def __init__(self, parent=None):
         super(CodeEdit, self).__init__(parent)
-        self.setFont(QFont("Courier New", 12))
+        self.text = ''
+        self.lexerName = ''
         self.horizontalScrollBar().setCursor(Qt.PointingHandCursor)
         self.setStyleSheet('''
         QTextEdit {
+            border: none;
             background-color: #14141c;
+            border-bottom-left-radius: 7px;
+            border-bottom-right-radius: 7px;
         }
         QScrollBar:horizontal {
             background: transparent;
@@ -1990,33 +2064,150 @@ class CodeEdit(QTextEdit):
             width: 0px;
         }
         ''')
-        """ #
-        self.lineNumberWidget = LineNumberShow(self)
-        self.lineNumberWidget.move(0, 1) """
+        #
+        font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
+        font.setFixedPitch(True)
+        font.setPixelSize(14)
+        self.setFont(font)
+        """ print('font pitch:', font.fixedPitch(), self.font().fixedPitch()) """
+        palette = self.palette()
+        palette.setColor(QPalette.Text, QColor(178, 170, 164))
+        self.setPalette(palette)
+        #LineNumberArea
+        self.lineNumberArea = LineNumberArea(self)
+        self.lineNumberArea.move(0, 0)
+        self.updateLineNumberAreaWidth()
         #textChanged
         self.textChanged.connect(self.adjustSize)
+        #valueChanged
+        self.verticalScrollBar().valueChanged.connect(self.on_scroll)
+        self.m_highlighters = {
+            "None": None,
+            "Python": QPythonHighlighter(),
+            "C++": QCXXHighlighter(),
+            "GLSL": QGLSLHighlighter(),
+            "LUA": QLuaHighlighter()
+        }
+        self.m_highlighter = self.m_highlighters["None"]
+
+    def setThemeStyle(self, isLightThemeStyle=False):
+        global code_theme_file_path
+        if isLightThemeStyle:
+            self.setStyleSheet('''
+            QTextEdit {
+                border: none;
+                background-color: #ecece4;
+                border-bottom-left-radius: 7px;
+                border-bottom-right-radius: 7px;
+            }
+            QScrollBar:horizontal {
+                background: transparent;
+                height: 10px;
+                padding: 0px 0px 4px 0px;
+            }
+            QScrollBar::handle:horizontal {
+                background: #bcbcb4;
+                height: 6px;
+                border-radius: 3px; /* 设置滑块为圆角矩形 */
+            }
+            QScrollBar::handle:horizontal:hover {
+                background: #8c8c8c;
+            }
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                background: transparent;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                width: 0px;
+            }
+            ''')
+            palette = self.palette()
+            palette.setColor(QPalette.Text, QColor(78, 86, 92))
+            self.setPalette(palette)
+            self.lineNumberArea.setLightBackgroundColor()
+            code_theme_file_path = os.path.normpath(os.path.join(current_dir, '..', 'config', 'light_theme.xml'))
+        else:
+            self.setStyleSheet('''
+            QTextEdit {
+                border: none;
+                background-color: #14141c;
+                border-bottom-left-radius: 7px;
+                border-bottom-right-radius: 7px;
+            }
+            QScrollBar:horizontal {
+                background: transparent;
+                height: 10px;
+                padding: 0px 0px 4px 0px;
+            }
+            QScrollBar::handle:horizontal {
+                background: #44444c;
+                height: 6px;
+                border-radius: 3px; /* 设置滑块为圆角矩形 */
+            }
+            QScrollBar::handle:horizontal:hover {
+                background: #747474;
+            }
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                background: transparent;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                width: 0px;
+            }
+            ''')
+            palette = self.palette()
+            palette.setColor(QPalette.Text, QColor(178, 170, 164))
+            self.setPalette(palette)
+            self.lineNumberArea.setDarkBackgroundColor()
+            code_theme_file_path = os.path.normpath(os.path.join(current_dir, '..', 'config', 'dark_theme.xml'))
+        self.highlightCode(self.text, self.lexerName)
+
+    def on_scroll(self, value):
+        self.lineNumberArea.repaint()
+
+    def getFirstVisibleBlock(self):
+        curs = QTextCursor(self.document())
+        curs.movePosition(QTextCursor.Start)
+        r1 = self.viewport().geometry()
+        for i in range(self.document().blockCount()):
+            block = curs.block()
+            r2 = self.document().documentLayout().blockBoundingRect(block).translated(self.viewport().geometry().x(), self.viewport().geometry().y() - self.verticalScrollBar().sliderPosition()).toRect()
+            if r1.intersects(r2):
+                return i
+            curs.movePosition(QTextCursor.NextBlock)
+        return 0
 
     def highlightCode(self, text, lexerName='python'):
-        match lexerName:
-            case 'c':
-                lexer = CLexer()
-            case 'cpp':
-                lexer = CppLexer()
-            case 'python':
-                lexer = PythonLexer()
-            case 'java':
-                lexer = JavaLexer()
-            case 'javascript':
-                lexer = JavascriptLexer()
-            case _:
-                lexer = PythonLexer()
-        text = self.add_line_numbers(text)
-        formatter = HtmlFormatter(style=CustomStyle, noclasses=True)
-        html = highlight(text, lexer, formatter)
-        """ html = html.replace('<pre style="line-height: 125%;">', '<pre style="line-height: 100%;">') """
-        self.setHtml(html)
+        self.text = text
+        self.lexerName = lexerName
 
-    def add_line_numbers(self, text):
+        match lexerName:
+            case 'cpp':
+                self.setHighlighter(self.m_highlighters["C++"])
+            case 'python':
+                self.setHighlighter(self.m_highlighters["Python"])
+            case 'glsl':
+                self.setHighlighter(self.m_highlighters["GLSL"])
+            case 'lua':
+                self.setHighlighter(self.m_highlighters["LUA"])
+            case _:
+                self.setHighlighter(self.m_highlighters["Python"])
+        """ text = self.add_line_numbers(text) """
+        """ formatter = HtmlFormatter(style=CustomStyle, noclasses=True)
+        html = highlight(text, lexer, formatter) """
+        """ html = html.replace('<pre style="line-height: 125%;">', '<pre style="line-height: 100%;">') """
+        """ self.setHtml(html) """
+        self.setText(text)
+        """ self.setPlainText(text) """
+
+    def setHighlighter(self, highlighter):
+        if self.m_highlighter:
+            self.m_highlighter.setDocument(None)
+        self.m_highlighter = highlighter
+        if self.m_highlighter:
+            """ print('m_highlighter:', self.m_highlighter) """
+            self.m_highlighter.setSyntaxStyle(QSyntaxStyle.defaultStyle())
+            self.m_highlighter.setDocument(self.document())
+
+    """ def add_line_numbers(self, text):
         # 根据 '\n' 分割字符串成多行
         lines = text.split('\n')
         
@@ -2028,78 +2219,1108 @@ class CodeEdit(QTextEdit):
         
         # 将处理后的行重新组合成字符串
         result = '\n'.join(numbered_lines)
-        return result
+        return result """
 
-    """ def updateLineNumberAreaWidth(self):
-        self.setViewportMargins(self.lineNumberWidget.width(), 0, 0, 0) """
-
-    """ def onTextChanged(self):
-        self.adjustSize()
-        QTimer.singleShot(1, self.adjustSize) """
+    def updateLineNumberAreaWidth(self):
+        self.lineNumberArea.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().blockCount())) + 1), self.viewport().height())
+        self.setViewportMargins(self.lineNumberArea.width(), 0, 0, 0)
 
     def adjustSize(self):
-        """ lineNumberText = '' """
+        """ print('height:', int(self.document().size().height())) """
         height = int(self.document().size().height())
         self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
-        """ self.lineNumberWidget.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().lineCount())) + 2), self.height())
-        print('lineNumberWidget.size():', self.lineNumberWidget.size())
         self.updateLineNumberAreaWidth()
-        for i in range(self.document().lineCount()):
-            lineNumberText += ' ' + str(i + 1) + ' \n'
-        self.lineNumberWidget.setText(lineNumberText) """
+        self.lineNumberArea.repaint()
         self.setSizeFinished.emit()
 
     def resizeEvent(self, event):
         QTextEdit.resizeEvent(self, event)
-        """ self.lineNumberWidget.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().lineCount())) + 2), self.height())
-        self.updateLineNumberAreaWidth() """
         height = int(self.document().size().height())
         self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
+        self.updateLineNumberAreaWidth()
+        self.lineNumberArea.repaint()
         self.setSizeFinished.emit()
 
-class CustomStyle(Style):
+""" class CustomStyle(Style):
     default_style = ""
     background_color = '#14141c'
     styles = {
         token.Token: "#b2aaa4",
-        token.Keyword: "#a6538c",  # 关键字为紫色
+        token.Keyword: "#a6538c",  # 关键字为紫色   #a45c74, #fc6447
         token.Name.Class: "#6dae59",  # 类型名为绿色
-        token.Name.Function: "#6dae59",  # 类型名为绿色
+        token.Name.Function: "#6dae59",  # 函数名为绿色
         token.Comment: "#aaa676",  # 注释为灰色
         token.String: "#399cc6",  # 字符串为蓝色
         token.Number: "#d2bd48",  # 数字为黄色
-    }
+    } """
+
+class QSyntaxStyle(QObject):
+    def __init__(self, parent=None):
+        super(QSyntaxStyle, self).__init__(parent)
+        self.m_name = ""
+        self.m_data = {}
+        self.m_loaded = False
+
+    def load(self, fl):
+        reader = QXmlStreamReader(fl)
+
+        while not reader.atEnd() and not reader.hasError():
+            token = reader.readNext()
+
+            if token == QXmlStreamReader.StartElement:
+                if reader.name() == "style-scheme":
+                    if reader.attributes().hasAttribute("name"):
+                        self.m_name = reader.attributes().value("name")
+                elif reader.name() == "style":
+                    attributes = reader.attributes()
+                    name = attributes.value("name")
+
+                    format = QTextCharFormat()
+
+                    if attributes.hasAttribute("background"):
+                        format.setBackground(QColor(attributes.value("background")))
+
+                    if attributes.hasAttribute("foreground"):
+                        format.setForeground(QColor(attributes.value("foreground")))
+
+                    if attributes.hasAttribute("bold") and attributes.value("bold") == "true":
+                        format.setFontWeight(QFont.Bold)
+
+                    if attributes.hasAttribute("italic") and attributes.value("italic") == "true":
+                        format.setFontItalic(True)
+
+                    if attributes.hasAttribute("underlineStyle"):
+                        underline = attributes.value("underlineStyle")
+                        s = QTextCharFormat.NoUnderline
+
+                        if underline == "SingleUnderline":
+                            s = QTextCharFormat.SingleUnderline
+                        elif underline == "DashUnderline":
+                            s = QTextCharFormat.DashUnderline
+                        elif underline == "DotLine":
+                            s = QTextCharFormat.DotLine
+                        elif underline == "DashDotLine":
+                            s = QTextCharFormat.DashDotLine
+                        elif underline == "DashDotDotLine":
+                            s = QTextCharFormat.DashDotDotLine
+                        elif underline == "WaveUnderline":
+                            s = QTextCharFormat.WaveUnderline
+                        elif underline == "SpellCheckUnderline":
+                            s = QTextCharFormat.SpellCheckUnderline
+                        else:
+                            print(f"Unknown underline value {underline}")
+
+                        format.setUnderlineStyle(s)
+
+                    self.m_data[name] = format
+
+        self.m_loaded = not reader.hasError()
+        return self.m_loaded
+
+    def name(self):
+        return self.m_name
+
+    def getFormat(self, name):
+        return self.m_data.get(name, QTextCharFormat())
+
+    def isLoaded(self):
+        return self.m_loaded
+
+    @staticmethod
+    def defaultStyle():
+        if not hasattr(QSyntaxStyle.defaultStyle, "style"):
+            QSyntaxStyle.defaultStyle.style = QSyntaxStyle()
+            if not QSyntaxStyle.defaultStyle.style.isLoaded():
+                # 初始化资源文件
+                # Q_INIT_RESOURCE(qcodeeditor_resources)
+                fl = QFile(code_theme_file_path)
+
+                if not fl.open(QIODevice.ReadOnly):
+                    print("Can't open default style file.")
+                    return QSyntaxStyle.defaultStyle.style
+
+                data = fl.readAll().data().decode('utf-8')
+                if not QSyntaxStyle.defaultStyle.style.load(data):
+                    print("Can't load default style.")
+        return QSyntaxStyle.defaultStyle.style
+
+class QStyleSyntaxHighlighter(QSyntaxHighlighter):
+    def __init__(self, document: QTextDocument = None):
+        super(QStyleSyntaxHighlighter, self).__init__(document)
+        self.m_syntaxStyle = None
+
+    def setSyntaxStyle(self, style: QSyntaxStyle):
+        self.m_syntaxStyle = style
+
+    def syntaxStyle(self) -> QSyntaxStyle:
+        return self.m_syntaxStyle
+
+class QCXXHighlighter(QStyleSyntaxHighlighter):
+    def __init__(self, document: QTextDocument = None):
+        super(QCXXHighlighter, self).__init__(document)
+        self.highlight_rules = []  # 存储高亮规则的列表
+        self.m_highlightDotRules = []
+        
+        # 初始化正则表达式模式：
+        self.include_pattern = QRegularExpression(r'(^\s*#\s*include\s*([<"][^:?"<>\|]+[">]))')  # #include 语句
+        self.function_pattern = QRegularExpression(r'(\b([_a-zA-Z][_a-zA-Z0-9]*\s+)?((?:[_a-zA-Z][_a-zA-Z0-9]*\s*::\s*)*[_a-zA-Z][_a-zA-Z0-9]*)(?=\s*\())')  # 函数声明
+        self.m_functionPattern = QRegularExpression(r"(\b([A-Za-z0-9_]+(?:\.))*([A-Za-z0-9_]+)(?=\s*\())")
+        """ self.def_type_pattern = QRegularExpression(r'(\b([_a-zA-Z][_a-zA-Z0-9]*)\s+[_a-zA-Z][_a-zA-Z0-9]*\s*[;=])') """  # 类型定义
+        self.def_type_pattern = QRegularExpression(r'(\b([_a-zA-Z][_a-zA-Z0-9]*)\s+([_a-zA-Z][_a-zA-Z0-9]*)\s*(?=[;=]))')
+        self.m_variPattern = QRegularExpression(r"(\b[A-Za-z_][A-Za-z0-9_]*\b)")
+        self.comment_start_pattern = QRegularExpression(r'/\*')  # 多行注释开始 /*
+        self.comment_end_pattern = QRegularExpression(r'\*/')    # 多行注释结束 */
+        
+        # 从 XML 文件加载语法规则
+        fl = QFile("config/cpp.xml")
+        if not fl.open(QFile.ReadOnly):
+            return
+        
+        language = QLanguage(fl)
+        if not language.isLoaded():
+            return
+        
+        # 解析语言规则并添加到高亮规则中
+        keys = language.keys()
+        for key in keys:
+            names = language.names(key)
+            for name in names:
+                self.highlight_rules.append({
+                    'pattern': QRegularExpression(rf'\b{name}\b'),  # 匹配单词边界
+                    'format': key  # 对应的格式类型
+                })
+        
+        # 添加数字的高亮规则
+        self.highlight_rules.append({
+            'pattern': QRegularExpression(r'(?<=\b|\s|^)(?i)(?:(?:(?:(?:(?:\d+(?:\'\d+)*)?\.(?:\d+(?:\'\d+)*)(?:e[+-]?(?:\d+(?:\'\d+)*))?)|(?:(?:\d+(?:\'\d+)*)\.(?:e[+-]?(?:\d+(?:\'\d+)*))?)|(?:(?:\d+(?:\'\d+)*)(?:e[+-]?(?:\d+(?:\'\d+)*)))|(?:0x(?:[0-9a-f]+(?:\'[0-9a-f]+)*)?\.(?:[0-9a-f]+(?:\'[0-9a-f]+)*)(?:p[+-]?(?:\d+(?:\'\d+)*)))|(?:0x(?:[0-9a-f]+(?:\'[0-9a-f]+)*)\.?(?:p[+-]?(?:\d+(?:\'\d+)*))))[lf]?)|(?:(?:(?:[1-9]\d*(?:\'\d+)*)|(?:0[0-7]*(?:\'[0-7]+)*)|(?:0x[0-9a-f]+(?:\'[0-9a-f]+)*)|(?:0b[01]+(?:\'[01]+)*))(?:u?l{0,2}|l{0,2}u?)))(?=\b|\s|$)'),
+            'format': 'Number'
+        })
+
+        self.m_highlightDotRules.append((
+            QRegularExpression(r"((?<!\d)\.(?!\d))"),
+            "Dot"
+        ))
+
+        # 添加字符串的高亮规则
+        self.highlight_rules.append({
+            'pattern': QRegularExpression(r'("[^\n"]*")'),  # 匹配双引号内的内容
+            'format': 'String'
+        })
+        
+        # 添加预处理指令的高亮规则（如 #define）
+        self.highlight_rules.append({
+            'pattern': QRegularExpression(r'(#[a-zA-Z_]+)'),
+            'format': 'Preprocessor'
+        })
+        
+        # 添加单行注释的高亮规则
+        self.highlight_rules.append({
+            'pattern': QRegularExpression(r'(//[^\n]*)'),  # 从 // 到行尾
+            'format': 'Comment'
+        })
+
+    def highlightBlock(self, text):
+        match_iterator = self.m_variPattern.globalMatch(text)
+        
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Vari")
+            )
+
+        match_iterator = self.function_pattern.globalMatch(text)
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            # 高亮返回类型部分
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Type")
+            )
+            # 高亮函数名部分
+            self.setFormat(
+                match.capturedStart(3),
+                match.capturedLength(3),
+                self.syntaxStyle().getFormat("Function")
+            )
+
+        match_iterator = self.m_functionPattern.globalMatch(text)
+        
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Type")
+            )
+            self.setFormat(
+                match.capturedStart(3),
+                match.capturedLength(3),
+                self.syntaxStyle().getFormat("Function")
+            )
+
+        match_iterator = self.def_type_pattern.globalMatch(text)
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            # 高亮类型名部分
+            self.setFormat(
+                match.capturedStart(3),
+                match.capturedLength(3),
+                self.syntaxStyle().getFormat("DefType")
+            )
+
+        for rule in self.m_highlightDotRules:
+            pattern, format_name = rule
+            match_iterator = pattern.globalMatch(text)
+            
+            while match_iterator.hasNext():
+                match = match_iterator.next()
+                self.setFormat(
+                    match.capturedStart(),
+                    match.capturedLength(),
+                    self.syntaxStyle().getFormat(format_name)
+                )
+
+        match_iterator = self.include_pattern.globalMatch(text)
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            # 高亮整个 #include 指令
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Preprocessor")
+            )
+            # 高亮包含的文件名部分
+            self.setFormat(
+                match.capturedStart(2),
+                match.capturedLength(2),
+                self.syntaxStyle().getFormat("String")
+            )
+
+        for rule in self.highlight_rules:
+            match_iterator = rule['pattern'].globalMatch(text)
+            while match_iterator.hasNext():
+                match = match_iterator.next()
+                self.setFormat(
+                    match.capturedStart(),
+                    match.capturedLength(),
+                    self.syntaxStyle().getFormat(rule['format'])
+                )
+
+        self.setCurrentBlockState(0)  # 初始状态
+        
+        start_index = 0
+        if self.previousBlockState() != 1:  # 如果前一个块不在注释中
+            start_match = self.comment_start_pattern.match(text)
+            start_index = start_match.capturedStart()
+        
+        while start_index >= 0:
+            end_match = self.comment_end_pattern.match(text, start_index)
+            end_index = end_match.capturedStart()
+            comment_length = 0
+            
+            if end_index == -1:  # 没有找到注释结束
+                self.setCurrentBlockState(1)  # 设置状态为"在注释中"
+                comment_length = len(text) - start_index
+            else:
+                comment_length = end_index - start_index + end_match.capturedLength()
+            
+            self.setFormat(
+                start_index,
+                comment_length,
+                self.syntaxStyle().getFormat("Comment")
+            )
+            
+            # 查找下一个注释开始
+            next_match = self.comment_start_pattern.match(text, start_index + comment_length)
+            start_index = next_match.capturedStart()
+
+class QPythonHighlighter(QStyleSyntaxHighlighter):
+    def __init__(self, document: QTextDocument = None):
+        super(QPythonHighlighter, self).__init__(document)
+        self.m_highlightRules = []
+        self.m_highlightDotRules = []
+        self.m_highlightStringRules = []
+        self.m_highlightBlockRules = []
+        """ self.m_includePattern = QRegularExpression(r"(import \w+)") """
+        self.m_includePattern = QRegularExpression(r"(?:from\s+(\w+(?:\.\w+)*)\s+)?import\s+((?:\w+(?:\s+as\s+\w+)?)(?:\s*,\s*\w+(?:\s+as\s+\w+)?)*|\*)")
+        """ self.m_functionPattern = QRegularExpression(r"(\b([A-Za-z0-9_]+(?:\.))*([A-Za-z0-9_]+)(?=\())") """
+        self.m_functionPattern = QRegularExpression(r"(\b([A-Za-z0-9_]+(?:\.))*([A-Za-z0-9_]+)(?=\s*\())")
+        """ self.m_defTypePattern = QRegularExpression(r"(\b([A-Za-z0-9_]+)\s+[A-Za-z]{1}[A-Za-z0-9_]+\s*[;=])") """
+        self.m_defTypePattern = QRegularExpression(r"(\b[A-Za-z_][A-Za-z0-9_]*\s*(?=\+?\s*=))")
+        self.m_variPattern = QRegularExpression(r"(\b[A-Za-z_][A-Za-z0-9_]*\b)")
+
+        """ current_dir = QDir.currentPath() """
+        """ print("当前工作目录:", current_dir) """
+        # Load the language definitions from the XML file
+        fl = QFile("config/python.xml")
+        if not fl.open(QFile.ReadOnly):
+            """ print("Can't open python style file") """
+            return
+
+        # Assuming QLanguage is a custom class you've implemented
+        language = QLanguage(fl)
+        if not language.isLoaded():
+            return
+
+        keys = language.keys()
+        for key in keys:
+            names = language.names(key)
+            for name in names:
+                self.m_highlightRules.append((
+                    QRegularExpression(fr"(\b{name}\b)"),
+                    key
+                ))
+
+        # Following rules have higher priority to display
+        # than language specific keys
+        # So they must be applied at last.
+
+        # Numbers
+        """ QRegularExpression(r"(\b(0b|0x){0,1}[\d.']+\b)"), """
+        self.m_highlightRules.append((
+            QRegularExpression(r"(\b(0b|0x)?(\d{1,3}(_?\d{3})*(\.\d+)?)\b)"),
+            "Number"
+        ))
+
+        self.m_highlightDotRules.append((
+            QRegularExpression(r"((?<!\d)\.(?!\d))"),
+            "Dot"
+        ))
+        
+        # Strings
+        self.m_highlightStringRules.append((
+            QRegularExpression(r'("[^\n"]*")'),
+            "String"
+        ))
+        self.m_highlightStringRules.append((
+            QRegularExpression(r"('[^\n']*')"),
+            "String"
+        ))
+        
+        # Single line comment
+        self.m_highlightRules.append((
+            QRegularExpression(r"#[^\n]*"),
+            "Comment"
+        ))
+        
+        # Multiline string
+        self.m_highlightBlockRules.append((
+            QRegularExpression(r'(""")'),
+            QRegularExpression(r'(""")'),
+            "String"
+        ))
+        self.m_highlightBlockRules.append((
+            QRegularExpression(r"(''')"),
+            QRegularExpression(r"(''')"),
+            "String"
+        ))
+        #
+        """ self.hCount = 0 """
+
+    def highlightBlock(self, text: str) -> None:
+        match_iterator = self.m_variPattern.globalMatch(text)
+        
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Vari")
+            )
+
+        # Checking for function
+        match_iterator = self.m_functionPattern.globalMatch(text)
+        
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Type")
+            )
+            self.setFormat(
+                match.capturedStart(3),
+                match.capturedLength(3),
+                self.syntaxStyle().getFormat("Function")
+            )
+        
+        match_iterator = self.m_defTypePattern.globalMatch(text)
+        
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("DefType")
+            )
+
+        for rule in self.m_highlightDotRules:
+            pattern, format_name = rule
+            match_iterator = pattern.globalMatch(text)
+            
+            while match_iterator.hasNext():
+                match = match_iterator.next()
+                self.setFormat(
+                    match.capturedStart(),
+                    match.capturedLength(),
+                    self.syntaxStyle().getFormat(format_name)
+                )
+
+        match_iterator = self.m_includePattern.globalMatch(text)
+        
+        while match_iterator.hasNext():
+            match = match_iterator.next()
+            
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Module")
+            )
+
+        # Apply regular highlighting rules
+        for rule in self.m_highlightRules:
+            pattern, format_name = rule
+            match_iterator = pattern.globalMatch(text)
+            
+            while match_iterator.hasNext():
+                match = match_iterator.next()
+                self.setFormat(
+                    match.capturedStart(),
+                    match.capturedLength(),
+                    self.syntaxStyle().getFormat(format_name)
+                )
+        
+        # Handle multi-line highlighting rules (like triple-quoted strings)
+        self.setCurrentBlockState(0)
+        start_index = 0
+        """ self.hCount += 1 """
+        """ print('hCount:', self.hCount) """
+        """ print('1 currentBlockState:', self.currentBlock(), self.currentBlockState()) """
+        highlight_rule_id = self.previousBlockState()
+        """ print('2 previousBlockState:', self.currentBlock(), highlight_rule_id) """
+        
+        start_index = 0
+        block_start_index_list = []
+
+        if highlight_rule_id < 1 or highlight_rule_id > len(self.m_highlightBlockRules):
+            for i, block_rule in enumerate(self.m_highlightBlockRules):
+                start_pattern_tmp, _, _ = block_rule
+                """ start_index_tmp = text.indexOf(start_pattern_tmp) """
+                start_match_tmp = start_pattern_tmp.match(text)  # 执行正则匹配
+                start_index_tmp = start_match_tmp.capturedStart()
+                block_start_index_list.append(start_index_tmp)
+
+                """ highlight_rule_id = i + 1
+                while start_index >= 0:
+
+                    # Should be + length of start pattern
+                    end_match = end_pattern.match(text, start_index + start_match.capturedLength())
+                    end_index = end_match.capturedStart()
+                    match_length = 0
+
+                    if end_index == -1:
+                        print('3:', self.currentBlock())
+                        self.setCurrentBlockState(highlight_rule_id)
+                        match_length = len(text) - start_index
+                    else:
+                        match_length = end_index - start_index + end_match.capturedLength()
+
+                    self.setFormat(
+                        start_index,
+                        match_length,
+                        self.syntaxStyle().getFormat(format_name)
+                    )
+
+                    start_match = start_pattern.match(text, start_index + match_length)  # 执行正则匹配
+                    start_index = start_match.capturedStart() """
+                
+                """ if start_index >= 0:
+                    highlight_rule_id = i + 1
+                    break """
+
+            block_start_min_index = -1
+            for start_index_tmp in block_start_index_list:
+                if start_index_tmp >= 0:
+                    if block_start_min_index == -1:
+                        block_start_min_index = start_index_tmp
+                    elif start_index_tmp < block_start_min_index:
+                        block_start_min_index = start_index_tmp
+            if block_start_min_index != -1:
+                for i, start_index_tmp in enumerate(block_start_index_list):
+                    if start_index_tmp == block_start_min_index:
+                        highlight_rule_id = i + 1
+                        break
+            start_index = block_start_min_index
+
+        """ print('start_index, start list:', start_index, block_start_index_list) """
+        if start_index >= 0:
+            block_rule = self.m_highlightBlockRules[highlight_rule_id - 1]
+            start_pattern, end_pattern, format_name = block_rule
+            if self.previousBlockState() < 1:
+                start_match = start_pattern.match(text)
+            """ print('get block_rule index:', highlight_rule_id - 1) """
+
+        if len(text) != 0 and start_index != 0:
+            """ for rule in self.m_highlightStringRules:
+                string_pattern, string_format_name = rule
+                if start_index == -1:
+                    match_iterator = string_pattern.globalMatch(text)
+                else:
+                    match_iterator = string_pattern.globalMatch(text[:start_index])
+
+                while match_iterator.hasNext():
+                    match = match_iterator.next()
+                    self.setFormat(
+                        match.capturedStart(),
+                        match.capturedLength(),
+                        self.syntaxStyle().getFormat(string_format_name)
+                    )
+                print('stringPatternStart0') """
+
+            self.singleLineStrHighlight(text, 0, start_index)
+
+        while start_index >= 0:
+            """ print('highlight_rule_id start_index:', highlight_rule_id, start_index)
+            if highlight_rule_id == 0:
+                print('highlight_rule_id:')
+                print(self.m_highlightBlockRules[highlight_rule_id - 1]) """
+
+            # Should be + length of start pattern
+            if self.previousBlockState() > 0 and start_index == 0:
+                end_match = end_pattern.match(text)
+            else:
+                end_match = end_pattern.match(text, start_index + start_match.capturedLength())
+                """ print('start capturedLength:', start_match.capturedLength()) """
+            end_index = end_match.capturedStart()
+            """ print('end_index:', end_index) """
+            match_length = 0
+
+            if end_index == -1:
+                """ print('3:', self.currentBlock()) """
+                self.setCurrentBlockState(highlight_rule_id)
+                match_length = len(text) - start_index
+                """ print('len(text), start_index, match_length:', len(text), start_index, match_length) """
+            else:
+                match_length = end_index - start_index + end_match.capturedLength()
+                """ print('end capturedLength, end_index, match_length:', end_match.capturedLength(), end_index, match_length) """
+
+            self.setFormat(
+                start_index,
+                match_length,
+                self.syntaxStyle().getFormat(format_name)
+            )
+            """ print('start_index, match_length:', start_index, match_length) """
+            stringPatternStart = start_index + match_length
+
+            """ start_index = text.indexOf(start_pattern, start_index + match_length) """
+            """ start_match = start_pattern.match(text, start_index + match_length)  # 执行正则匹配
+            start_index = start_match.capturedStart()
+            print('match_length, start_index:', match_length, start_index) """
+
+            block_start_index_list = []
+            for i, block_rule in enumerate(self.m_highlightBlockRules):
+                start_pattern_tmp, _, _ = block_rule
+                """ start_index_tmp = text.indexOf(start_pattern_tmp) """
+                start_match_tmp = start_pattern_tmp.match(text, start_index + match_length)  # 执行正则匹配
+                """ print('start_index, match_length, start_match:', start_index, match_length, start_match_tmp) """
+                start_index_tmp = start_match_tmp.capturedStart()
+                block_start_index_list.append(start_index_tmp)
+
+            block_start_min_index = -1
+            for start_index_tmp in block_start_index_list:
+                if start_index_tmp >= 0:
+                    if block_start_min_index == -1:
+                        block_start_min_index = start_index_tmp
+                    elif start_index_tmp < block_start_min_index:
+                        block_start_min_index = start_index_tmp
+            if block_start_min_index != -1:
+                for i, start_index_tmp in enumerate(block_start_index_list):
+                    if start_index_tmp == block_start_min_index:
+                        highlight_rule_id = i + 1
+                        break
+
+            """ print('start_index, start list:', start_index, block_start_index_list) """
+            if block_start_min_index >= 0:
+                block_rule = self.m_highlightBlockRules[highlight_rule_id - 1]
+                start_pattern, end_pattern, format_name = block_rule
+                start_match = start_pattern.match(text, start_index + match_length)
+                """ print('start capturedLength, start_index, match_length:', start_match.capturedLength(), start_index, match_length)
+                print('get block_rule index:', highlight_rule_id - 1) """
+            start_index = block_start_min_index
+            """ print('start_index', start_index) """
+
+            if not (stringPatternStart == len(text) or stringPatternStart == start_index):
+                """ for rule in self.m_highlightStringRules:
+                    string_pattern, string_format_name = rule
+                    if start_index == -1:
+                        match_iterator = string_pattern.globalMatch(text[stringPatternStart:])
+                    else:
+                        match_iterator = string_pattern.globalMatch(text[stringPatternStart:start_index])
+
+                    while match_iterator.hasNext():
+                        match = match_iterator.next()
+                        self.setFormat(
+                            match.capturedStart() + stringPatternStart,
+                            match.capturedLength(),
+                            self.syntaxStyle().getFormat(string_format_name)
+                        )
+                    print('stringPatternStart1') """
+
+                self.singleLineStrHighlight(text, stringPatternStart, start_index)
+
+    def singleLineStrHighlight(self, text, stringPatternStart, stringPatternEnd):
+        string_index = 0
+        string_length = 0
+        string_rule_id = 0
+
+        string_index_list = []
+        for rule in self.m_highlightStringRules:
+            string_pattern_tmp, _ = rule
+            if stringPatternEnd == -1:
+                string_match_tmp = string_pattern_tmp.match(text[stringPatternStart:])
+            else:
+                string_match_tmp = string_pattern_tmp.match(text[stringPatternStart:stringPatternEnd])
+            string_index_tmp = string_match_tmp.capturedStart()
+            string_index_list.append(string_index_tmp)
+
+        string_min_index = -1
+        for string_index_tmp in string_index_list:
+            if string_index_tmp >= 0:
+                if string_min_index == -1:
+                    string_min_index = string_index_tmp
+                elif string_index_tmp < string_min_index:
+                    string_min_index = string_index_tmp
+        if string_min_index != -1:
+            for i, string_index_tmp in enumerate(string_index_list):
+                if string_index_tmp == string_min_index:
+                    string_rule_id = i + 1
+                    break
+
+        while(string_min_index >= 0):
+            rule = self.m_highlightStringRules[string_rule_id - 1]
+            string_pattern, string_format_name = rule
+            """ if self.previousBlockState() < 1: """
+            if stringPatternEnd == -1:
+                string_match = string_pattern.match(text[stringPatternStart:], string_index + string_length)
+            else:
+                string_match = string_pattern.match(text[stringPatternStart:stringPatternEnd], string_index + string_length)
+            string_index = string_min_index
+            string_length = string_match.capturedLength()
+            self.setFormat(
+                string_index + stringPatternStart,
+                string_length,
+                self.syntaxStyle().getFormat(string_format_name)
+            )
+
+            string_index_list = []
+            for rule in self.m_highlightStringRules:
+                string_pattern_tmp, _ = rule
+                if stringPatternEnd == -1:
+                    string_match_tmp = string_pattern_tmp.match(text[stringPatternStart:], string_index + string_length)
+                else:
+                    string_match_tmp = string_pattern_tmp.match(text[stringPatternStart:stringPatternEnd], string_index + string_length)
+                string_index_tmp = string_match_tmp.capturedStart()
+                string_index_list.append(string_index_tmp)
+
+            string_min_index = -1
+            for string_index_tmp in string_index_list:
+                if string_index_tmp >= 0:
+                    if string_min_index == -1:
+                        string_min_index = string_index_tmp
+                    elif string_index_tmp < string_min_index:
+                        string_min_index = string_index_tmp
+            if string_min_index != -1:
+                for i, string_index_tmp in enumerate(string_index_list):
+                    if string_index_tmp == string_min_index:
+                        string_rule_id = i + 1
+                        break
+
+class QGLSLHighlighter(QStyleSyntaxHighlighter):
+    def __init__(self, document: QTextDocument = None):
+        super(QGLSLHighlighter, self).__init__(document)
+        
+        self.m_highlightRules = []
+        
+        # 初始化正则表达式模式
+        self.m_includePattern = QRegularExpression(r'(#include\s+([<"][a-zA-Z0-9*._]+[">]))')
+        self.m_functionPattern = QRegularExpression(r'(\b([A-Za-z0-9_]+(?:\s+|::))*([A-Za-z0-9_]+)(?=\())')
+        self.m_defTypePattern = QRegularExpression(r'(\b([A-Za-z0-9_]+)\s+[A-Za-z]{1}[A-Za-z0-9_]+\s*[;=])')
+        self.m_commentStartPattern = QRegularExpression(r'(/\*)')
+        self.m_commentEndPattern = QRegularExpression(r'(\*/)')
+        
+        # 加载语法高亮规则
+        self.loadHighlightRules()
+        
+    def loadHighlightRules(self):
+        # Load the language definitions from the XML file
+        fl = QFile("config/glsl.xml")
+        if not fl.open(QFile.ReadOnly):
+            """ print("Can't open glsl style file") """
+            return
+
+        # Assuming QLanguage is a custom class you've implemented
+        language = QLanguage(fl)
+        if not language.isLoaded():
+            return
+
+        keys = language.keys()
+        for key in keys:
+            names = language.names(key)
+            for name in names:
+                self.m_highlightRules.append((
+                    QRegularExpression(fr"(\b{name}\b)"),
+                    key
+                ))
+
+        # 数字
+        self.m_highlightRules.append((
+            QRegularExpression(r'\b(0b|0x){0,1}[\d\']+\b'),
+            "Number"
+        ))
+        
+        # 预处理指令
+        self.m_highlightRules.append((
+            QRegularExpression(r'#[a-zA-Z_]+'),
+            "Preprocessor"
+        ))
+        
+        # 单行注释
+        self.m_highlightRules.append((
+            QRegularExpression('//[^\n]*'),
+            "Comment"
+        ))
+        
+        # 这里可以添加更多GLSL特定的关键字规则
+        
+    def highlightBlock(self, text: str) -> None:
+        # 处理#include指令
+        matchIterator = self.m_includePattern.globalMatch(text)
+        while matchIterator.hasNext():
+            match = matchIterator.next()
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Preprocessor")
+            )
+            self.setFormat(
+                match.capturedStart(2),
+                match.capturedLength(2),
+                self.syntaxStyle().getFormat("String")
+            )
+        
+        # 处理函数
+        matchIterator = self.m_functionPattern.globalMatch(text)
+        while matchIterator.hasNext():
+            match = matchIterator.next()
+            self.setFormat(
+                match.capturedStart(),
+                match.capturedLength(),
+                self.syntaxStyle().getFormat("Type")
+            )
+            self.setFormat(
+                match.capturedStart(3),
+                match.capturedLength(3),
+                self.syntaxStyle().getFormat("Function")
+            )
+        
+        # 应用常规高亮规则
+        for rule in self.m_highlightRules:
+            pattern, formatName = rule
+            matchIterator = pattern.globalMatch(text)
+            while matchIterator.hasNext():
+                match = matchIterator.next()
+                self.setFormat(
+                    match.capturedStart(),
+                    match.capturedLength(),
+                    self.syntaxStyle().getFormat(formatName)
+                )
+        
+        # 处理多行注释
+        self.setCurrentBlockState(0)
+        startIndex = 0
+        if self.previousBlockState() != 1:
+            match = self.m_commentStartPattern.match(text)
+            startIndex = match.capturedStart()
+        
+        while startIndex >= 0:
+            match = self.m_commentEndPattern.match(text, startIndex)
+            endIndex = match.capturedStart()
+            commentLength = 0
+            
+            if endIndex == -1:
+                self.setCurrentBlockState(1)
+                commentLength = len(text) - startIndex
+            else:
+                commentLength = endIndex - startIndex + match.capturedLength()
+            
+            self.setFormat(
+                startIndex,
+                commentLength,
+                self.syntaxStyle().getFormat("Comment")
+            )
+            match = self.m_commentStartPattern.match(text, startIndex + commentLength)
+            startIndex = match.capturedStart()
+
+class QLuaHighlighter(QStyleSyntaxHighlighter):
+    def __init__(self, document: QTextDocument = None):
+        super(QLuaHighlighter, self).__init__(document)
+        # 初始化高亮规则
+        self.highlight_rules = []
+        self.highlight_block_rules = []
+        
+        # 正则表达式模式
+        self.require_pattern = QRegularExpression(r"(require\s*([(\"'][a-zA-Z0-9*._]+['\")]))")
+        self.function_pattern = QRegularExpression(r"(\b([A-Za-z0-9_]+(?:\s+|::))*([A-Za-z0-9_]+)(?=\())")
+        self.def_type_pattern = QRegularExpression(r"(\b([A-Za-z0-9_]+)\s+([A-Za-z]{1}[A-Za-z0-9_]+)\s*[=])")
+        
+        # Load the language definitions from the XML file
+        fl = QFile("config/lua.xml")
+        if not fl.open(QFile.ReadOnly):
+            """ print("Can't open lua style file") """
+            return
+
+        # Assuming QLanguage is a custom class you've implemented
+        language = QLanguage(fl)
+        if not language.isLoaded():
+            return
+
+        keys = language.keys()
+        for key in keys:
+            names = language.names(key)
+            for name in names:
+                self.highlight_rules.append((
+                    QRegularExpression(fr"(\b\s{0,1}{name}\s{0,1}\b)"),
+                    key
+                ))
+
+        # 数字
+        self.highlight_rules.append((
+            QRegularExpression(r"\b(0b|0x){0,1}[\d.']+\b"),
+            "Number"
+        ))
+        
+        # 字符串
+        self.highlight_rules.append((
+            QRegularExpression(r"[\"][^\n\"]*[\"]|['][^\n']*[']"),
+            "String"
+        ))
+        
+        # 预处理器
+        self.highlight_rules.append((
+            QRegularExpression(r"#\![a-zA-Z_]+"),
+            "Preprocessor"
+        ))
+        
+        # 单行注释
+        self.highlight_rules.append((
+            QRegularExpression(r"--[^\n]*"),
+            "Comment"
+        ))
+        
+        # 多行规则
+        # 多行注释
+        self.highlight_block_rules.append({
+            "start": QRegularExpression(r"--\[\["),
+            "end": QRegularExpression(r"--\]\]"),
+            "format": "Comment"
+        })
+        
+        # 多行字符串
+        self.highlight_block_rules.append({
+            "start": QRegularExpression(r"\[\["),
+            "end": QRegularExpression(r"\]\]"),
+            "format": "String"
+        })
+
+    def highlightBlock(self, text):
+        """高亮文本块"""
+        # 检查require语句
+        it = self.require_pattern.globalMatch(text)
+        while it.hasNext():
+            match = it.next()
+            self.setFormat(match.capturedStart(), match.capturedLength(), 
+                          self.syntaxStyle().getFormat("Preprocessor"))
+            self.setFormat(match.capturedStart(2), match.capturedLength(2),
+                          self.syntaxStyle().getFormat("String"))
+        
+        # 检查函数定义
+        it = self.function_pattern.globalMatch(text)
+        while it.hasNext():
+            match = it.next()
+            self.setFormat(match.capturedStart(), match.capturedLength(),
+                          self.syntaxStyle().getFormat("Type"))
+            self.setFormat(match.capturedStart(3), match.capturedLength(3),
+                          self.syntaxStyle().getFormat("Function"))
+        
+        # 检查类型定义
+        it = self.def_type_pattern.globalMatch(text)
+        while it.hasNext():
+            match = it.next()
+            self.setFormat(match.capturedStart(3), match.capturedLength(3),
+                          self.syntaxStyle().getFormat("Type"))
+        
+        # 应用基础高亮规则
+        for pattern, format_name in self.highlight_rules:
+            it = pattern.globalMatch(text)
+            while it.hasNext():
+                match = it.next()
+                self.setFormat(match.capturedStart(), match.capturedLength(),
+                              self.syntaxStyle().getFormat(format_name))
+        
+        # 处理多行规则
+        current_state = self.previousBlockState()
+        start_index = 0
+        
+        if current_state < 1 or current_state > len(self.highlight_block_rules):
+            for i, rule in enumerate(self.highlight_block_rules):
+                match = rule["start"].match(text)
+                start_index = match.capturedStart()
+                if start_index >= 0:
+                    current_state = i + 1
+                    break
+        
+        while start_index >= 0:
+            rule = self.highlight_block_rules[current_state - 1]
+            match = rule["end"].match(text, start_index)
+            end_index = match.capturedStart()
+            match_length = 0
+            
+            if end_index == -1:
+                self.setCurrentBlockState(current_state)
+                match_length = len(text) - start_index
+            else:
+                match_length = end_index - start_index + match.capturedLength()
+            
+            self.setFormat(start_index, match_length, self.syntaxStyle().getFormat(rule["format"]))
+            match = rule["start"].match(text, start_index + match_length)
+            start_index = match.capturedStart()
+
+class QLanguage(QObject):
+    def __init__(self, device, parent=None):
+        super(QLanguage, self).__init__(parent)
+        self._loaded = False
+        self._list = {}
+        self.load(device)
+
+    def load(self, device):
+        if device is None:
+            return False
+
+        reader = QXmlStreamReader(device)
+
+        name = ""
+        string_list = []
+        read_text = False
+
+        while not reader.atEnd() and not reader.hasError():
+            token_type = reader.readNext()
+
+            if token_type == QXmlStreamReader.StartElement:
+                if reader.name() == "section":
+                    if string_list:
+                        self._list[name] = string_list
+                        string_list = []
+
+                    name = reader.attributes().value("name")
+                elif reader.name() == "name":
+                    read_text = True
+
+            elif token_type == QXmlStreamReader.Characters and read_text:
+                string_list.append(reader.text())
+                read_text = False
+
+        if string_list:
+            self._list[name] = string_list
+
+        self._loaded = not reader.hasError()
+        return self._loaded
+
+    def keys(self):
+        return list(self._list.keys())
+
+    def names(self, key):
+        return self._list.get(key, [])
+
+    def isLoaded(self):
+        return self._loaded
 
 class CodeShow(QWidget):
-    def __init__(self, codeText, lexerName='python', maxWidth=650, parent=None):
+    def __init__(self, codeText, lexerName='python', maxWidth=810, parent=None):
         super(CodeShow, self).__init__(parent)
+        self.codeText = codeText
         self.maxWidth = maxWidth
-        self.mainVLayout = QVBoxLayout()
-        self.setLayout(self.mainVLayout)
-        #
+        self.setObjectName('CodeShow')
+        self.setStyleSheet('''
+        #CodeShow {
+            border-radius: 7px;
+        }
+        ''')
+        #topWidget QWidget
         self.topWidget = QWidget()
         """ self.topWidget.setFixedHeight(20) """
         self.topWidget.setStyleSheet('''
         QWidget {
-            background-color: #14141c;
+            background-color: #34343c;
+            border-top-left-radius: 7px;
+            border-top-right-radius: 7px;
         }
         ''')
-        self.topSubHLayout = QHBoxLayout()
-        self.topWidget.setLayout(self.topSubHLayout)
-        #
+        #label QLabel
         self.label = QLabel(lexerName)
         font = QFont()
         font.setPointSize(windowFontPointSize)
         self.label.setFont(font)
         self.palette = self.label.palette()
-        self.palette.setColor(QPalette.Text, QColor(178, 170, 164))
+        """ self.palette.setColor(QPalette.Text, QColor(178, 170, 164)) """
+        self.palette.setColor(QPalette.Text, QColor(Qt.white))
         self.label.setPalette(self.palette)
         self.label.adjustSize()
-        #
+        #toggleThemeButton PushButton
+        self.toggleThemeButton = PushButton(tipText='日间主题', tipOffsetX=15, tipOffsetY=35)
+        self.toggleThemeButton.setFixedSize(self.label.height(), self.label.height())
+        self.light_theme_images_path = os.path.join(images_dir, 'light_theme.png').replace('\\', '/')
+        self.dark_theme_images_path = os.path.join(images_dir, 'dark_theme.png').replace('\\', '/')
+        self.toggleThemeButton.setIcon(QIcon(f"{self.light_theme_images_path}"))
+        self.toggleThemeButton.setIconSize(QSize(20, 20))
+        self.toggleThemeButton.setStyleSheet('''
+        QPushButton{
+            border: none;
+            background: transparent;
+        }
+        ''')
+        self.toggleThemeButton.clicked.connect(self.toggleThemeStyle)
+        self.isLightThemeStyle = False
+        #wordWrapButton PushButton
+        self.wordWrapButton = PushButton(tipText='折叠成单行', tipOffsetX=15, tipOffsetY=35)
+        self.wordWrapButton.setFixedSize(self.label.height(), self.label.height())
+        self.light_word_wrap_images_path = os.path.join(images_dir, 'light_word_wrap.png').replace('\\', '/')
+        self.light_single_line_images_path = os.path.join(images_dir, 'light_single_line.png').replace('\\', '/')
+        self.dark_word_wrap_images_path = os.path.join(images_dir, 'dark_word_wrap.png').replace('\\', '/')
+        self.dark_single_line_images_path = os.path.join(images_dir, 'dark_single_line.png').replace('\\', '/')
+        self.wordWrapButton.setIcon(QIcon(f"{self.light_single_line_images_path}"))
+        self.wordWrapButton.setIconSize(QSize(20, 20))
+        self.wordWrapButton.setStyleSheet('''
+        QPushButton{
+            border: none;
+            background: transparent;
+        }
+        ''')
+        self.wordWrapButton.clicked.connect(self.setLineWordWrapMode)
+        self.isWordWrap = True
+        #codeCopyButton PushButton
         self.codeCopyButton = PushButton(tipText='复制代码', tipOffsetX=15, tipOffsetY=35)
         self.codeCopyButton.setFixedSize(self.label.height(), self.label.height())
-        self.code_copy_images_path = os.path.join(images_dir, 'code_copy.png').replace('\\', '/')
-        self.codeCopyButton.setIcon(QIcon(f"{self.code_copy_images_path}"))
+        self.light_code_copy_images_path = os.path.join(images_dir, 'light_code_copy.png').replace('\\', '/')
+        self.dark_code_copy_images_path = os.path.join(images_dir, 'dark_code_copy.png').replace('\\', '/')
+        self.codeCopyButton.setIcon(QIcon(f"{self.light_code_copy_images_path}"))
         self.codeCopyButton.setIconSize(QSize(20, 20))
         self.codeCopyButton.setStyleSheet('''
         QPushButton{
@@ -2107,17 +3328,43 @@ class CodeShow(QWidget):
             background: transparent;
         }
         ''')
-        #
-        self.topSubHLayout.addWidget(self.label, 0, Qt.AlignLeft)
-        self.topSubHLayout.addWidget(self.codeCopyButton, 0, Qt.AlignRight)
-        self.topSubHLayout.setContentsMargins(0, 0, 0, 0)
+        self.codeCopyButton.clicked.connect(self.copyCode)
+        #QClipboard
+        self.clip = QApplication.clipboard()
+        #topSubLeftWidget QWidget
+        self.topSubLeftWidget = QWidget()
+        self.topSubLeftWidget.setFixedHeight(self.label.height())
+        self.topSubLeftHLayout = QHBoxLayout()
+        self.topSubLeftWidget.setLayout(self.topSubLeftHLayout)
+        self.topSubLeftHLayout.setAlignment(Qt.AlignLeft)
+        self.topSubLeftHLayout.setContentsMargins(0, 0, 0, 0)
+        self.topSubLeftHLayout.addWidget(self.label)
+        #topSubRightWidget QWidget
+        self.topSubRightWidget = QWidget()
+        self.topSubRightWidget.setFixedHeight(self.label.height())
+        self.topSubRightHLayout = QHBoxLayout()
+        self.topSubRightWidget.setLayout(self.topSubRightHLayout)
+        self.topSubRightHLayout.setAlignment(Qt.AlignRight)
+        self.topSubRightHLayout.setContentsMargins(0, 0, 0, 0)
+        self.topSubRightHLayout.setSpacing(0)
+        self.topSubRightHLayout.addWidget(self.toggleThemeButton)
+        self.topSubRightHLayout.addWidget(self.wordWrapButton)
+        self.topSubRightHLayout.addWidget(self.codeCopyButton)
+        #topHLayout QHBoxLayout
+        self.topHLayout = QHBoxLayout()
+        self.topWidget.setLayout(self.topHLayout)
+        self.topHLayout.addWidget(self.topSubLeftWidget, 0, Qt.AlignLeft)
+        self.topHLayout.addWidget(self.topSubRightWidget, 0, Qt.AlignRight)
+        self.topHLayout.setContentsMargins(10, 0, 10, 0)
         self.topWidget.setFixedHeight(self.label.height())
-        #
+        #CodeEdit
         self.codeEdit = CodeEdit()
         self.codeEdit.setSizeFinished.connect(self.OnSizeFinished)
         self.codeEdit.highlightCode(codeText, lexerName=lexerName)
         self.codeEdit.setFixedWidth(self.maxWidth)
-        #
+        #mainVLayout QVBoxLayout
+        self.mainVLayout = QVBoxLayout()
+        self.setLayout(self.mainVLayout)
         self.mainVLayout.addWidget(self.topWidget)
         self.mainVLayout.addWidget(self.codeEdit)
         self.mainVLayout.setContentsMargins(0, 0, 0, 0)
@@ -2131,23 +3378,89 @@ class CodeShow(QWidget):
         self.setFixedSize(self.maxWidth, self.codeEdit.height() + self.topWidget.height())
         """ print('CodeEdit:', self.codeEdit.width(), self.codeEdit.height()) """
 
+    def connectCodeCopyButtonClick(self, fun):
+        self.codeCopyButton.clicked.connect(fun)
+
     def hasSelectedText(self):
         return self.codeEdit.textCursor().hasSelection()
 
     def getSelectedText(self):
         return self.codeEdit.textCursor().selectedText()
 
+    def toggleThemeStyle(self):
+        self.isLightThemeStyle = not self.isLightThemeStyle
+        if self.isLightThemeStyle:
+            self.topWidget.setStyleSheet('''
+            QWidget {
+                background-color: #ccccc4;
+                border-top-left-radius: 7px;
+                border-top-right-radius: 7px;
+            }
+            ''')
+            self.palette = self.label.palette()
+            self.palette.setColor(QPalette.Text, QColor(Qt.black))
+            self.label.setPalette(self.palette)
+            self.toggleThemeButton.setIcon(QIcon(f"{self.dark_theme_images_path}"))
+            self.toggleThemeButton.tipText = '夜间主题'
+            if self.isWordWrap:
+                self.wordWrapButton.setIcon(QIcon(f"{self.dark_single_line_images_path}"))
+            else:
+                self.wordWrapButton.setIcon(QIcon(f"{self.dark_word_wrap_images_path}"))
+            self.codeCopyButton.setIcon(QIcon(f"{self.dark_code_copy_images_path}"))
+        else:
+            self.topWidget.setStyleSheet('''
+            QWidget {
+                background-color: #34343c;
+                border-top-left-radius: 7px;
+                border-top-right-radius: 7px;
+            }
+            ''')
+            self.palette = self.label.palette()
+            self.palette.setColor(QPalette.Text, QColor(Qt.white))
+            self.label.setPalette(self.palette)
+            self.toggleThemeButton.setIcon(QIcon(f"{self.light_theme_images_path}"))
+            self.toggleThemeButton.tipText = '日间主题'
+            if self.isWordWrap:
+                self.wordWrapButton.setIcon(QIcon(f"{self.light_single_line_images_path}"))
+            else:
+                self.wordWrapButton.setIcon(QIcon(f"{self.light_word_wrap_images_path}"))
+            self.codeCopyButton.setIcon(QIcon(f"{self.light_code_copy_images_path}"))
+        self.codeEdit.setThemeStyle(self.isLightThemeStyle)
+
+    def setLineWordWrapMode(self):
+        self.isWordWrap = not self.isWordWrap
+        if self.isWordWrap:
+            self.codeEdit.setWordWrapMode(QTextOption.WordWrap)
+            self.codeEdit.setLineWrapMode(QTextEdit.WidgetWidth)
+            if self.isLightThemeStyle:
+                self.wordWrapButton.setIcon(QIcon(f"{self.dark_single_line_images_path}"))
+            else:
+                self.wordWrapButton.setIcon(QIcon(f"{self.light_single_line_images_path}"))
+            self.wordWrapButton.tipText = '折叠成单行'
+        else:
+            self.codeEdit.setWordWrapMode(QTextOption.NoWrap)
+            self.codeEdit.setLineWrapMode(QTextEdit.NoWrap)
+            if self.isLightThemeStyle:
+                self.wordWrapButton.setIcon(QIcon(f"{self.dark_word_wrap_images_path}"))
+            else:
+                self.wordWrapButton.setIcon(QIcon(f"{self.light_word_wrap_images_path}"))
+            self.wordWrapButton.tipText = '自动换行'
+
+    def copyCode(self):
+        self.clip.setText(self.codeText)
+
 class MessageWidget(QWidget):
     """ thinkTextRecvEnd = pyqtSignal() """
     resizeFinished = pyqtSignal()
     setTexting = pyqtSignal(bool)
 
-    def __init__(self, text, copyFun, renewResponseFun, listWidget, isUser=True, thinkIsExpand=True, textMaxWidth=780, parent=None):
+    def __init__(self, text, copyFun, renewResponseFun, listWidget, isUser=True, thinkIsExpand=True, textMaxWidth=877, parent=None):
         super(MessageWidget, self).__init__(parent)
         self.listWidget = listWidget
         self.text = text
         self.textMaxWidth = textMaxWidth
         self.isUser = isUser
+        self.copyFun = copyFun
         #ImageLabel
         self.imageLabel = ImageLabel(isUser=self.isUser)
         #textWidget TextWidget
@@ -2173,7 +3486,7 @@ class MessageWidget(QWidget):
             #thinkBackVLayout QVBoxLayout
             self.thinkBackVLayout = QVBoxLayout()
             self.thinkBackWidget.setLayout(self.thinkBackVLayout)
-            self.thinkBackVLayout.setContentsMargins(10, 0, 0, 0)
+            self.thinkBackVLayout.setContentsMargins(30, 0, 15, 0)
             self.thinkBackVLayout.setSpacing(0)
             #thinkIsExpand
             self.thinkIsExpand = thinkIsExpand
@@ -2218,8 +3531,9 @@ class MessageWidget(QWidget):
                 """ print('thinkCodeBlocks:', thinkCodeBlocks) """
                 for CodeBlock in thinkCodeBlocks:
                     language, code = CodeBlock
-                    self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth - 10, parent=self))
+                    self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth - self.imageLabel.width() - 80, parent=self))
                     """ self.thinkCodeShowList[-1].hide() """
+                    self.thinkCodeShowList[-1].connectCodeCopyButtonClick(copyFun)
                     thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     thinkSplitTextList.append(thinkTempTextList[0])
                     thinkTempText = thinkTempTextList[1]
@@ -2235,7 +3549,7 @@ class MessageWidget(QWidget):
                 #ThinkWidget
                 for splitText in thinkSplitTextList:
                     if splitText != '':
-                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=textMaxWidth - 10, parent=self))
+                        self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=textMaxWidth - self.imageLabel.width() - 80, parent=self))
                     """ print('init len:', splitText[-10:], len(self.thinkTextShowList), len(self.thinkCodeShowList), len(self.resultTextShowList), len(self.resultCodeShowList)) """
                 j = 0
                 for i in range(len(self.thinkCodeShowList)):
@@ -2271,8 +3585,9 @@ class MessageWidget(QWidget):
                 resultCodeBlocks = self.extract_code_blocks(self.resultText)
                 for CodeBlock in resultCodeBlocks:
                     language, code = CodeBlock
-                    self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth, parent=self))
+                    self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth - self.imageLabel.width() - 35, parent=self))
                     """ self.resultCodeShowList[-1].hide() """
+                    self.resultCodeShowList[-1].connectCodeCopyButtonClick(copyFun)
                     resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     resultSplitTextList.append(resultTempTextList[0])
                     resultTempText = resultTempTextList[1]
@@ -2280,7 +3595,7 @@ class MessageWidget(QWidget):
                 #TextShow
                 for splitText in resultSplitTextList:
                     if splitText != '':
-                        self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=textMaxWidth, parent=self))
+                        self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=textMaxWidth - self.imageLabel.width() - 35, parent=self))
                 #textLayout
                 j = 0
                 for i in range(len(self.resultCodeShowList)):
@@ -2295,7 +3610,7 @@ class MessageWidget(QWidget):
                     self.textLayout.addWidget(self.resultTextShowList[-1])
                 """ for i in range(self.textLayout.count()):
                     print('init subwidget1:', i, self.textLayout.itemAt(i).widget()) """
-            self.textLayout.setContentsMargins(5, 5, 5, 5)
+            self.textLayout.setContentsMargins(15, 5, 15, 5)
             """ #TextShow
             for splitText in splitTextList:
                 if splitText != '':
@@ -2319,9 +3634,9 @@ class MessageWidget(QWidget):
                 self.isRecvFirst = False """
         else:
             #TextShow
-            self.textShow = TextShow(text, isUser=self.isUser, maxWidth=textMaxWidth)
+            self.textShow = TextShow(text, isUser=self.isUser, maxWidth=textMaxWidth - self.imageLabel.width() - 15)
             self.textLayout.addWidget(self.textShow)
-            self.textLayout.setContentsMargins(5, 5, 5, 5)
+            self.textLayout.setContentsMargins(5, 0, 5, 0)
         """ if self.isUser:
             self.textLayout.addWidget(self.textShow)
             self.textLayout.setContentsMargins(5, 5, 5, 5)
@@ -2397,7 +3712,7 @@ class MessageWidget(QWidget):
         if self.isUser:
             """ self.textLayout.addWidget(self.funWidget)
             self.textLayout.setSpacing(0) """
-            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
+            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height())
             self.textBoxLayout.addWidget(self.textWidget)
             self.textBoxLayout.addWidget(self.funWidget)
             self.textBoxLayout.setContentsMargins(0, 0, 0, 0)
@@ -2407,7 +3722,7 @@ class MessageWidget(QWidget):
             self.subVLayout2.addWidget(self.imageLabel)
         else:
             self.subVLayout1.addWidget(self.imageLabel)
-            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0)
+            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0) + 45
             thinkBackHeight = sum([textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
             self.thinkBackWidget.setFixedSize(thinkBackWidth, thinkBackHeight)
             self.textLayout.setSpacing(0)
@@ -2449,7 +3764,7 @@ class MessageWidget(QWidget):
                 codeShowHeights = sum([codeShow.height() for codeShow in self.codeShowList]) """
                 """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + textShowHeights + codeShowHeights + 10) """
                 """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10) """
-            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 10, thinkHeight + resultHeight + 10)
+            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 30, thinkHeight + resultHeight + 10)
             self.loadingWidget = LoadingWidget()
             """ self.textLayout.addWidget(self.loadingWidget)
             self.textLayout.setSpacing(0) """
@@ -2497,7 +3812,7 @@ class MessageWidget(QWidget):
         # 使用 re.DOTALL 让 . 匹配换行符
         matches = re.findall(pattern, text, re.DOTALL)
         # 过滤出指定语言的代码块
-        supported_languages = {"c", "cpp", "python", "java", "javascript"}
+        supported_languages = {"cpp", "python", "glsl", "lua"}
         code_blocks = []
         for language, code in matches:
             if language.lower() in supported_languages:
@@ -2572,10 +3887,10 @@ class MessageWidget(QWidget):
 
     def setSize(self):
         if self.isUser:
-            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
+            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height())
             self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
         else:
-            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0)
+            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0) + 45
             thinkBackHeight = sum([textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
             self.thinkBackWidget.setFixedSize(thinkBackWidth, thinkBackHeight)
             if self.thinkIsExpand:
@@ -2616,7 +3931,7 @@ class MessageWidget(QWidget):
                 codeShowHeights = sum([codeShow.height() for codeShow in self.codeShowList]) """
                 """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + textShowHeights + codeShowHeights + 10) """
                 """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10) """
-            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 10, thinkHeight + resultHeight + 10)
+            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 30, thinkHeight + resultHeight + 10)
             if self.loadingWidgetIsRemove:
                 self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
             else:
@@ -2661,10 +3976,12 @@ class MessageWidget(QWidget):
                 for index, CodeBlock in enumerate(thinkCodeBlocks):
                     language, code = CodeBlock
                     if thinkCodeShowListLastLen < index:
-                        self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth - 10, parent=self))
+                        self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth - self.imageLabel.width() - 80, parent=self))
                         #set visible
                         self.thinkCodeShowList[-1].setVisible(self.thinkIsExpand)
                         """ self.thinkCodeShowList[-1].hide() """
+                        #connect codeCopyButton Click
+                        self.thinkCodeShowList[-1].connectCodeCopyButtonClick(self.copyFun)
                     else:
                         self.thinkCodeShowList[index].setText(code.strip(), lexerName=language)
                     thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
@@ -2686,7 +4003,7 @@ class MessageWidget(QWidget):
                 for splitText in thinkSplitTextList:
                     if splitText != '':
                         if thinkTextShowListLastLen < i:
-                            self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=self.textMaxWidth - 10, parent=self))
+                            self.thinkTextShowList.append(ThinkWidget(splitText, maxWidth=self.textMaxWidth - self.imageLabel.width() - 80, parent=self))
                             #set visible
                             self.thinkTextShowList[-1].setVisible(self.thinkIsExpand)
                         else:
@@ -2729,8 +4046,10 @@ class MessageWidget(QWidget):
                 for index, CodeBlock in enumerate(resultCodeBlocks):
                     language, code = CodeBlock
                     if resultCodeShowListLastLen < index:
-                        self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth, parent=self))
+                        self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth - self.imageLabel.width() - 35, parent=self))
                         """ self.resultCodeShowList[-1].hide() """
+                        #connect codeCopyButton Click
+                        self.resultCodeShowList[-1].connectCodeCopyButtonClick(self.copyFun)
                     else:
                         self.resultCodeShowList[index].setText(code.strip(), lexerName=language)
                     resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
@@ -2743,7 +4062,7 @@ class MessageWidget(QWidget):
                 for splitText in resultSplitTextList:
                     if splitText != '':
                         if resultTextShowListLastLen < i:
-                            self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=self.textMaxWidth, parent=self))
+                            self.resultTextShowList.append(TextShow(splitText, isUser=self.isUser, maxWidth=self.textMaxWidth - self.imageLabel.width() - 35, parent=self))
                         else:
                             self.resultTextShowList[i].setText(splitText)
                         i += 1
@@ -2765,10 +4084,10 @@ class MessageWidget(QWidget):
             self.textShow.setText(text)
 
         if self.isUser:
-            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height() + 10)
+            self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height())
             self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
         else:
-            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0)
+            thinkBackWidth = max([textShow.width() for textShow in self.thinkTextShowList] + [codeShow.width() for codeShow in self.thinkCodeShowList], default=0) + 45
             thinkBackHeight = sum([textShow.height() for textShow in self.thinkTextShowList] + [codeShow.height() for codeShow in self.thinkCodeShowList])
             self.thinkBackWidget.setFixedSize(thinkBackWidth, thinkBackHeight)
             if self.thinkIsExpand:
@@ -2779,6 +4098,7 @@ class MessageWidget(QWidget):
                     thinkWidth = 0
                     thinkHeight = 0
                 if self.resultText != '':
+                    """ print('width list:', [textShow.width() for textShow in self.resultTextShowList] + [codeShow.width() for codeShow in self.resultCodeShowList]) """
                     resultWidth = max([textShow.width() for textShow in self.resultTextShowList] + [codeShow.width() for codeShow in self.resultCodeShowList])
                     resultHeight = sum([textShow.height() for textShow in self.resultTextShowList] + [codeShow.height() for codeShow in self.resultCodeShowList])
                 else:
@@ -2810,7 +4130,8 @@ class MessageWidget(QWidget):
                 """ self.textWidget.setFixedSize(max(allWidths) + 10, self.thinkButton.height() + textShowHeights + codeShowHeights + 10) """
                 """ self.textWidget.setFixedSize(max(self.thinkButton.width(), self.textShow.width()) + 10, self.thinkButton.height() + self.textShow.height() + 10) """
             """ print('textWidget:', thinkWidth, thinkHeight, resultWidth, resultHeight) """
-            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 10, thinkHeight + resultHeight + 10)
+            self.textWidget.setFixedSize(max(thinkWidth, resultWidth) + 30, thinkHeight + resultHeight + 10)
+            """ print('thinkWidth resultWidth textWidget:', thinkWidth, resultWidth, self.textWidget.width()) """
             """ print(self.textWidget.size()) """
             if self.loadingWidgetIsRemove:
                 self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
@@ -4653,7 +5974,7 @@ class MainWindow(QMainWindow):
                             }
                         ]
                 #MessageWidget
-                self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=True, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+                self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=True, textMaxWidth=self.chatShow.width() * 3 // 4)
                 """ self.messageSendWidget.connectSetSizeFinished(self.messageWidgetResize) """
                 self.messageSendWidget.connectResizeFinished(self.messageWidgetResize)
                 self.messageSendWidget.connectSetTexting(self.getSetTexting)
@@ -4703,7 +6024,7 @@ class MainWindow(QMainWindow):
             else:
                 self.messageWidgetList[i].removeRenewResponseButton()
         #MessageWidget
-        self.messageRecvWidget = MessageWidget(self.Message, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=False, textMaxWidth=int(self.chatShow.width() * 2 / 3))
+        self.messageRecvWidget = MessageWidget(self.Message, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=False, textMaxWidth=self.chatShow.width() * 3 // 4)
         """ self.messageRecvWidget.connectSetSizeFinished(self.messageWidgetResize) """
         self.messageRecvWidget.connectResizeFinished(self.messageWidgetResize)
         self.messageRecvWidget.connectSetTexting(self.getSetTexting)
@@ -4925,11 +6246,11 @@ class MainWindow(QMainWindow):
                 #MessageWidget
                 if useThinkExpandList:
                     if not isUser:
-                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=self.thinkExpandedList[expandIndex], textMaxWidth=self.chatShow.width() * 2 // 3)
+                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=self.thinkExpandedList[expandIndex], textMaxWidth=self.chatShow.width() * 3 // 4)
                     else:
-                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, textMaxWidth=self.chatShow.width() * 2 // 3)
+                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, textMaxWidth=self.chatShow.width() * 3 // 4)
                 else:
-                    self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=False, textMaxWidth=self.chatShow.width() * 2 // 3)
+                    self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=False, textMaxWidth=self.chatShow.width() * 3 // 4)
                 """ self.messageWidget.connectSetSizeFinished(self.messageWidgetResize) """
                 self.messageWidget.connectResizeFinished(self.messageWidgetResize)
                 self.messageWidget.connectSetTexting(self.getSetTexting)

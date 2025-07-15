@@ -969,7 +969,8 @@ class TextShow(QWidget):
         self.maxWidth = maxWidth - 10
         self.label.setMaximumWidth(self.maxWidth)
         self.font = QFont()
-        self.font.setPointSize(windowFontPointSize)
+        """ self.font.setPointSize(windowFontPointSize) """
+        self.font.setPixelSize(bubbleFontPixelSize)
         self.label.setFont(self.font)
         self.font_metrics = QFontMetricsF(self.font)
         self.mainHLayout = QHBoxLayout()
@@ -1434,9 +1435,9 @@ class ThinkingButton(QWidget):
         self.leftIconLabel.setFixedSize(20, 20)
         #textLabel QLabel
         self.textLabel = QLabel('思考中...')
-        self.font = QFont()
-        self.font.setPixelSize(20)
-        self.textLabel.setFont(self.font)
+        font = QFont()
+        font.setPointSize(windowFontPointSize)
+        self.textLabel.setFont(font)
         self.textLabel.adjustSize()
         #rightIconLabel QLabel
         self.rightIconLabel = QLabel()
@@ -1610,7 +1611,9 @@ class ThinkWidget(QWidget):
         self.maxWidth = maxWidth
         self.label.setMaximumWidth(self.maxWidth)
         self.font = QFont()
-        self.font.setPointSize(windowFontPointSize)
+        """ self.font.setPointSize(windowFontPointSize) """
+        self.font.setPixelSize(bubbleFontPixelSize)
+        print('ThinkWidget bubbleFontPixelSize:', bubbleFontPixelSize)
         self.label.setFont(self.font)
         self.font_metrics = QFontMetricsF(self.font)
         self.mainHLayout = QHBoxLayout()
@@ -2064,10 +2067,9 @@ class CodeEdit(QTextEdit):
             width: 0px;
         }
         ''')
-        #
         font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
         font.setFixedPitch(True)
-        font.setPixelSize(14)
+        font.setPointSize(windowFontPointSize)
         self.setFont(font)
         """ print('font pitch:', font.fixedPitch(), self.font().fixedPitch()) """
         palette = self.palette()
@@ -2229,14 +2231,14 @@ class CodeEdit(QTextEdit):
         """ print('height:', int(self.document().size().height())) """
         height = int(self.document().size().height())
         self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
-        self.updateLineNumberAreaWidth()
+        """ self.updateLineNumberAreaWidth()
         self.lineNumberArea.repaint()
-        self.setSizeFinished.emit()
+        self.setSizeFinished.emit() """
 
     def resizeEvent(self, event):
         QTextEdit.resizeEvent(self, event)
-        height = int(self.document().size().height())
-        self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
+        """ height = int(self.document().size().height())
+        self.setFixedHeight(height + self.horizontalScrollBar().height() + 10) """
         self.updateLineNumberAreaWidth()
         self.lineNumberArea.repaint()
         self.setSizeFinished.emit()
@@ -5203,6 +5205,7 @@ class MainWindow(QMainWindow):
                 self.dpi = self.curScreen.logicalDotsPerInch()
                 global bubbleFontPixelSize
                 bubbleFontPixelSize = math.ceil(bubbleFontPointSize * (self.dpi / 72))
+                print('mouseReleaseEvent bubbleFontPixelSize:', bubbleFontPixelSize)
                 self.screenChanged = False
             if self.isRegenerate:
                 self.isRegenerate = False

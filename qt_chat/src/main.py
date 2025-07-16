@@ -1490,6 +1490,7 @@ class ThinkingButton(QWidget):
         else:
             self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_down_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
         self.clicked.emit()
+        print('ThinkingButton mousePressEvent')
         QWidget.mousePressEvent(self, event)
 
     def connectButtonClick(self, fun):
@@ -2231,17 +2232,18 @@ class CodeEdit(QTextEdit):
         """ print('height:', int(self.document().size().height())) """
         height = int(self.document().size().height())
         self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
-        """ self.updateLineNumberAreaWidth()
-        self.lineNumberArea.repaint()
-        self.setSizeFinished.emit() """
-
-    def resizeEvent(self, event):
-        QTextEdit.resizeEvent(self, event)
-        """ height = int(self.document().size().height())
-        self.setFixedHeight(height + self.horizontalScrollBar().height() + 10) """
         self.updateLineNumberAreaWidth()
         self.lineNumberArea.repaint()
         self.setSizeFinished.emit()
+
+    def resizeEvent(self, event):
+        if self.height() != int(self.document().size().height()) + self.horizontalScrollBar().height() + 10:
+            height = int(self.document().size().height())
+            self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
+            self.updateLineNumberAreaWidth()
+            self.lineNumberArea.repaint()
+            self.setSizeFinished.emit()
+        QTextEdit.resizeEvent(self, event)
 
 """ class CustomStyle(Style):
     default_style = ""
@@ -3828,14 +3830,19 @@ class MessageWidget(QWidget):
             return
 
     def thinkButtonClicked(self):
+        print('thinkButtonClicked')
         self.thinkIsExpand = not self.thinkIsExpand
         #set visible
-        for thinkWidget in self.thinkTextShowList:
+        """ for thinkWidget in self.thinkTextShowList:
             thinkWidget.setVisible(self.thinkIsExpand)
         for codeShow in self.thinkCodeShowList:
-            codeShow.setVisible(self.thinkIsExpand)
-        #
+            codeShow.setVisible(self.thinkIsExpand) """
+        self.thinkBackWidget.setVisible(self.thinkIsExpand)
+        print('thinkButtonClicked1')
+        #setSize
         self.setSize()
+        self.layout().update()
+        print('thinkButtonClicked2')
 
     """ def thinkToggleWidget(self):
         print('thinkToggleWidget') """
@@ -3999,6 +4006,8 @@ class MessageWidget(QWidget):
                     #textLayout
                     self.textLayout.addWidget(self.thinkButton)
                     self.textLayout.addWidget(self.thinkBackWidget)
+                    #set visible
+                    self.thinkBackWidget.setVisible(self.thinkIsExpand)
                 #ThinkWidget
                 i = 0
                 thinkTextShowListLastLen = len(self.thinkTextShowList) - 1

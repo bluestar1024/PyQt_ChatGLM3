@@ -1490,7 +1490,6 @@ class ThinkingButton(QWidget):
         else:
             self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_down_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
         self.clicked.emit()
-        print('ThinkingButton mousePressEvent')
         QWidget.mousePressEvent(self, event)
 
     def connectButtonClick(self, fun):
@@ -3830,7 +3829,6 @@ class MessageWidget(QWidget):
             return
 
     def thinkButtonClicked(self):
-        print('thinkButtonClicked')
         self.thinkIsExpand = not self.thinkIsExpand
         #set visible
         """ for thinkWidget in self.thinkTextShowList:
@@ -3838,11 +3836,9 @@ class MessageWidget(QWidget):
         for codeShow in self.thinkCodeShowList:
             codeShow.setVisible(self.thinkIsExpand) """
         self.thinkBackWidget.setVisible(self.thinkIsExpand)
-        print('thinkButtonClicked1')
-        #setSize
-        self.setSize()
-        self.layout().update()
-        print('thinkButtonClicked2')
+        """ #setSize
+        self.setSize() """
+        self.resizeFinished.emit()
 
     """ def thinkToggleWidget(self):
         print('thinkToggleWidget') """

@@ -4980,6 +4980,10 @@ class MainWindow(QMainWindow):
         self.isSending = False
         #isContinueShow
         self.isContinueShow = True
+        #isScreenMax
+        self.isScreenMax = False
+        #lastNormalGeometry
+        self.lastNormalGeometry = self.geometry()
 
     def moveEvent(self, event):
         #screen
@@ -5366,12 +5370,17 @@ class MainWindow(QMainWindow):
         self.showMinimized()
 
     def UiMaximize(self):
-        if self.isMaximized():
-            self.showNormal()
+        if self.isScreenMax:
+            """ self.showNormal() """
+            self.setGeometry(self.lastNormalGeometry)
             self.maxButton.setIcon(QIcon(f"{self.max_images_path}"))
+            self.isScreenMax = False
         else:
-            self.showMaximized()
+            """ self.showMaximized() """
+            self.lastNormalGeometry = self.geometry()
+            self.setGeometry(-10, -10, self.screen().size().width() + 20, self.screen().size().height() + 20)
             self.maxButton.setIcon(QIcon(f"{self.normal_images_path}"))
+            self.isScreenMax = True
 
     def UiClose(self):
         self.saveCurChatRecord(withholdCurChatFile=True)

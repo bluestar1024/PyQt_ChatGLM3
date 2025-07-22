@@ -7,7 +7,7 @@ Created on Tue Feb 13 18:31:44 2024
 
 import sys, os
 from enum import Enum
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QMenu, QFrame, QGraphicsDropShadowEffect, QPlainTextEdit
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QMenu, QFrame, QGraphicsDropShadowEffect
 from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QTime, QObject, QXmlStreamReader, QFile, QIODevice, QRegularExpression, QDir
 from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextCursor, QTextCharFormat, QTextDocument, QSyntaxHighlighter, QTextOption
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
@@ -58,6 +58,76 @@ textEditFullBTColor = QColor(100, 100, 100, 0)
 """ fulBubbleColor = QColor(119, 221, 255)
 userBubbleColor = QColor(16, 149, 222)
 aiBubbleColor = QColor(17, 173, 222) """
+
+testText2 = '''<think>
+让我想一下两种方法。第一种方法更直观，适合新手理解。第二种方法效率更高，特别是当n很大的时候。那么对于这个问题来说，两种方式都行。我应该两种方法都写吗？可能问题只需要一种实现，但为了全面，我可以两种情况都考虑一下。
+
+那我先写出循环的方法。Java中，for循环从1到100，每次加i。代码结构大概是：
+
+```cpp
+int sum = 0;
+for (int i = 1; i <= 100; ++i) {
+    #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
+    sum += i;
+}
+std::cout << sum << std::endl;
+
+#include <iostream>
+#include <QDebug>
+
+#sdfgs	"fdgdf"
+#cfdsf	546
+
+int main()
+{
+    int n, sum = 0;
+
+    std::cout << "Enter a positive integer: ";
+    std::cin >> n;
+
+    for (int i = 1; i <= n; ++i)
+    {
+        sum += i;
+    }
+
+    std::cout << "Sum = " << sum;
+    return 0;
+}
+int fun()
+fun()
+std:: fun()
+int std::fun ()
+float std::std::fun()
+fun
+
+// sdassadfsa sda
+
+// sada
+
+/* jkhj
+jkk
+gjh */
+
+int xf;
+int ydsf = 1;
+int sdy=0
+int xv + =1
+int xvbd+ =1
+int xf+=1
+int xfddd - =1
+int fvdx * =1
+int xfg / =1
+int xh % =1
+int xnb , y ;
+int xdgf = 1,
+
+a.b.fun()
+12.3
+```
+
+然后是Python的部分。Python的语法更简单，循环的话：
+</think>
+'''
 
 testText = '''<think>
 让我想一下两种方法。第一种方法更直观，适合新手理解。第二种方法效率更高，特别是当n很大的时候。那么对于这个问题来说，两种方式都行。我应该两种方法都写吗？可能问题只需要一种实现，但为了全面，我可以两种情况都考虑一下。
@@ -155,13 +225,6 @@ class LineNumberArea(QWidget):
         """ self.editor.updateRequest.connect(self.update) """
         print(self.editor.document())
 
-    def update_width(self, block_count):
-        # 计算行号区域宽度
-        self.setFixedWidth(self.editor.fontMetrics().horizontalAdvance('9') * 
-        len(str(block_count)) + 20)
-        #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, 
-        # self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-
     def paintEvent(self, event):
         """ painter = QPainter(self)
         painter.fillRect(event.rect(), QColor(240, 240, 240))
@@ -174,11 +237,6 @@ class LineNumberArea(QWidget):
         painter = QPainter(self)
         painter.fillRect(event.rect(), QColor(240, 240, 240))
         """ for count in range(0, self.editor.document().blockCount()): """
-        block = self.editor.document().begin()
-        while block and block.isValid():
-            line_number = block.blockNumber() + 1
-            painter.drawText(0, block.position(), str(line_number))
-            block = block.next()
         painter.end()
 
 class CodeEditor(QTextEdit):
@@ -186,15 +244,6 @@ class CodeEditor(QTextEdit):
         super().__init__()
         self.setTabStopWidth(4)
         self.lineNumberArea = LineNumberArea(self)
-        
-    def highlight_code(self, text):
-        print('highlight_code')
-        lexer = PythonLexer()
-        formatter = HtmlFormatter(style='colorful', noclasses=True)
-        html = highlight(text, lexer, formatter)
-        self.setHtml(html)
-        # 调整行号区域宽度
-        self.lineNumberArea.update_width(self.document().blockCount())
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -209,69 +258,6 @@ if __name__ == "__main__":
     window.show()
     sys.exit(app.exec_())
 ```
-
-这样应该就能得到结果了。或者直接用公式的话，可能更简洁：
-
-这两种方法都可行，我觉得第二种更好，因为效率更高而且代码更简洁。
-
-现在整理一下：
-
-C++：
-```cpp
-#include <iostream>
-
-using namespace std;
-
-int main() {
-    #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-    int n = 100;
-    int sum = n * (n + 1) / 2;
-    cout << sum << endl;
-    return 0;
-}
-```
-
-或者循环：
-
-```cpp
-#include <iostream>
-
-using namespace std;
-
-int main() {
-    int sum = 0;
-    for (int i = 1; i <= 100; ++i) {
-        sum += i;
-    }
-    #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-    cout << sum << endl;
-    return 0;
-}
-```
-
-Python：
-```python
-n = 100
-total = n * (n + 1) // 2
-#path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-print(total)
-```
-
-或者循环：
-
-```python
-sum = 0
-for i in range(1, 101):
-    sum += i
-    #path.addRoundedRect(self.rect().x() + 1, self.rect().y() + 1, self.rect().width() - 2, self.rect().height() - 2, 16, 16)
-print(sum)
-```
-
-或者使用range和sum函数：
-
-print(sum(range(1, 101)))
-
-嗯，我觉得这三种方法都是可行的。现在，我需要把它们分别用Java、C++和Python写出来。
 
 总结一下，每个语言可以有两种实现方式，但问题可能只需要一种，所以我可以选择其中一种，比如公式的方法，这样更简洁高效。
 </think>
@@ -372,8 +358,8 @@ class messageThread(QThread):
     def run(self):
         self.contentOutput = testText
         if self.use_stream:
-            for i in range(0, len(self.contentOutput), 40):
-                self.newMessage.emit(self.contentOutput[i:i+40])
+            for i in range(0, len(self.contentOutput), 400):
+                self.newMessage.emit(self.contentOutput[i:i+400])
                 time.sleep(1)
         else:
             self.newMessage.emit(self.contentOutput)
@@ -1100,6 +1086,7 @@ class TextShow(QWidget):
 
     def updateSize(self, result):
         width, height = result
+        """ print('TextShow width, height:', width + 10, height + 10) """
         if width != 0 and height != 0:
             self.webEngineView.setFixedSize(width, height)
             self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height())
@@ -1111,9 +1098,9 @@ class TextShow(QWidget):
             return 'center-align'  # 居中对齐
         elif ':-' in format_string:
             return 'left-align'   # 左对齐
-        elif '-:' in format_string:  
+        elif '-:' in format_string:
             return 'right-align'  # 右对齐
-        else:  
+        else:
             return ''
 
     def getTable(self, text):
@@ -1613,7 +1600,7 @@ class ThinkWidget(QWidget):
         self.font = QFont()
         """ self.font.setPointSize(windowFontPointSize) """
         self.font.setPixelSize(bubbleFontPixelSize)
-        print('ThinkWidget bubbleFontPixelSize:', bubbleFontPixelSize)
+        """ print('ThinkWidget bubbleFontPixelSize:', bubbleFontPixelSize) """
         self.label.setFont(self.font)
         self.font_metrics = QFontMetricsF(self.font)
         self.mainHLayout = QHBoxLayout()
@@ -2035,10 +2022,11 @@ class LineNumberArea(QWidget):
 class CodeEdit(QTextEdit):
     setSizeFinished = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, maxWidth=810, parent=None):
         super(CodeEdit, self).__init__(parent)
         self.text = ''
         self.lexerName = ''
+        self.setFixedWidth(maxWidth)
         self.horizontalScrollBar().setCursor(Qt.PointingHandCursor)
         self.setStyleSheet('''
         QTextEdit {
@@ -2080,9 +2068,10 @@ class CodeEdit(QTextEdit):
         self.lineNumberArea.move(0, 0)
         self.updateLineNumberAreaWidth()
         #textChanged
+        """ self.textChanged.connect(self.onTextChanged) """
         self.textChanged.connect(self.adjustSize)
         #valueChanged
-        self.verticalScrollBar().valueChanged.connect(self.on_scroll)
+        self.verticalScrollBar().valueChanged.connect(self.onScroll)
         self.m_highlighters = {
             "None": None,
             "Python": QPythonHighlighter(),
@@ -2091,6 +2080,8 @@ class CodeEdit(QTextEdit):
             "LUA": QLuaHighlighter()
         }
         self.m_highlighter = self.m_highlighters["None"]
+        #isAdjustSizeCalled
+        self.isAdjustSizeCalled = False
 
     def setThemeStyle(self, isLightThemeStyle=False):
         global code_theme_file_path
@@ -2162,7 +2153,7 @@ class CodeEdit(QTextEdit):
             code_theme_file_path = os.path.normpath(os.path.join(current_dir, '..', 'config', 'dark_theme.xml'))
         self.highlightCode(self.text, self.lexerName)
 
-    def on_scroll(self, value):
+    def onScroll(self, value):
         self.lineNumberArea.repaint()
 
     def getFirstVisibleBlock(self):
@@ -2227,22 +2218,28 @@ class CodeEdit(QTextEdit):
         self.lineNumberArea.setFixedSize(self.fontMetrics().horizontalAdvance('9') * (len(str(self.document().blockCount())) + 1), self.viewport().height())
         self.setViewportMargins(self.lineNumberArea.width(), 0, 0, 0)
 
+    """ def onTextChanged(self):
+        QTimer.singleShot(1, self.adjustSize) """
+
     def adjustSize(self):
-        """ print('height:', int(self.document().size().height())) """
-        height = int(self.document().size().height())
-        self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
+        self.isAdjustSizeCalled = True
+        print('CodeEdit adjustSize height:', int(self.document().size().height()), self.horizontalScrollBar().height(), self)
+        self.setFixedHeight(int(self.document().size().height()) + 15)
         self.updateLineNumberAreaWidth()
         self.lineNumberArea.repaint()
         self.setSizeFinished.emit()
+        self.isAdjustSizeCalled = False
 
     def resizeEvent(self, event):
-        if self.height() != int(self.document().size().height()) + self.horizontalScrollBar().height() + 10:
-            height = int(self.document().size().height())
-            self.setFixedHeight(height + self.horizontalScrollBar().height() + 10)
+        QTextEdit.resizeEvent(self, event)
+        print('CodeEdit resizeEvent isAdjustSizeCalled', self.isAdjustSizeCalled, self)
+        print('?=', self.height(), int(self.document().size().height()))
+        if self.height() != int(self.document().size().height()) + 15:
+            print('CodeEdit resizeEvent adjust height')
+            self.setFixedHeight(int(self.document().size().height()) + 15)
             self.updateLineNumberAreaWidth()
             self.lineNumberArea.repaint()
             self.setSizeFinished.emit()
-        QTextEdit.resizeEvent(self, event)
 
 """ class CustomStyle(Style):
     default_style = ""
@@ -3361,10 +3358,15 @@ class CodeShow(QWidget):
         self.topHLayout.setContentsMargins(10, 0, 10, 0)
         self.topWidget.setFixedHeight(self.label.height())
         #CodeEdit
-        self.codeEdit = CodeEdit()
+        self.codeEdit = CodeEdit(self.maxWidth)
         self.codeEdit.setSizeFinished.connect(self.OnSizeFinished)
         self.codeEdit.highlightCode(codeText, lexerName=lexerName)
-        self.codeEdit.setFixedWidth(self.maxWidth)
+        """ self.codeEdit.setWordWrapMode(QTextOption.WordWrap)
+        self.codeEdit.setLineWrapMode(QTextEdit.WidgetWidth) """
+        """ self.codeEdit.setFixedHeight(int(self.codeEdit.document().size().height()) + 15)
+        self.codeEdit.updateLineNumberAreaWidth()
+        self.codeEdit.lineNumberArea.repaint()
+        self.codeEdit.setSizeFinished.emit() """
         #mainVLayout QVBoxLayout
         self.mainVLayout = QVBoxLayout()
         self.setLayout(self.mainVLayout)
@@ -3372,6 +3374,11 @@ class CodeShow(QWidget):
         self.mainVLayout.addWidget(self.codeEdit)
         self.mainVLayout.setContentsMargins(0, 0, 0, 0)
         self.mainVLayout.setSpacing(0)
+        #singleShot
+        QTimer.singleShot(1, self.onSetText)
+
+    def onSetText(self):
+        self.codeEdit.setText(self.codeText)
 
     def setText(self, codeText, lexerName='python'):
         self.codeEdit.highlightCode(codeText, lexerName=lexerName)
@@ -3379,7 +3386,7 @@ class CodeShow(QWidget):
 
     def OnSizeFinished(self):
         self.setFixedSize(self.maxWidth, self.codeEdit.height() + self.topWidget.height())
-        """ print('CodeEdit:', self.codeEdit.width(), self.codeEdit.height()) """
+        print('CodeShow:', self.height(), self.codeEdit.height(), self.topWidget.height())
 
     def connectCodeCopyButtonClick(self, fun):
         self.codeCopyButton.clicked.connect(fun)
@@ -3448,6 +3455,7 @@ class CodeShow(QWidget):
             else:
                 self.wordWrapButton.setIcon(QIcon(f"{self.light_word_wrap_images_path}"))
             self.wordWrapButton.tipText = '自动换行'
+        self.codeEdit.adjustSize()
 
     def copyCode(self):
         self.clip.setText(self.codeText)
@@ -4976,10 +4984,10 @@ class MainWindow(QMainWindow):
         self.isSending = False
         #isContinueShow
         self.isContinueShow = True
-        #isScreenMax
+        """ #isScreenMax
         self.isScreenMax = False
         #lastNormalGeometry
-        self.lastNormalGeometry = self.geometry()
+        self.lastNormalGeometry = self.geometry() """
 
     def moveEvent(self, event):
         #screen
@@ -5214,7 +5222,7 @@ class MainWindow(QMainWindow):
                 self.dpi = self.curScreen.logicalDotsPerInch()
                 global bubbleFontPixelSize
                 bubbleFontPixelSize = math.ceil(bubbleFontPointSize * (self.dpi / 72))
-                print('mouseReleaseEvent bubbleFontPixelSize:', bubbleFontPixelSize)
+                """ print('mouseReleaseEvent bubbleFontPixelSize:', bubbleFontPixelSize) """
                 self.screenChanged = False
             if self.isRegenerate:
                 self.isRegenerate = False
@@ -5366,17 +5374,18 @@ class MainWindow(QMainWindow):
         self.showMinimized()
 
     def UiMaximize(self):
-        if self.isScreenMax:
-            """ self.showNormal() """
-            self.setGeometry(self.lastNormalGeometry)
+        """ if self.isScreenMax: """
+        if self.isMaximized():
+            self.showNormal()
+            """ self.setGeometry(self.lastNormalGeometry) """
             self.maxButton.setIcon(QIcon(f"{self.max_images_path}"))
-            self.isScreenMax = False
+            """ self.isScreenMax = False """
         else:
-            """ self.showMaximized() """
-            self.lastNormalGeometry = self.geometry()
-            self.setGeometry(-10, -10, self.screen().size().width() + 20, self.screen().size().height() + 20)
+            self.showMaximized()
+            """ self.lastNormalGeometry = self.geometry()
+            self.setGeometry(-10, -10, self.screen().size().width() + 20, self.screen().size().height() + 20) """
             self.maxButton.setIcon(QIcon(f"{self.normal_images_path}"))
-            self.isScreenMax = True
+            """ self.isScreenMax = True """
 
     def UiClose(self):
         self.saveCurChatRecord(withholdCurChatFile=True)

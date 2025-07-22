@@ -1423,9 +1423,26 @@ class ThinkingButton(QWidget):
         #textLabel QLabel
         self.textLabel = QLabel('思考中...')
         font = QFont()
-        font.setPointSize(windowFontPointSize)
+        """ font.setPointSize(windowFontPointSize) """
+        font.setPixelSize(bubbleFontPixelSize)
         self.textLabel.setFont(font)
+        print('font size', self.textLabel.font().pixelSize(), self.textLabel.font().pointSize())
+        self.textLabel.setTextFormat(Qt.PlainText)
+        self.textLabel.setMargin(0)
+        self.textLabel.setContentsMargins(0, 0, 0, 0)
+        self.textLabel.setIndent(0)
         self.textLabel.adjustSize()
+        """ font = self.textLabel.font()
+        self.metrics = QFontMetricsF(font)
+        self.textWidth = int(self.metrics.horizontalAdvance(self.textLabel.text()))
+        self.textLabel.setFixedWidth(self.textWidth) """
+        self.textLabel.setStyleSheet('''
+        QLabel{
+            background: green;
+            padding: 0px;
+            margin: 0px;
+        }
+        ''')
         #rightIconLabel QLabel
         self.rightIconLabel = QLabel()
         self.arrow_up_images_path = os.path.join(images_dir, 'arrow_up.png').replace('\\', '/')
@@ -1441,6 +1458,8 @@ class ThinkingButton(QWidget):
         mainHLayout.setContentsMargins(5, 5, 5, 5)
         mainHLayout.setSpacing(0)
         self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
+        """ self.setFixedWidth(self.leftIconLabel.width() + self.textWidth + self.rightIconLabel.width() + 10) """
+        print('ThinkingButton textLabel size', self.size(), self.leftIconLabel.size(), self.textLabel.size(), self.rightIconLabel.size())
         #thinkTime
         self.thinkTimeLength = 0
         self.startThinkTime = QTime.currentTime()
@@ -1488,6 +1507,10 @@ class ThinkingButton(QWidget):
         self.textLabel.setText(f"已深度思考(用时{self.thinkTimeLength}秒)")
         self.textLabel.adjustSize()
         self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
+        """ self.textWidth = int(self.metrics.horizontalAdvance(self.textLabel.text()))
+        self.textLabel.setFixedWidth(self.textWidth)
+        self.setFixedWidth(self.leftIconLabel.width() + self.textWidth + self.rightIconLabel.width() + 10) """
+        print('ThinkingButton textLabel size', self.size(), self.leftIconLabel.size(), self.textLabel.size(), self.rightIconLabel.size())
 
 """ class ThinkLabel(QLabel):
     def __init__(self, text, maxWidth=765, parent=None):

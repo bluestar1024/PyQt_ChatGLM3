@@ -1464,6 +1464,15 @@ class ThinkingButton(QWidget):
         self.thinkTimeLength = 0
         self.startThinkTime = QTime.currentTime()
 
+    def getThinkTimeLength(self):
+        return self.thinkTimeLength
+
+    def setThinkTimeLength(self, thinkTimeLength):
+        self.thinkTimeLength = thinkTimeLength
+        self.textLabel.setText(f"已深度思考(用时{self.thinkTimeLength}秒)")
+        self.textLabel.adjustSize()
+        self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
+
     def enterEvent(self, event):
         self.backgroundColor = QColor(232, 232, 232)
         self.repaint()
@@ -3488,13 +3497,15 @@ class MessageWidget(QWidget):
     resizeFinished = pyqtSignal()
     setTexting = pyqtSignal(bool)
 
-    def __init__(self, text, copyFun, renewResponseFun, listWidget, isUser=True, thinkIsExpand=True, textMaxWidth=877, parent=None):
+    def __init__(self, text, copyFun, renewResponseFun, listWidget, thinkTimeLengthList, thinkTimeIndex, isUser=True, thinkIsExpand=True, textMaxWidth=877, parent=None):
         super(MessageWidget, self).__init__(parent)
         self.listWidget = listWidget
         self.text = text
         self.textMaxWidth = textMaxWidth
         self.isUser = isUser
         self.copyFun = copyFun
+        self.thinkTimeLengthList = thinkTimeLengthList
+        self.thinkTimeIndex = thinkTimeIndex
         #ImageLabel
         self.imageLabel = ImageLabel(isUser=self.isUser)
         #textWidget TextWidget
@@ -3911,6 +3922,11 @@ class MessageWidget(QWidget):
                         """ print('ThinkWidget sizeFinish:', self.thinkWidgetSizeFinshedCount, self.textShowSizeFinshedCount) """
                         self.resizeFinished.emit()
                         self.setTexting.emit(False)
+                        if self.thinkButton.getThinkTimeLength() == 0:
+                            self.thinkButton.setThinkTimeLength(self.thinkTimeLengthList[self.thinkTimeIndex])
+                        else:
+                            self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
+                        print('thinkTimeLengthList:', self.thinkTimeLengthList)
             else:
                 self.textShowSizeFinshedCount += 1
                 if self.textShowSizeFinshedCount == len(self.resultTextShowList):
@@ -3920,6 +3936,11 @@ class MessageWidget(QWidget):
                         """ print('TextShow sizeFinish:', self.thinkWidgetSizeFinshedCount, self.textShowSizeFinshedCount) """
                         self.resizeFinished.emit()
                         self.setTexting.emit(False)
+                        if self.thinkButton.getThinkTimeLength() == 0:
+                            self.thinkButton.setThinkTimeLength(self.thinkTimeLengthList[self.thinkTimeIndex])
+                        else:
+                            self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
+                        print('thinkTimeLengthList:', self.thinkTimeLengthList)
 
     def setSize(self):
         if self.isUser:
@@ -5001,6 +5022,8 @@ class MainWindow(QMainWindow):
         self.screenChanged = False
         #thinkExpandedList
         self.thinkExpandedList = []
+        #thinkTimeLengthList
+        self.thinkTimeLengthList = []
         """ #messageIsRenewResponse
         self.messageIsRenewResponse = False """
         #isSending
@@ -6023,7 +6046,8 @@ class MainWindow(QMainWindow):
                             }
                         ]
                 #MessageWidget
-                self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=True, textMaxWidth=self.chatShow.width() * 3 // 4)
+                self.thinkTimeLengthList.append(0)
+                self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, self.thinkTimeLengthList, len(self.messageWidgetList), isUser=True, textMaxWidth=self.chatShow.width() * 3 // 4)
                 """ self.messageSendWidget.connectSetSizeFinished(self.messageWidgetResize) """
                 self.messageSendWidget.connectResizeFinished(self.messageWidgetResize)
                 self.messageSendWidget.connectSetTexting(self.getSetTexting)
@@ -6073,7 +6097,8 @@ class MainWindow(QMainWindow):
             else:
                 self.messageWidgetList[i].removeRenewResponseButton()
         #MessageWidget
-        self.messageRecvWidget = MessageWidget(self.Message, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=False, textMaxWidth=self.chatShow.width() * 3 // 4)
+        self.thinkTimeLengthList.append(0)
+        self.messageRecvWidget = MessageWidget(self.Message, self.textCopy, self.messageRenewResponse, self.chatShow, self.thinkTimeLengthList, len(self.messageWidgetList), isUser=False, textMaxWidth=self.chatShow.width() * 3 // 4)
         """ self.messageRecvWidget.connectSetSizeFinished(self.messageWidgetResize) """
         self.messageRecvWidget.connectResizeFinished(self.messageWidgetResize)
         self.messageRecvWidget.connectSetTexting(self.getSetTexting)
@@ -6188,7 +6213,7 @@ class MainWindow(QMainWindow):
         try:
             with open(os.path.join(chat_records_dir, self.chatRecordFileName), 'a', encoding='utf-8') as f:
                 for i in range(0, self.chatShow.count()):
-                    chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                    chatRecordStr = self.messageWidgetList[i].getText() + '\n' + f'消息部件思考时长:{self.thinkTimeLengthList[i]}秒\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
                     f.write(chatRecordStr)
         except FileNotFoundError:
             print(f"错误：文件 {os.path.join(chat_records_dir, self.chatRecordFileName)} 不存在")
@@ -6224,7 +6249,7 @@ class MainWindow(QMainWindow):
                             #write to curChat file
                             with open(os.path.join(chat_records_dir, self.curChatFile), 'a', encoding='utf-8') as f:
                                 for i in range(0, self.chatShow.count()):
-                                    chatRecordStr = self.messageWidgetList[i].getText() + '\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
+                                    chatRecordStr = self.messageWidgetList[i].getText() + '\n' + f'消息部件思考时长:{self.thinkTimeLengthList[i]}秒\n' + str(self.messageWidgetList[i].getIsUser()) + '\n'
                                     f.write(chatRecordStr)
                     except FileNotFoundError:
                         print(f"错误：文件 {os.path.join(chat_records_dir, self.curChatFile)} 不存在")
@@ -6269,6 +6294,8 @@ class MainWindow(QMainWindow):
         #init
         text = ''
         isUser = True
+        self.thinkTimeLengthList.clear()
+        thinkTimeIndex = 0
         if useThinkExpandList:
             expandIndex = 0
         #read curChat file
@@ -6295,11 +6322,11 @@ class MainWindow(QMainWindow):
                 #MessageWidget
                 if useThinkExpandList:
                     if not isUser:
-                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=self.thinkExpandedList[expandIndex], textMaxWidth=self.chatShow.width() * 3 // 4)
+                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, self.thinkTimeLengthList, thinkTimeIndex, isUser=isUser, thinkIsExpand=self.thinkExpandedList[expandIndex], textMaxWidth=self.chatShow.width() * 3 // 4)
                     else:
-                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, textMaxWidth=self.chatShow.width() * 3 // 4)
+                        self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, self.thinkTimeLengthList, thinkTimeIndex, isUser=isUser, textMaxWidth=self.chatShow.width() * 3 // 4)
                 else:
-                    self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, isUser=isUser, thinkIsExpand=False, textMaxWidth=self.chatShow.width() * 3 // 4)
+                    self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, self.thinkTimeLengthList, thinkTimeIndex, isUser=isUser, thinkIsExpand=False, textMaxWidth=self.chatShow.width() * 3 // 4)
                 """ self.messageWidget.connectSetSizeFinished(self.messageWidgetResize) """
                 self.messageWidget.connectResizeFinished(self.messageWidgetResize)
                 self.messageWidget.connectSetTexting(self.getSetTexting)
@@ -6328,9 +6355,14 @@ class MainWindow(QMainWindow):
                     self.messageWidget.toggleWidget()
                 #clear text
                 text = ''
+                #thinkTimeIndex
+                thinkTimeIndex += 1
                 if useThinkExpandList and not isUser:
                     #expandIndex
                     expandIndex += 1
+            elif lines[i][:8] == '消息部件思考时长':
+                match = re.search(r'\d+', lines[i])
+                self.thinkTimeLengthList.append(int(match.group()))
             else:
                 text += lines[i]
 
@@ -6449,6 +6481,7 @@ class MainWindow(QMainWindow):
         self.saveCurChatRecord()
         #clear
         self.messageWidgetList.clear()
+        self.thinkTimeLengthList.clear()
         for i in range(0, self.chatShow.count()):
             itemWidget = self.chatShow.itemWidget(self.chatShow.item(i))
             itemWidget.deleteLater()

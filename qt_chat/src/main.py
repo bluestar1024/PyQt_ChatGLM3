@@ -8,8 +8,8 @@ Created on Tue Feb 13 18:31:44 2024
 import sys, os
 from enum import Enum
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QMenu, QFrame, QGraphicsDropShadowEffect
-from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QTime, QObject, QXmlStreamReader, QFile, QIODevice, QRegularExpression, QDir
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextCursor, QTextCharFormat, QTextDocument, QSyntaxHighlighter, QTextOption
+from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QTime, QObject, QXmlStreamReader, QFile, QIODevice, QRegularExpression
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextCursor, QTextCharFormat, QTextDocument, QSyntaxHighlighter, QTextOption, QGuiApplication
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 """ from pygments import highlight, token
 from pygments.lexers import CLexer, CppLexer, PythonLexer, JavaLexer, JavascriptLexer
@@ -196,7 +196,7 @@ a.b.fun()
 ```
 
 然后是Python的部分。Python的语法更简单，循环的话：
-
+### jfdls;lf
 ```python
 sum = 0
 for i in range(1, 101):
@@ -358,8 +358,8 @@ class messageThread(QThread):
     def run(self):
         self.contentOutput = testText
         if self.use_stream:
-            for i in range(0, len(self.contentOutput), 400):
-                self.newMessage.emit(self.contentOutput[i:i+400])
+            for i in range(0, len(self.contentOutput), 40):
+                self.newMessage.emit(self.contentOutput[i:i+40])
                 time.sleep(1)
         else:
             self.newMessage.emit(self.contentOutput)
@@ -1426,7 +1426,7 @@ class ThinkingButton(QWidget):
         """ font.setPointSize(windowFontPointSize) """
         font.setPixelSize(bubbleFontPixelSize)
         self.textLabel.setFont(font)
-        print('font size', self.textLabel.font().pixelSize(), self.textLabel.font().pointSize())
+        """ print('font size', self.textLabel.font().pixelSize(), self.textLabel.font().pointSize()) """
         self.textLabel.setTextFormat(Qt.PlainText)
         self.textLabel.setMargin(0)
         self.textLabel.setContentsMargins(0, 0, 0, 0)
@@ -1459,7 +1459,7 @@ class ThinkingButton(QWidget):
         mainHLayout.setSpacing(0)
         self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
         """ self.setFixedWidth(self.leftIconLabel.width() + self.textWidth + self.rightIconLabel.width() + 10) """
-        print('ThinkingButton textLabel size', self.size(), self.leftIconLabel.size(), self.textLabel.size(), self.rightIconLabel.size())
+        """ print('ThinkingButton textLabel size', self.size(), self.leftIconLabel.size(), self.textLabel.size(), self.rightIconLabel.size()) """
         #thinkTime
         self.thinkTimeLength = 0
         self.startThinkTime = QTime.currentTime()
@@ -1519,7 +1519,7 @@ class ThinkingButton(QWidget):
         """ self.textWidth = int(self.metrics.horizontalAdvance(self.textLabel.text()))
         self.textLabel.setFixedWidth(self.textWidth)
         self.setFixedWidth(self.leftIconLabel.width() + self.textWidth + self.rightIconLabel.width() + 10) """
-        print('ThinkingButton textLabel size', self.size(), self.leftIconLabel.size(), self.textLabel.size(), self.rightIconLabel.size())
+        """ print('ThinkingButton textLabel size', self.size(), self.leftIconLabel.size(), self.textLabel.size(), self.rightIconLabel.size()) """
 
 """ class ThinkLabel(QLabel):
     def __init__(self, text, maxWidth=765, parent=None):
@@ -2112,8 +2112,8 @@ class CodeEdit(QTextEdit):
             "LUA": QLuaHighlighter()
         }
         self.m_highlighter = self.m_highlighters["None"]
-        #isAdjustSizeCalled
-        self.isAdjustSizeCalled = False
+        """ #isAdjustSizeCalled
+        self.isAdjustSizeCalled = False """
 
     def setThemeStyle(self, isLightThemeStyle=False):
         global code_theme_file_path
@@ -2254,20 +2254,20 @@ class CodeEdit(QTextEdit):
         QTimer.singleShot(1, self.adjustSize) """
 
     def adjustSize(self):
-        self.isAdjustSizeCalled = True
-        print('CodeEdit adjustSize height:', int(self.document().size().height()), self.horizontalScrollBar().height(), self)
+        """ self.isAdjustSizeCalled = True """
+        """ print('CodeEdit adjustSize height:', int(self.document().size().height()), self.horizontalScrollBar().height(), self) """
         self.setFixedHeight(int(self.document().size().height()) + 15)
         self.updateLineNumberAreaWidth()
         self.lineNumberArea.repaint()
         self.setSizeFinished.emit()
-        self.isAdjustSizeCalled = False
+        """ self.isAdjustSizeCalled = False """
 
     def resizeEvent(self, event):
         QTextEdit.resizeEvent(self, event)
-        print('CodeEdit resizeEvent isAdjustSizeCalled', self.isAdjustSizeCalled, self)
-        print('?=', self.height(), int(self.document().size().height()))
+        """ print('CodeEdit resizeEvent isAdjustSizeCalled', self.isAdjustSizeCalled, self) """
+        """ print('?=', self.height(), int(self.document().size().height())) """
         if self.height() != int(self.document().size().height()) + 15:
-            print('CodeEdit resizeEvent adjust height')
+            """ print('CodeEdit resizeEvent adjust height') """
             self.setFixedHeight(int(self.document().size().height()) + 15)
             self.updateLineNumberAreaWidth()
             self.lineNumberArea.repaint()
@@ -3418,7 +3418,7 @@ class CodeShow(QWidget):
 
     def OnSizeFinished(self):
         self.setFixedSize(self.maxWidth, self.codeEdit.height() + self.topWidget.height())
-        print('CodeShow:', self.height(), self.codeEdit.height(), self.topWidget.height())
+        """ print('CodeShow:', self.height(), self.codeEdit.height(), self.topWidget.height()) """
 
     def connectCodeCopyButtonClick(self, fun):
         self.codeCopyButton.clicked.connect(fun)
@@ -3575,11 +3575,14 @@ class MessageWidget(QWidget):
                             thinkTempText = thinkTempTextList[1] """
                 """ print('thinkCodeBlocks:', thinkCodeBlocks) """
                 for CodeBlock in thinkCodeBlocks:
-                    language, code = CodeBlock
+                    language, code, end_marker = CodeBlock
                     self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth - self.imageLabel.width() - 80, parent=self))
                     """ self.thinkCodeShowList[-1].hide() """
                     self.thinkCodeShowList[-1].connectCodeCopyButtonClick(copyFun)
-                    thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
+                    if end_marker:
+                        thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
+                    else:
+                        thinkTempTextList = thinkTempText.split('```' + language + '\n' + code, maxsplit=1)
                     thinkSplitTextList.append(thinkTempTextList[0])
                     thinkTempText = thinkTempTextList[1]
                 """ if thinkTempText != '': """
@@ -3629,11 +3632,14 @@ class MessageWidget(QWidget):
             if self.resultText != '':
                 resultCodeBlocks = self.extract_code_blocks(self.resultText)
                 for CodeBlock in resultCodeBlocks:
-                    language, code = CodeBlock
+                    language, code, end_marker = CodeBlock
                     self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=textMaxWidth - self.imageLabel.width() - 35, parent=self))
                     """ self.resultCodeShowList[-1].hide() """
                     self.resultCodeShowList[-1].connectCodeCopyButtonClick(copyFun)
-                    resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
+                    if end_marker:
+                        resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
+                    else:
+                        resultTempTextList = resultTempText.split('```' + language + '\n' + code, maxsplit=1)
                     resultSplitTextList.append(resultTempTextList[0])
                     resultTempText = resultTempTextList[1]
                 resultSplitTextList.append(resultTempText)
@@ -3851,7 +3857,7 @@ class MessageWidget(QWidget):
         code_blocks.append(re.findall(javaPattern, text, re.DOTALL))
         code_blocks.append(re.findall(javascriptPattern, text, re.DOTALL))
         return code_blocks """
-    def extract_code_blocks(self, text):
+    """ def extract_code_blocks(self, text):
         # 定义正则表达式模式，匹配代码块
         pattern = r"```(\w+)\n(.*?)```"
         # 使用 re.DOTALL 让 . 匹配换行符
@@ -3862,6 +3868,26 @@ class MessageWidget(QWidget):
         for language, code in matches:
             if language.lower() in supported_languages:
                 code_blocks.append([language, code])
+        return code_blocks """
+    def extract_code_blocks(self, text):
+        # 定义正则表达式模式，匹配代码块
+        """ pattern = r"```(\w+)\n(.*?)\s*(?:```|$)" """
+        pattern = r"```(\w+)\n(.*?)(```|$)"
+        # 使用 re.DOTALL 让 . 匹配换行符
+        matches = re.findall(pattern, text, re.DOTALL)
+        # 过滤出指定语言的代码块
+        supported_languages = {"cpp", "python", "glsl", "lua"}
+        code_blocks = []
+        """ for language, code in matches: """
+        for language, code, end_marker in matches:
+            if language.lower() in supported_languages:
+                # 检查代码块是否以 ``` 结束
+                """ end_marker = "```" if text[text.find(code) + len(code):].startswith("```") else None """
+                """ if end_marker == "```":
+                    print('end_marker:```')
+                else:
+                    print('end_marker:空') """
+                code_blocks.append([language, code, end_marker])
         return code_blocks
 
     def getThinkIsExpanded(self):
@@ -3926,7 +3952,7 @@ class MessageWidget(QWidget):
                             self.thinkButton.setThinkTimeLength(self.thinkTimeLengthList[self.thinkTimeIndex])
                         else:
                             self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
-                        print('thinkTimeLengthList:', self.thinkTimeLengthList)
+                        """ print('thinkTimeLengthList:', self.thinkTimeLengthList) """
             else:
                 self.textShowSizeFinshedCount += 1
                 if self.textShowSizeFinshedCount == len(self.resultTextShowList):
@@ -3940,7 +3966,7 @@ class MessageWidget(QWidget):
                             self.thinkButton.setThinkTimeLength(self.thinkTimeLengthList[self.thinkTimeIndex])
                         else:
                             self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
-                        print('thinkTimeLengthList:', self.thinkTimeLengthList)
+                        """ print('thinkTimeLengthList:', self.thinkTimeLengthList) """
 
     def setSize(self):
         if self.isUser:
@@ -4031,7 +4057,7 @@ class MessageWidget(QWidget):
                 thinkCodeBlocks = self.extract_code_blocks(self.thinkText)
                 thinkCodeShowListLastLen = len(self.thinkCodeShowList) - 1
                 for index, CodeBlock in enumerate(thinkCodeBlocks):
-                    language, code = CodeBlock
+                    language, code, end_marker = CodeBlock
                     if thinkCodeShowListLastLen < index:
                         self.thinkCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth - self.imageLabel.width() - 80, parent=self))
                         #set visible
@@ -4041,7 +4067,10 @@ class MessageWidget(QWidget):
                         self.thinkCodeShowList[-1].connectCodeCopyButtonClick(self.copyFun)
                     else:
                         self.thinkCodeShowList[index].setText(code.strip(), lexerName=language)
-                    thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
+                    if end_marker:
+                        thinkTempTextList = thinkTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
+                    else:
+                        thinkTempTextList = thinkTempText.split('```' + language + '\n' + code, maxsplit=1)
                     thinkSplitTextList.append(thinkTempTextList[0])
                     thinkTempText = thinkTempTextList[1]
                 thinkSplitTextList.append(thinkTempText)
@@ -4103,7 +4132,7 @@ class MessageWidget(QWidget):
                 resultCodeBlocks = self.extract_code_blocks(self.resultText)
                 resultCodeShowListLastLen = len(self.resultCodeShowList) - 1
                 for index, CodeBlock in enumerate(resultCodeBlocks):
-                    language, code = CodeBlock
+                    language, code, end_marker = CodeBlock
                     if resultCodeShowListLastLen < index:
                         self.resultCodeShowList.append(CodeShow(code.strip(), lexerName=language, maxWidth=self.textMaxWidth - self.imageLabel.width() - 35, parent=self))
                         """ self.resultCodeShowList[-1].hide() """
@@ -4111,7 +4140,10 @@ class MessageWidget(QWidget):
                         self.resultCodeShowList[-1].connectCodeCopyButtonClick(self.copyFun)
                     else:
                         self.resultCodeShowList[index].setText(code.strip(), lexerName=language)
-                    resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
+                    if end_marker:
+                        resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
+                    else:
+                        resultTempTextList = resultTempText.split('```' + language + '\n' + code, maxsplit=1)
                     resultSplitTextList.append(resultTempTextList[0])
                     resultTempText = resultTempTextList[1]
                 resultSplitTextList.append(resultTempText)
@@ -4776,6 +4808,7 @@ class TitleWidget(QWidget):
     def __init__(self, parent=None):
         super(TitleWidget, self).__init__(parent)
         self.setMouseTracking(True)
+        self.isRound = True
 
     def paintEvent(self, event):
         #QPainter create
@@ -4784,9 +4817,12 @@ class TitleWidget(QWidget):
         #QPainterPath
         path = QPainterPath()
         path.setFillRule(Qt.WindingFill)
-        path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 16, 16)
-        path.addRect(self.rect().x(), self.rect().height() - 16, 16, 16)
-        path.addRect(self.rect().width() - 16, self.rect().height() - 16, 16, 16)
+        if self.isRound:
+            path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 16, 16)
+            path.addRect(self.rect().x(), self.rect().height() - 16, 16, 16)
+            path.addRect(self.rect().width() - 16, self.rect().height() - 16, 16, 16)
+        else:
+            path.addRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height())
         #QBrush
         brush = QBrush(Qt.SolidPattern)
         brush.setColor(QColor(60, 60, 60))
@@ -4801,6 +4837,14 @@ class TitleWidget(QWidget):
         QWidget.mouseMoveEvent(self, event)
         event.ignore()
 
+    def setRoundAngle(self):
+        self.isRound = True
+        self.repaint()
+
+    def setRightAngle(self):
+        self.isRound = False
+        self.repaint()
+
 class Widget(QWidget):
     def __init__(self, parent=None):
         super(Widget, self).__init__(parent)
@@ -4814,10 +4858,24 @@ class Frame(QFrame):
     def __init__(self, parent=None):
         super(Frame, self).__init__(parent)
         self.setMouseTracking(True)
+        """ self.isMaxi = False """
 
     def mouseMoveEvent(self, event):
         QWidget.mouseMoveEvent(self, event)
         event.ignore()
+
+    """ def resizeEvent(self, event):
+        QFrame.resizeEvent(self, event)
+        if self.isMaxi:
+            self.move(0, 0)
+        else:
+            self.move(10, 10)
+
+    def setMaxiFlag(self):
+        self.isMaxi = True
+
+    def setNormFlag(self):
+        self.isMaxi = False """
 
 class Splitter(QSplitter):
     def __init__(self, parent=None):
@@ -4914,8 +4972,9 @@ class MainWindow(QMainWindow):
         self.contentVLayout.setStretch(1, 1)
         #mainWidget Frame
         self.mainWidget = Frame(self)
-        self.mainWidget.setFixedSize(self.width() - 20, self.height() - 20)
-        self.mainWidget.move(10, 10)
+        """ self.mainWidget.setFixedSize(self.width() - 20, self.height() - 20)
+        self.mainWidget.move(10, 10) """
+        self.mainWidget.setGeometry(10, 10, self.width() - 20, self.height() - 20)
         self.mainWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.mainWidget.setObjectName("mainWidget")
         self.mainWidget.setStyleSheet('''
@@ -5030,10 +5089,10 @@ class MainWindow(QMainWindow):
         self.isSending = False
         #isContinueShow
         self.isContinueShow = True
-        """ #isScreenMax
+        #isScreenMax
         self.isScreenMax = False
         #lastNormalGeometry
-        self.lastNormalGeometry = self.geometry() """
+        self.lastNormalGeometry = self.geometry()
 
     def moveEvent(self, event):
         #screen
@@ -5282,8 +5341,21 @@ class MainWindow(QMainWindow):
 
     def resizeEvent(self, event):
         #mainWidget Frame
-        self.mainWidget.setFixedSize(self.width() - 20, self.height() - 20)
-        self.mainWidget.move(10, 10)
+        if self.isScreenMax:
+            print('self size', self.size(), self.width(), self.height())
+            """ self.mainWidget.setMaxiFlag()
+            self.mainWidget.setFixedSize(self.width(), self.height()) """
+            """ self.mainWidget.move(0, 0) """
+            self.mainWidget.setGeometry(0, 0, self.width(), self.height())
+            """ self.mainWidget.showMaximized() """
+            print('mainWidget size:', self.mainWidget.size())
+            print('3333')
+        else:
+            """ self.mainWidget.setNormFlag()
+            self.mainWidget.setFixedSize(self.width() - 20, self.height() - 20) """
+            """ self.mainWidget.move(10, 10) """
+            self.mainWidget.setGeometry(10, 10, self.width() - 20, self.height() - 20)
+            print('4444')
         #setting widget set geometry
         self.settingWidget.resize(self.mainWidget.width() // 3, self.mainWidget.height() - self.titleWidget.height())
         if self.settingWidgetIsOpen:
@@ -5420,18 +5492,38 @@ class MainWindow(QMainWindow):
         self.showMinimized()
 
     def UiMaximize(self):
-        """ if self.isScreenMax: """
-        if self.isMaximized():
-            self.showNormal()
-            """ self.setGeometry(self.lastNormalGeometry) """
+        """ if self.isMaximized(): """
+        if self.isScreenMax:
+            self.isScreenMax = False
+            """ self.showNormal() """
+            self.setGeometry(self.lastNormalGeometry)
+            """ self.mainWidget.setFixedSize(self.width() - 20, self.height() - 20)
+            self.mainWidget.move(10, 10) """
             self.maxButton.setIcon(QIcon(f"{self.max_images_path}"))
-            """ self.isScreenMax = False """
+            self.mainWidget.setStyleSheet('''
+            #mainWidget {
+                border-radius: 16px;
+                background-color: #F0F0F0;
+            }
+            ''')
+            self.titleWidget.setRoundAngle()
+            print('1111')
         else:
-            self.showMaximized()
-            """ self.lastNormalGeometry = self.geometry()
-            self.setGeometry(-10, -10, self.screen().size().width() + 20, self.screen().size().height() + 20) """
+            self.isScreenMax = True
+            """ self.showMaximized() """
+            self.lastNormalGeometry = self.geometry()
+            print('screen availableGeometry:', QGuiApplication.primaryScreen().availableGeometry().width(), QGuiApplication.primaryScreen().availableGeometry().height())
+            self.setGeometry(0, 0, QGuiApplication.primaryScreen().availableGeometry().width(), QGuiApplication.primaryScreen().availableGeometry().height())
+            print('self size:', self.size())
+            """ self.mainWidget.setGeometry(0, 0, self.width(), self.height()) """
             self.maxButton.setIcon(QIcon(f"{self.normal_images_path}"))
-            """ self.isScreenMax = True """
+            self.mainWidget.setStyleSheet('''
+            #mainWidget {
+                background-color: #F0F0F0;
+            }
+            ''')
+            self.titleWidget.setRightAngle()
+            print('2222')
 
     def UiClose(self):
         self.saveCurChatRecord(withholdCurChatFile=True)
@@ -5837,14 +5929,14 @@ class MainWindow(QMainWindow):
 
     def settingFoldButtonClicked(self):
         if not self.chatRecordsWidgetIsOpen:
-            print('settingFoldButtonClicked, not chatRecordsWidgetIsOpen')
+            """ print('settingFoldButtonClicked, not chatRecordsWidgetIsOpen') """
             self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
             self.settingAnimationMove.setEndValue(QRect(-self.settingWidget.width(), self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
             self.settingAnimationMove.start()
             self.settingWidgetIsOpen = False
             self.settingIsTop = False
         else:
-            print('settingFoldButtonClicked, chatRecordsWidgetIsOpen')
+            """ print('settingFoldButtonClicked, chatRecordsWidgetIsOpen') """
             self.settingAnimationMove2.setStartValue(self.settingWidget.geometry())
             self.settingAnimationMove2.setEndValue(QRect(-self.settingWidget.width(), self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
             self.settingAnimationMove2.start()
@@ -5877,14 +5969,14 @@ class MainWindow(QMainWindow):
 
     def chatRecordsFoldButtonClicked(self):
         if not self.settingWidgetIsOpen:
-            print('chatRecordsFoldButtonClicked, not settingWidgetIsOpen')
+            """ print('chatRecordsFoldButtonClicked, not settingWidgetIsOpen') """
             self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
             self.chatRecordsAnimationMove.setEndValue(QRect(-self.chatRecordsWidget.width(), self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
             self.chatRecordsAnimationMove.start()
             self.chatRecordsWidgetIsOpen = False
             self.chatRecordsIsTop = False
         else:
-            print('chatRecordsFoldButtonClicked, settingWidgetIsOpen')
+            """ print('chatRecordsFoldButtonClicked, settingWidgetIsOpen') """
             self.chatRecordsAnimationMove2.setStartValue(self.chatRecordsWidget.geometry())
             self.chatRecordsAnimationMove2.setEndValue(QRect(-self.chatRecordsWidget.width(), self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
             self.chatRecordsAnimationMove2.start()

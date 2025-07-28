@@ -386,9 +386,13 @@ class PushButton(QPushButton):
 
     def event(self, event):
         if event.type() == QEvent.ToolTip:
-            font = QFont()
-            font.setPointSize(buttonFontPointSize)
-            QToolTip.setFont(font)
+            font_id = QFontDatabase.addApplicationFont(font_file_path)
+            if font_id != -1:
+                font_families = QFontDatabase.applicationFontFamilies(font_id)
+                if font_families:
+                    font_family = font_families[0]
+                    font = QFont(font_family, buttonFontPointSize)
+                    QToolTip.setFont(font)
             QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
         return QPushButton.event(self, event)
 
@@ -424,10 +428,13 @@ class FunWidget(QWidget):
         #titleLabel QLabel
         self.titleLabel = QLabel()
         self.titleLabel.setFixedHeight(60)
-        self.titleFont = QFont()
-        self.titleFont.setPointSize(titleFontPointSize)
-        self.titleFont.setBold(True)
-        self.titleLabel.setFont(self.titleFont)
+        font_id = QFontDatabase.addApplicationFont(font_file_path)
+        if font_id != -1:
+            font_families = QFontDatabase.applicationFontFamilies(font_id)
+            if font_families:
+                font_family = font_families[0]
+                font = QFont(font_family, titleFontPointSize)
+                self.titleLabel.setFont(font)
         self.titleLabel.setText('AI助理')
         self.titleLabel.adjustSize()
         #funMidSubWidget QWidget
@@ -572,9 +579,13 @@ class SendButton(QPushButton):
 
     def event(self, event):
         if event.type() == QEvent.ToolTip:
-            font = QFont()
-            font.setPointSize(buttonFontPointSize)
-            QToolTip.setFont(font)
+            font_id = QFontDatabase.addApplicationFont(font_file_path)
+            if font_id != -1:
+                font_families = QFontDatabase.applicationFontFamilies(font_id)
+                if font_families:
+                    font_family = font_families[0]
+                    font = QFont(font_family, buttonFontPointSize)
+                    QToolTip.setFont(font)
             QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
         return QPushButton.event(self, event)
 
@@ -954,11 +965,16 @@ class TextShow(QWidget):
         self.label.setWordWrap(True)
         self.maxWidth = maxWidth - 10
         self.label.setMaximumWidth(self.maxWidth)
-        self.font = QFont()
-        """ self.font.setPointSize(windowFontPointSize) """
-        self.font.setPixelSize(bubbleFontPixelSize)
-        self.label.setFont(self.font)
-        self.font_metrics = QFontMetricsF(self.font)
+        font_id = QFontDatabase.addApplicationFont(font_file_path)
+        if font_id != -1:
+            font_families = QFontDatabase.applicationFontFamilies(font_id)
+            if font_families:
+                font_family = font_families[0]
+                self.font = QFont(font_family, windowFontPointSize)
+                """ self.font.setPointSize(windowFontPointSize) """
+                """ self.font.setPixelSize(bubbleFontPixelSize) """
+                self.label.setFont(self.font)
+                self.font_metrics = QFontMetricsF(self.font)
         self.mainHLayout = QHBoxLayout()
         self.webEngineView = WebEngineView()
         self.webEngineView.setMaximumWidth(self.maxWidth)
@@ -1400,9 +1416,13 @@ class CopyButton(QPushButton):
 
     def event(self, event):
         if event.type() == QEvent.ToolTip:
-            font = QFont()
-            font.setPointSize(buttonFontPointSize)
-            QToolTip.setFont(font)
+            font_id = QFontDatabase.addApplicationFont(font_file_path)
+            if font_id != -1:
+                font_families = QFontDatabase.applicationFontFamilies(font_id)
+                if font_families:
+                    font_family = font_families[0]
+                    font = QFont(font_family, buttonFontPointSize)
+                    QToolTip.setFont(font)
             QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
         return QPushButton.event(self, event)
 
@@ -1422,20 +1442,20 @@ class ThinkingButton(QWidget):
         self.leftIconLabel.setFixedSize(20, 20)
         #textLabel QLabel
         self.textLabel = QLabel('思考中...')
-        font = QFont()
-        """ font.setPointSize(windowFontPointSize) """
-        font.setPixelSize(bubbleFontPixelSize)
-        self.textLabel.setFont(font)
-        """ print('font size', self.textLabel.font().pixelSize(), self.textLabel.font().pointSize()) """
+        font_id = QFontDatabase.addApplicationFont(font_file_path)
+        if font_id != -1:
+            font_families = QFontDatabase.applicationFontFamilies(font_id)
+            if font_families:
+                font_family = font_families[0]
+                font = QFont(font_family, windowFontPointSize)
+                """ font.setPointSize(windowFontPointSize) """
+                """ font.setPixelSize(bubbleFontPixelSize) """
+                self.textLabel.setFont(font)
         self.textLabel.setTextFormat(Qt.PlainText)
         self.textLabel.setMargin(0)
         self.textLabel.setContentsMargins(0, 0, 0, 0)
         self.textLabel.setIndent(0)
         self.textLabel.adjustSize()
-        """ font = self.textLabel.font()
-        self.metrics = QFontMetricsF(font)
-        self.textWidth = int(self.metrics.horizontalAdvance(self.textLabel.text()))
-        self.textLabel.setFixedWidth(self.textWidth) """
         self.textLabel.setStyleSheet('''
         QLabel{
             background: green;
@@ -1458,8 +1478,6 @@ class ThinkingButton(QWidget):
         mainHLayout.setContentsMargins(5, 5, 5, 5)
         mainHLayout.setSpacing(0)
         self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
-        """ self.setFixedWidth(self.leftIconLabel.width() + self.textWidth + self.rightIconLabel.width() + 10) """
-        """ print('ThinkingButton textLabel size', self.size(), self.leftIconLabel.size(), self.textLabel.size(), self.rightIconLabel.size()) """
         #thinkTime
         self.thinkTimeLength = 0
         self.startThinkTime = QTime.currentTime()
@@ -1516,10 +1534,6 @@ class ThinkingButton(QWidget):
         self.textLabel.setText(f"已深度思考(用时{self.thinkTimeLength}秒)")
         self.textLabel.adjustSize()
         self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
-        """ self.textWidth = int(self.metrics.horizontalAdvance(self.textLabel.text()))
-        self.textLabel.setFixedWidth(self.textWidth)
-        self.setFixedWidth(self.leftIconLabel.width() + self.textWidth + self.rightIconLabel.width() + 10) """
-        """ print('ThinkingButton textLabel size', self.size(), self.leftIconLabel.size(), self.textLabel.size(), self.rightIconLabel.size()) """
 
 """ class ThinkLabel(QLabel):
     def __init__(self, text, maxWidth=765, parent=None):
@@ -1629,12 +1643,16 @@ class ThinkWidget(QWidget):
         self.label.setWordWrap(True)
         self.maxWidth = maxWidth
         self.label.setMaximumWidth(self.maxWidth)
-        self.font = QFont()
-        """ self.font.setPointSize(windowFontPointSize) """
-        self.font.setPixelSize(bubbleFontPixelSize)
-        """ print('ThinkWidget bubbleFontPixelSize:', bubbleFontPixelSize) """
-        self.label.setFont(self.font)
-        self.font_metrics = QFontMetricsF(self.font)
+        font_id = QFontDatabase.addApplicationFont(font_file_path)
+        if font_id != -1:
+            font_families = QFontDatabase.applicationFontFamilies(font_id)
+            if font_families:
+                font_family = font_families[0]
+                self.font = QFont(font_family, windowFontPointSize)
+                """ self.font.setPointSize(windowFontPointSize) """
+                """ self.font.setPixelSize(bubbleFontPixelSize) """
+                self.label.setFont(self.font)
+                self.font_metrics = QFontMetricsF(self.font)
         self.mainHLayout = QHBoxLayout()
         self.webEngineView = WebEngineView()
         self.webEngineView.setMaximumWidth(self.maxWidth)
@@ -3308,9 +3326,13 @@ class CodeShow(QWidget):
         ''')
         #label QLabel
         self.label = QLabel(lexerName)
-        font = QFont()
-        font.setPointSize(windowFontPointSize)
-        self.label.setFont(font)
+        font_id = QFontDatabase.addApplicationFont(font_file_path)
+        if font_id != -1:
+            font_families = QFontDatabase.applicationFontFamilies(font_id)
+            if font_families:
+                font_family = font_families[0]
+                font = QFont(font_family, windowFontPointSize)
+                self.label.setFont(font)
         self.palette = self.label.palette()
         """ self.palette.setColor(QPalette.Text, QColor(178, 170, 164)) """
         self.palette.setColor(QPalette.Text, QColor(Qt.white))
@@ -4355,11 +4377,15 @@ class PrintLabel(QWidget):
         super(PrintLabel, self).__init__(parent)
         self.text = text.strip('\n')
         self.label = QLabel()
-        self.font = QFont()
-        self.font.setPointSize(windowFontPointSize)
-        self.font.setBold(True)
-        self.label.setFont(self.font)
-        self.font_metrics = QFontMetricsF(self.font)
+        font_id = QFontDatabase.addApplicationFont(font_file_path)
+        if font_id != -1:
+            font_families = QFontDatabase.applicationFontFamilies(font_id)
+            if font_families:
+                font_family = font_families[0]
+                self.font = QFont(font_family, windowFontPointSize)
+                self.font.setBold(True)
+                self.label.setFont(self.font)
+                self.font_metrics = QFontMetricsF(self.font)
         self.palette = self.label.palette()
         self.palette.setColor(QPalette.WindowText, QColor(76, 106, 246))
         self.label.setPalette(self.palette)
@@ -4425,10 +4451,13 @@ class Label(QLabel):
     def __init__(self, parent=None):
         super(Label, self).__init__(parent)
         self.setFixedHeight(32)
-        self.font = QFont()
-        self.font.setPointSize(windowFontPointSize)
-        """ self.font.setBold(True) """
-        self.setFont(self.font)
+        font_id = QFontDatabase.addApplicationFont(font_file_path)
+        if font_id != -1:
+            font_families = QFontDatabase.applicationFontFamilies(font_id)
+            if font_families:
+                font_family = font_families[0]
+                self.font = QFont(font_family, windowFontPointSize)
+                self.setFont(self.font)
         """ self.palette = self.palette()
         self.palette.setColor(QPalette.WindowText, QColor(23, 171, 227))
         self.setPalette(self.palette) """
@@ -4637,10 +4666,14 @@ class ChatRecordsWidget(QWidget):
         self.label = QLabel()
         self.label.resize(self.width() - self.buttonWidget.width() - 40, 50)
         self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        font = QFont()
-        font.setPointSize(titleFontPointSize)
-        font.setBold(True)
-        self.label.setFont(font)
+        font_id = QFontDatabase.addApplicationFont(font_file_path)
+        if font_id != -1:
+            font_families = QFontDatabase.applicationFontFamilies(font_id)
+            if font_families:
+                font_family = font_families[0]
+                font = QFont(font_family, titleFontPointSize)
+                font.setBold(True)
+                self.label.setFont(font)
         self.label.setText("聊天历史")
         self.label.setAlignment(Qt.AlignLeft)
         #headWidget QWidget

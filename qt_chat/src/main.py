@@ -3288,6 +3288,7 @@ class CodeShow(QWidget):
     def __init__(self, codeText, lexerName='python', maxWidth=810, parent=None):
         super(CodeShow, self).__init__(parent)
         self.codeText = codeText
+        self.lexerName = lexerName
         self.maxWidth = maxWidth
         self.setObjectName('CodeShow')
         self.setStyleSheet('''
@@ -3412,9 +3413,17 @@ class CodeShow(QWidget):
     def onSetText(self):
         self.codeEdit.setText(self.codeText)
 
+    def getText(self):
+        return self.codeText
+
     def setText(self, codeText, lexerName='python'):
+        self.codeText = codeText
+        self.lexerName = lexerName
         self.codeEdit.highlightCode(codeText, lexerName=lexerName)
         self.codeEdit.setFixedWidth(self.maxWidth)
+
+    def getLexerName(self):
+        return self.lexerName
 
     def OnSizeFinished(self):
         self.setFixedSize(self.maxWidth, self.codeEdit.height() + self.topWidget.height())
@@ -3904,6 +3913,8 @@ class MessageWidget(QWidget):
         for codeShow in self.thinkCodeShowList:
             codeShow.setVisible(self.thinkIsExpand) """
         self.thinkBackWidget.setVisible(self.thinkIsExpand)
+        for codeShow in self.thinkCodeShowList:
+            codeShow.setText(codeShow.getText(), lexerName=codeShow.getLexerName())
         """ #setSize
         self.setSize() """
         self.resizeFinished.emit()
@@ -6349,6 +6360,7 @@ class MainWindow(QMainWindow):
                         print(f"发生未知错误：{e}")
 
     def chatRecordsGenerateItem(self, searchText=''):
+        index = 0
         #generate item
         for fileName in os.listdir(os.path.join(os.getcwd(), chat_records_dir)):
             if fileName.endswith(".txt"):
@@ -6360,8 +6372,13 @@ class MainWindow(QMainWindow):
                         print(f"错误：文件 {os.path.join(chat_records_dir, fileName)} 不存在")
                     except Exception as e:
                         print(f"发生未知错误：{e}")
+                    for index in range(0, len(lines)):
+                        if lines[index] == 'True\n':
+                            if lines[index + 1] == '<think>\n':
+                                index += 1
+                            break
                     #create item
-                    chatRecordStr = lines[0] + lines[len(lines) - 2].strip('\n')
+                    chatRecordStr = lines[0] + lines[index + 1].strip('\n')
                     item = self.chatRecordsWidget.addListItem(chatRecordStr)
                     #item set data
                     self.chatRecordsWidget.listItemSetData(item, fileName)
@@ -6372,8 +6389,13 @@ class MainWindow(QMainWindow):
                         if searchText in content:
                             with open(os.path.join(chat_records_dir, fileName), 'r', encoding='utf-8') as f:
                                 lines = f.readlines()
+                            for index in range(0, len(lines)):
+                                if lines[index] == 'True\n':
+                                    if lines[index + 1] == '<think>\n':
+                                        index += 1
+                                    break
                             #create item
-                            chatRecordStr = lines[0] + lines[len(lines) - 2].strip('\n')
+                            chatRecordStr = lines[0] + lines[index + 1].strip('\n')
                             item = self.chatRecordsWidget.addListItem(chatRecordStr)
                             #item set data
                             self.chatRecordsWidget.listItemSetData(item, fileName)

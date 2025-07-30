@@ -970,9 +970,9 @@ class TextShow(QWidget):
             font_families = QFontDatabase.applicationFontFamilies(font_id)
             if font_families:
                 font_family = font_families[0]
-                self.font = QFont(font_family, windowFontPointSize)
+                self.font = QFont(font_family)
                 """ self.font.setPointSize(windowFontPointSize) """
-                """ self.font.setPixelSize(bubbleFontPixelSize) """
+                self.font.setPixelSize(bubbleFontPixelSize)
                 self.label.setFont(self.font)
                 self.font_metrics = QFontMetricsF(self.font)
         self.mainHLayout = QHBoxLayout()
@@ -1447,9 +1447,9 @@ class ThinkingButton(QWidget):
             font_families = QFontDatabase.applicationFontFamilies(font_id)
             if font_families:
                 font_family = font_families[0]
-                font = QFont(font_family, windowFontPointSize)
+                font = QFont(font_family)
                 """ font.setPointSize(windowFontPointSize) """
-                """ font.setPixelSize(bubbleFontPixelSize) """
+                font.setPixelSize(bubbleFontPixelSize)
                 self.textLabel.setFont(font)
         self.textLabel.setTextFormat(Qt.PlainText)
         self.textLabel.setMargin(0)
@@ -1648,9 +1648,9 @@ class ThinkWidget(QWidget):
             font_families = QFontDatabase.applicationFontFamilies(font_id)
             if font_families:
                 font_family = font_families[0]
-                self.font = QFont(font_family, windowFontPointSize)
+                self.font = QFont(font_family)
                 """ self.font.setPointSize(windowFontPointSize) """
-                """ self.font.setPixelSize(bubbleFontPixelSize) """
+                self.font.setPixelSize(bubbleFontPixelSize)
                 self.label.setFont(self.font)
                 self.font_metrics = QFontMetricsF(self.font)
         self.mainHLayout = QHBoxLayout()
@@ -5179,13 +5179,14 @@ class MainWindow(QMainWindow):
             else:
                 if self.regionDir == RegionEnum.TITLE:
                     self.UiDrag(event.globalPos())
-                    if event.globalPos().x() <= 0:
-                        screen_geometry = QApplication.desktop().availableGeometry()
+                    screen_geometry = self.screen().availableGeometry()
+                    """ print('event.globalPos().x():', event.globalPos().x()) """
+                    if event.globalPos().x() <= screen_geometry.x():
                         if not (self.width() == screen_geometry.width() // 2 and self.height() == screen_geometry.height()):
                             self.uiRectWidth = self.width()
                             self.uiRectHeight = self.height()
                             self.isChangeRectFirst = True
-                        self.setGeometry(0, 0, screen_geometry.width() // 2, screen_geometry.height())
+                        self.setGeometry(screen_geometry.x(), screen_geometry.y(), screen_geometry.width() // 2, screen_geometry.height())
                         self.mainWidget.setGeometry(0, 0, self.width(), self.height())
                         self.mainWidget.setStyleSheet('''
                         #mainWidget {
@@ -5362,7 +5363,7 @@ class MainWindow(QMainWindow):
         if not self.isScreenHalf:
             self.lastNormalGeometry = self.geometry()
             print('lastNormalGeometry DoubleClickEvent:', self.lastNormalGeometry)
-        self.setGeometry(0, 0, QApplication.desktop().availableGeometry().width(), QApplication.desktop().availableGeometry().height())
+        self.setGeometry(self.screen().availableGeometry())
         self.maxButton.setIcon(QIcon(f"{self.normal_images_path}"))
         self.mainWidget.setStyleSheet('''
         #mainWidget {
@@ -5389,8 +5390,8 @@ class MainWindow(QMainWindow):
             print('11')
             if self.isScreenHalf:
                 print('22')
-                screen_geometry = QApplication.desktop().availableGeometry()
-                screen_half_rect = QRect(0, 0, screen_geometry.width() // 2, screen_geometry.height())
+                screen_geometry = self.screen().availableGeometry()
+                screen_half_rect = QRect(screen_geometry.x(), screen_geometry.y(), screen_geometry.width() // 2, screen_geometry.height())
                 print('mouseReleaseEvent:', self.geometry(), screen_half_rect)
                 if self.geometry().topLeft() != screen_half_rect.topLeft() or self.geometry().width() != screen_half_rect.width() or self.geometry().height() != screen_half_rect.height():
                     if not self.isScreenMax:
@@ -5628,8 +5629,7 @@ class MainWindow(QMainWindow):
             if not self.isScreenHalf:
                 self.lastNormalGeometry = self.geometry()
                 print('lastNormalGeometry maxi:', self.lastNormalGeometry)
-            """ print('screen availableGeometry:', QGuiApplication.primaryScreen().availableGeometry().width(), QGuiApplication.primaryScreen().availableGeometry().height()) """
-            self.setGeometry(0, 0, QApplication.desktop().availableGeometry().width(), QApplication.desktop().availableGeometry().height())
+            self.setGeometry(self.screen().availableGeometry())
             """ print('self size:', self.size()) """
             """ self.mainWidget.setGeometry(0, 0, self.width(), self.height()) """
             self.maxButton.setIcon(QIcon(f"{self.normal_images_path}"))

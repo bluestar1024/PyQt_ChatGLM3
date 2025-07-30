@@ -4881,6 +4881,10 @@ class TitleWidget(QWidget):
         QWidget.mouseMoveEvent(self, event)
         event.ignore()
 
+    """ def mouseDoubleClickEvent(self, event):
+        QWidget.mouseDoubleClickEvent(self, event)
+        event.ignore() """
+
     def setRoundAngle(self):
         self.isRound = True
         self.repaint()
@@ -4905,8 +4909,12 @@ class Frame(QFrame):
         """ self.isMaxi = False """
 
     def mouseMoveEvent(self, event):
-        QWidget.mouseMoveEvent(self, event)
+        QFrame.mouseMoveEvent(self, event)
         event.ignore()
+
+    """ def mouseDoubleClickEvent(self, event):
+        QFrame.mouseDoubleClickEvent(self, event)
+        event.ignore() """
 
     """ def resizeEvent(self, event):
         QFrame.resizeEvent(self, event)
@@ -5135,8 +5143,14 @@ class MainWindow(QMainWindow):
         self.isContinueShow = True
         #isScreenMax
         self.isScreenMax = False
+        #isScreenHalf
+        self.isScreenHalf = False
         #lastNormalGeometry
         self.lastNormalGeometry = self.geometry()
+        #ui width and height
+        self.uiRectWidth = self.width()
+        self.uiRectHeight = self.height()
+        self.isChangeRectFirst = False
 
     def moveEvent(self, event):
         #screen
@@ -5165,6 +5179,33 @@ class MainWindow(QMainWindow):
             else:
                 if self.regionDir == RegionEnum.TITLE:
                     self.UiDrag(event.globalPos())
+                    if event.globalPos().x() <= 0:
+                        screen_geometry = QApplication.desktop().availableGeometry()
+                        if not (self.width() == screen_geometry.width() // 2 and self.height() == screen_geometry.height()):
+                            self.uiRectWidth = self.width()
+                            self.uiRectHeight = self.height()
+                            self.isChangeRectFirst = True
+                        self.setGeometry(0, 0, screen_geometry.width() // 2, screen_geometry.height())
+                        self.mainWidget.setGeometry(0, 0, self.width(), self.height())
+                        self.mainWidget.setStyleSheet('''
+                        #mainWidget {
+                            background-color: #F0F0F0;
+                        }
+                        ''')
+                        self.titleWidget.setRightAngle()
+                        self.isScreenHalf = True
+                    else:
+                        if self.isChangeRectFirst:
+                            self.isChangeRectFirst = False
+                            self.resize(self.uiRectWidth, self.uiRectHeight)
+                            print('changeRect')
+                            self.mainWidget.setStyleSheet('''
+                            #mainWidget {
+                                border-radius: 16px;
+                                background-color: #F0F0F0;
+                            }
+                            ''')
+                            self.titleWidget.setRoundAngle()
         QMainWindow.mouseMoveEvent(self, event)
 
     def isItemShowFull(self, widget):
@@ -5316,17 +5357,45 @@ class MainWindow(QMainWindow):
     def UiDrag(self, globalPos):
         self.move(self.pressPosDistanceUiGlobalTL + globalPos)
 
+    def mouseDoubleClickEvent(self, event):
+        self.isScreenMax = True
+        if not self.isScreenHalf:
+            self.lastNormalGeometry = self.geometry()
+            print('lastNormalGeometry DoubleClickEvent:', self.lastNormalGeometry)
+        self.setGeometry(0, 0, QApplication.desktop().availableGeometry().width(), QApplication.desktop().availableGeometry().height())
+        self.maxButton.setIcon(QIcon(f"{self.normal_images_path}"))
+        self.mainWidget.setStyleSheet('''
+        #mainWidget {
+            background-color: #F0F0F0;
+        }
+        ''')
+        self.titleWidget.setRightAngle()
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.mouseLeftButtonIsPress = True
             #title region calculate the distance to move
             if self.regionDir == RegionEnum.TITLE:
                 self.pressPosDistanceUiGlobalTL = self.geometry().topLeft() - event.globalPos()
+                if (not self.isScreenHalf) and (not self.isScreenMax):
+                    self.lastNormalGeometry = self.geometry()
+                    print('lastNormalGeometry event:', self.lastNormalGeometry)
         QMainWindow.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.mouseLeftButtonIsPress = False
+            #isScreenHalf
+            print('11')
+            if self.isScreenHalf:
+                print('22')
+                screen_geometry = QApplication.desktop().availableGeometry()
+                screen_half_rect = QRect(0, 0, screen_geometry.width() // 2, screen_geometry.height())
+                print('mouseReleaseEvent:', self.geometry(), screen_half_rect)
+                if self.geometry().topLeft() != screen_half_rect.topLeft() or self.geometry().width() != screen_half_rect.width() or self.geometry().height() != screen_half_rect.height():
+                    if not self.isScreenMax:
+                        self.isScreenHalf = False
+                        print('33 isScreenMax:', self.isScreenMax)
             #judge mouse press position
             if self.pushButtonIsPress:
                 self.pushButtonIsPress = False
@@ -5386,13 +5455,13 @@ class MainWindow(QMainWindow):
     def resizeEvent(self, event):
         #mainWidget Frame
         if self.isScreenMax:
-            print('self size', self.size(), self.width(), self.height())
+            """ print('self size', self.size(), self.width(), self.height()) """
             """ self.mainWidget.setMaxiFlag()
             self.mainWidget.setFixedSize(self.width(), self.height()) """
             """ self.mainWidget.move(0, 0) """
             self.mainWidget.setGeometry(0, 0, self.width(), self.height())
             """ self.mainWidget.showMaximized() """
-            print('mainWidget size:', self.mainWidget.size())
+            """ print('mainWidget size:', self.mainWidget.size()) """
             print('3333')
         else:
             """ self.mainWidget.setNormFlag()
@@ -5541,6 +5610,7 @@ class MainWindow(QMainWindow):
             self.isScreenMax = False
             """ self.showNormal() """
             self.setGeometry(self.lastNormalGeometry)
+            print('lastNormalGeometry norm:', self.lastNormalGeometry)
             """ self.mainWidget.setFixedSize(self.width() - 20, self.height() - 20)
             self.mainWidget.move(10, 10) """
             self.maxButton.setIcon(QIcon(f"{self.max_images_path}"))
@@ -5555,10 +5625,12 @@ class MainWindow(QMainWindow):
         else:
             self.isScreenMax = True
             """ self.showMaximized() """
-            self.lastNormalGeometry = self.geometry()
-            print('screen availableGeometry:', QGuiApplication.primaryScreen().availableGeometry().width(), QGuiApplication.primaryScreen().availableGeometry().height())
-            self.setGeometry(0, 0, QGuiApplication.primaryScreen().availableGeometry().width(), QGuiApplication.primaryScreen().availableGeometry().height())
-            print('self size:', self.size())
+            if not self.isScreenHalf:
+                self.lastNormalGeometry = self.geometry()
+                print('lastNormalGeometry maxi:', self.lastNormalGeometry)
+            """ print('screen availableGeometry:', QGuiApplication.primaryScreen().availableGeometry().width(), QGuiApplication.primaryScreen().availableGeometry().height()) """
+            self.setGeometry(0, 0, QApplication.desktop().availableGeometry().width(), QApplication.desktop().availableGeometry().height())
+            """ print('self size:', self.size()) """
             """ self.mainWidget.setGeometry(0, 0, self.width(), self.height()) """
             self.maxButton.setIcon(QIcon(f"{self.normal_images_path}"))
             self.mainWidget.setStyleSheet('''

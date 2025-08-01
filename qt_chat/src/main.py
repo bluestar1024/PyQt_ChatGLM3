@@ -3873,6 +3873,11 @@ class MessageWidget(QWidget):
         #main widget set size
         self.setFixedSize(self.imageLabel.width() + self.textBoxWidget.width() + 5, max(self.imageLabel.height(), self.textBoxWidget.height()))
 
+    def breakHandle(self):
+        if not self.thinkTextIsRecvEnd:
+            self.thinkButton.setThinkEnd()
+            self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
+
     """ def extract_code_blocks(text):
         code_blocks = []
         # 正则表达式匹配代码块
@@ -5199,7 +5204,6 @@ class MainWindow(QMainWindow):
                         if self.isChangeRectFirst:
                             self.isChangeRectFirst = False
                             self.resize(self.uiRectWidth, self.uiRectHeight)
-                            print('changeRect')
                             self.mainWidget.setStyleSheet('''
                             #mainWidget {
                                 border-radius: 16px;
@@ -5362,7 +5366,7 @@ class MainWindow(QMainWindow):
         self.isScreenMax = True
         if not self.isScreenHalf:
             self.lastNormalGeometry = self.geometry()
-            print('lastNormalGeometry DoubleClickEvent:', self.lastNormalGeometry)
+            """ print('lastNormalGeometry DoubleClickEvent:', self.lastNormalGeometry) """
         self.setGeometry(self.screen().availableGeometry())
         self.maxButton.setIcon(QIcon(f"{self.normal_images_path}"))
         self.mainWidget.setStyleSheet('''
@@ -5380,23 +5384,20 @@ class MainWindow(QMainWindow):
                 self.pressPosDistanceUiGlobalTL = self.geometry().topLeft() - event.globalPos()
                 if (not self.isScreenHalf) and (not self.isScreenMax):
                     self.lastNormalGeometry = self.geometry()
-                    print('lastNormalGeometry event:', self.lastNormalGeometry)
+                    """ print('lastNormalGeometry event:', self.lastNormalGeometry) """
         QMainWindow.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.mouseLeftButtonIsPress = False
             #isScreenHalf
-            print('11')
             if self.isScreenHalf:
-                print('22')
                 screen_geometry = self.screen().availableGeometry()
                 screen_half_rect = QRect(screen_geometry.x(), screen_geometry.y(), screen_geometry.width() // 2, screen_geometry.height())
-                print('mouseReleaseEvent:', self.geometry(), screen_half_rect)
+                """ print('mouseReleaseEvent:', self.geometry(), screen_half_rect) """
                 if self.geometry().topLeft() != screen_half_rect.topLeft() or self.geometry().width() != screen_half_rect.width() or self.geometry().height() != screen_half_rect.height():
                     if not self.isScreenMax:
                         self.isScreenHalf = False
-                        print('33 isScreenMax:', self.isScreenMax)
             #judge mouse press position
             if self.pushButtonIsPress:
                 self.pushButtonIsPress = False
@@ -5463,13 +5464,10 @@ class MainWindow(QMainWindow):
             self.mainWidget.setGeometry(0, 0, self.width(), self.height())
             """ self.mainWidget.showMaximized() """
             """ print('mainWidget size:', self.mainWidget.size()) """
-            print('3333')
         else:
             """ self.mainWidget.setNormFlag()
             self.mainWidget.setFixedSize(self.width() - 20, self.height() - 20) """
             """ self.mainWidget.move(10, 10) """
-            self.mainWidget.setGeometry(10, 10, self.width() - 20, self.height() - 20)
-            print('4444')
         #setting widget set geometry
         self.settingWidget.resize(self.mainWidget.width() // 3, self.mainWidget.height() - self.titleWidget.height())
         if self.settingWidgetIsOpen:
@@ -5611,7 +5609,7 @@ class MainWindow(QMainWindow):
             self.isScreenMax = False
             """ self.showNormal() """
             self.setGeometry(self.lastNormalGeometry)
-            print('lastNormalGeometry norm:', self.lastNormalGeometry)
+            """ print('lastNormalGeometry norm:', self.lastNormalGeometry) """
             """ self.mainWidget.setFixedSize(self.width() - 20, self.height() - 20)
             self.mainWidget.move(10, 10) """
             self.maxButton.setIcon(QIcon(f"{self.max_images_path}"))
@@ -5622,13 +5620,12 @@ class MainWindow(QMainWindow):
             }
             ''')
             self.titleWidget.setRoundAngle()
-            print('1111')
         else:
             self.isScreenMax = True
             """ self.showMaximized() """
             if not self.isScreenHalf:
                 self.lastNormalGeometry = self.geometry()
-                print('lastNormalGeometry maxi:', self.lastNormalGeometry)
+                """ print('lastNormalGeometry maxi:', self.lastNormalGeometry) """
             self.setGeometry(self.screen().availableGeometry())
             """ print('self size:', self.size()) """
             """ self.mainWidget.setGeometry(0, 0, self.width(), self.height()) """
@@ -5639,7 +5636,6 @@ class MainWindow(QMainWindow):
             }
             ''')
             self.titleWidget.setRightAngle()
-            print('2222')
 
     def UiClose(self):
         self.saveCurChatRecord(withholdCurChatFile=True)
@@ -6292,6 +6288,8 @@ class MainWindow(QMainWindow):
         else:
             self.thread.stop()
             self.isSending = False
+            if self.messageRecvWidget:
+                self.messageRecvWidget.breakHandle()
         """ self.isSending = not self.isSending """
 
     def messageStart(self):
@@ -6545,7 +6543,7 @@ class MainWindow(QMainWindow):
                     else:
                         self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, self.thinkTimeLengthList, thinkTimeIndex, isUser=isUser, textMaxWidth=self.chatShow.width() * 3 // 4)
                 else:
-                    self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, self.thinkTimeLengthList, thinkTimeIndex, isUser=isUser, thinkIsExpand=False, textMaxWidth=self.chatShow.width() * 3 // 4)
+                    self.messageWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, self.thinkTimeLengthList, thinkTimeIndex, isUser=isUser, thinkIsExpand=True, textMaxWidth=self.chatShow.width() * 3 // 4)
                 """ self.messageWidget.connectSetSizeFinished(self.messageWidgetResize) """
                 self.messageWidget.connectResizeFinished(self.messageWidgetResize)
                 self.messageWidget.connectSetTexting(self.getSetTexting)
@@ -6687,6 +6685,12 @@ class MainWindow(QMainWindow):
 
     def generateChatRecord(self, item):
         #clear
+        if self.isSending:
+            self.thread.stop()
+            self.isSending = False
+            if self.messageRecvWidget:
+                self.messageRecvWidget.breakHandle()
+        self.saveCurChatRecord()
         self.messageWidgetList.clear()
         for i in range(0, self.chatShow.count()):
             itemWidget = self.chatShow.itemWidget(self.chatShow.item(i))

@@ -5077,15 +5077,16 @@ class MainWindow(QMainWindow):
         self.chatRecordsAnimationMove.setEasingCurve(QEasingCurve.OutQuad)
         self.chatRecordsAnimationMove.valueChanged.connect(self.chatRecordsUiAnimationMove)
         self.chatRecordsAnimationMove.finished.connect(self.chatRecordsUiMoveFinished)
-        #chatRecordsAnimationMove2 QPropertyAnimation
+        """ #chatRecordsAnimationMove2 QPropertyAnimation
         self.chatRecordsAnimationMove2 = QPropertyAnimation(self.chatRecordsWidget, b'geometry')
         self.chatRecordsAnimationMove2.setDuration(1000)
         self.chatRecordsAnimationMove2.setEasingCurve(QEasingCurve.OutQuad)
         self.chatRecordsAnimationMove2.valueChanged.connect(self.chatRecordsUiAnimationMove2)
-        self.chatRecordsAnimationMove2.finished.connect(self.chatRecordsUiMoveFinished)
+        self.chatRecordsAnimationMove2.finished.connect(self.chatRecordsUiMoveFinished) """
         #chatRecordsWidgetIsOpen
         self.chatRecordsWidgetIsOpen = False
-        #chatRecordsFoldButton PushButton
+
+        """ #chatRecordsFoldButton PushButton
         self.chatRecordsFoldButton = PushButton(tipText='折叠', tipOffsetX=5, tipOffsetY=35, parent=self.mainWidget)
         self.chatRecordsFoldButton.setFixedSize(30, 50)
         self.chatRecordsFoldButton.setIconSize(QSize(30, 50))
@@ -5102,7 +5103,8 @@ class MainWindow(QMainWindow):
         ''')
         self.chatRecordsFoldButton.move(0, (self.mainWidget.height() + self.titleWidget.height() - self.chatRecordsFoldButton.height()) // 2)
         self.chatRecordsFoldButton.hide()
-        self.chatRecordsFoldButton.clicked.connect(self.chatRecordsFoldButtonClicked)
+        self.chatRecordsFoldButton.clicked.connect(self.chatRecordsFoldButtonClicked) """
+
         #emptyTextLabel PrintLabel
         self.emptyTextLabel = PrintLabel('文本不能为空', self)
         self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() + 10)
@@ -5128,10 +5130,10 @@ class MainWindow(QMainWindow):
         self.messageWidgetIsSelect = False
         #selectMessageWidgetNumber
         self.selectMessageWidgetNumber = -1 """
-        #settingIsTop
-        self.settingIsTop = False
-        #chatRecordsIsTop
-        self.chatRecordsIsTop = False
+        """ #settingIsTop
+        self.settingIsTop = False """
+        """ #chatRecordsIsTop
+        self.chatRecordsIsTop = False """
         #screen
         self.lastScreen = self.curScreen = self.screen()
         self.dpi = 0.0
@@ -5478,10 +5480,10 @@ class MainWindow(QMainWindow):
             self.chatInputWidget.resize(self.mainWidget.width() * 2 // 3, self.chatInputWidget.height())
             self.splitter.resize(self.mainWidget.width() * 2 // 3, self.splitter.height())
             self.contentVLayout.setContentsMargins(self.mainWidget.width() // 3, 0, 0, 0)
-            self.settingFoldButton.move(self.settingWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.settingFoldButton.height()) // 2)
+            """ self.settingFoldButton.move(self.settingWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.settingFoldButton.height()) // 2) """
         else:
             self.settingWidget.move(-self.settingWidget.width(), self.titleWidget.height())
-            self.settingFoldButton.move(0, (self.mainWidget.height() + self.titleWidget.height() - self.settingFoldButton.height()) // 2)
+            """ self.settingFoldButton.move(0, (self.mainWidget.height() + self.titleWidget.height() - self.settingFoldButton.height()) // 2) """
         #chatRecords widget set geometry
         self.chatRecordsWidget.resetWidgetSize(self.mainWidget.width() // 3, self.mainWidget.height() - self.titleWidget.height())
         if self.chatRecordsWidgetIsOpen:
@@ -5492,10 +5494,10 @@ class MainWindow(QMainWindow):
             self.chatInputWidget.resize(self.mainWidget.width() * 2 // 3, self.chatInputWidget.height())
             self.splitter.resize(self.mainWidget.width() * 2 // 3, self.splitter.height())
             self.contentVLayout.setContentsMargins(self.mainWidget.width() // 3, 0, 0, 0)
-            self.chatRecordsFoldButton.move(self.chatRecordsWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.chatRecordsFoldButton.height()) // 2)
+            """ self.chatRecordsFoldButton.move(self.chatRecordsWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.chatRecordsFoldButton.height()) // 2) """
         else:
             self.chatRecordsWidget.move(-self.chatRecordsWidget.width(), self.titleWidget.height())
-            self.chatRecordsFoldButton.move(0, (self.mainWidget.height() + self.titleWidget.height() - self.chatRecordsFoldButton.height()) // 2)
+            """ self.chatRecordsFoldButton.move(0, (self.mainWidget.height() + self.titleWidget.height() - self.chatRecordsFoldButton.height()) // 2) """
         #TextEditFull adjust size
         self.chatInput.resetWidgetSize()
         #move emptyTextLabel
@@ -5945,17 +5947,18 @@ class MainWindow(QMainWindow):
         self.settingAnimationMove = QPropertyAnimation(self.settingWidget, b'geometry')
         self.settingAnimationMove.setDuration(1000)
         self.settingAnimationMove.setEasingCurve(QEasingCurve.OutQuad)
-        self.settingAnimationMove.valueChanged.connect(self.settingUiAnimationMove)
+        """ self.settingAnimationMove.valueChanged.connect(self.settingUiAnimationMove)
         self.settingAnimationMove.finished.connect(self.settingUiMoveFinished)
         #settingAnimationMove2 QPropertyAnimation
         self.settingAnimationMove2 = QPropertyAnimation(self.settingWidget, b'geometry')
         self.settingAnimationMove2.setDuration(1000)
         self.settingAnimationMove2.setEasingCurve(QEasingCurve.OutQuad)
         self.settingAnimationMove2.valueChanged.connect(self.settingUiAnimationMove2)
-        self.settingAnimationMove2.finished.connect(self.settingUiMoveFinished)
+        self.settingAnimationMove2.finished.connect(self.settingUiMoveFinished) """
         #settingWidgetIsOpen
         self.settingWidgetIsOpen = False
-        #settingFoldButton PushButton
+
+        """ #settingFoldButton PushButton
         self.settingFoldButton = PushButton(tipText='折叠', tipOffsetX=5, tipOffsetY=35, parent=self.mainWidget)
         self.settingFoldButton.setFixedSize(30, 50)
         self.settingFoldButton.setIconSize(QSize(30, 50))
@@ -5974,51 +5977,51 @@ class MainWindow(QMainWindow):
         ''')
         self.settingFoldButton.move(0, (self.mainWidget.height() + self.titleWidget.height() - self.settingFoldButton.height()) // 2)
         self.settingFoldButton.hide()
-        self.settingFoldButton.clicked.connect(self.settingFoldButtonClicked)
+        self.settingFoldButton.clicked.connect(self.settingFoldButtonClicked) """
 
     def settingButtonClicked(self):
-        if not self.settingWidgetIsOpen:
-            """ if not self.chatRecordsWidgetIsOpen:
-                self.settingWidget.raise_()
-                self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
-                self.settingAnimationMove.setEndValue(QRect(0, self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
-                self.settingAnimationMove.start()
-                self.settingWidgetIsOpen = True
-                self.settingIsTop = True
-            else: """
+        """ if not self.settingWidgetIsOpen: """
+        """ if not self.chatRecordsWidgetIsOpen:
             self.settingWidget.raise_()
-            self.settingAnimationMove2.setStartValue(self.settingWidget.geometry())
-            self.settingAnimationMove2.setEndValue(QRect(0, self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
-            self.settingAnimationMove2.start()
+            self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
+            self.settingAnimationMove.setEndValue(QRect(0, self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
+            self.settingAnimationMove.start()
             self.settingWidgetIsOpen = True
             self.settingIsTop = True
-            self.chatRecordsIsTop = False
-            self.settingFoldButton.raise_()
-            self.settingFoldButton.show()
-        else:
-            """ if self.settingIsTop:
-                if not self.chatRecordsWidgetIsOpen:
-                    self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
-                    self.settingAnimationMove.setEndValue(QRect(-self.settingWidget.width(), self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
-                    self.settingAnimationMove.start()
-                    self.settingWidgetIsOpen = False
-                    self.settingIsTop = False
-                else:
-                    self.settingAnimationMove2.setStartValue(self.settingWidget.geometry())
-                    self.settingAnimationMove2.setEndValue(QRect(-self.settingWidget.width(), self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
-                    self.settingAnimationMove2.start()
-                    self.settingWidgetIsOpen = False
-                    self.settingIsTop = False
-                    self.chatRecordsIsTop = True
-            else: """
-            self.settingWidget.raise_()
-            self.settingFoldButton.raise_()
-            self.settingIsTop = True
-            self.chatRecordsIsTop = False
+        else: """
+        self.settingWidget.raise_()
+        self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
+        self.settingAnimationMove.setEndValue(QRect(0, self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
+        self.settingAnimationMove.start()
+        self.settingWidgetIsOpen = True
+        """ self.settingIsTop = True """
+        """ self.chatRecordsIsTop = False """
+        """ self.settingFoldButton.raise_()
+        self.settingFoldButton.show() """
+        """ else: """
+        """ if self.settingIsTop:
+            if not self.chatRecordsWidgetIsOpen:
+                self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
+                self.settingAnimationMove.setEndValue(QRect(-self.settingWidget.width(), self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
+                self.settingAnimationMove.start()
+                self.settingWidgetIsOpen = False
+                self.settingIsTop = False
+            else:
+                self.settingAnimationMove2.setStartValue(self.settingWidget.geometry())
+                self.settingAnimationMove2.setEndValue(QRect(-self.settingWidget.width(), self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
+                self.settingAnimationMove2.start()
+                self.settingWidgetIsOpen = False
+                self.settingIsTop = False
+                self.chatRecordsIsTop = True
+        else: """
+        """ self.settingWidget.raise_()
+        self.settingFoldButton.raise_()
+        self.settingIsTop = True
+        self.chatRecordsIsTop = False """
         #pushButtonIsPress
         self.pushButtonIsPress = True
 
-    def settingUiAnimationMove(self, rect):
+    """ def settingUiAnimationMove(self, rect):
         self.settingFoldButton.move(rect.x() + self.settingWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.settingFoldButton.height()) // 2)
         self.chatShow.resize(self.mainWidget.width() - rect.x() - self.settingWidget.width() - 29, self.chatShow.height())
         self.chatShowWidget.resize(self.mainWidget.width() - rect.x() - self.settingWidget.width(), self.chatShowWidget.height())
@@ -6026,38 +6029,34 @@ class MainWindow(QMainWindow):
         self.chatInput.resetWidgetSize()
         self.chatInputWidget.resize(self.mainWidget.width() - rect.x() - self.settingWidget.width(), self.chatInputWidget.height())
         self.splitter.resize(self.mainWidget.width() - rect.x() - self.settingWidget.width(), self.splitter.height())
-        self.contentVLayout.setContentsMargins(rect.x() + self.settingWidget.width(), 0, 0, 0)
-        """ #resizeTimer
-        self.resizeTimer.start(150) """
+        self.contentVLayout.setContentsMargins(rect.x() + self.settingWidget.width(), 0, 0, 0) """
 
-    def settingUiMoveFinished(self):
+    """ def settingUiMoveFinished(self):
         if not self.settingWidgetIsOpen:
             self.settingFoldButton.hide()
         if self.sender() == self.settingAnimationMove:
-            self.messageWidgetRegenerate()
+            self.messageWidgetRegenerate() """
 
-    def settingUiAnimationMove2(self, rect):
-        self.settingFoldButton.move(rect.x() + self.settingWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.settingFoldButton.height()) // 2)
+    """ def settingUiAnimationMove2(self, rect):
+        self.settingFoldButton.move(rect.x() + self.settingWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.settingFoldButton.height()) // 2) """
 
-    def settingFoldButtonClicked(self):
+    """ def settingFoldButtonClicked(self):
         if not self.chatRecordsWidgetIsOpen:
-            """ print('settingFoldButtonClicked, not chatRecordsWidgetIsOpen') """
             self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
             self.settingAnimationMove.setEndValue(QRect(-self.settingWidget.width(), self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
             self.settingAnimationMove.start()
             self.settingWidgetIsOpen = False
             self.settingIsTop = False
         else:
-            """ print('settingFoldButtonClicked, chatRecordsWidgetIsOpen') """
             self.settingAnimationMove2.setStartValue(self.settingWidget.geometry())
             self.settingAnimationMove2.setEndValue(QRect(-self.settingWidget.width(), self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
             self.settingAnimationMove2.start()
             self.settingWidgetIsOpen = False
             self.settingIsTop = False
-            self.chatRecordsIsTop = True
+            self.chatRecordsIsTop = True """
 
     def chatRecordsUiAnimationMove(self, rect):
-        self.chatRecordsFoldButton.move(rect.x() + self.chatRecordsWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.chatRecordsFoldButton.height()) // 2)
+        """ self.chatRecordsFoldButton.move(rect.x() + self.chatRecordsWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.chatRecordsFoldButton.height()) // 2) """
         self.chatShow.resize(self.mainWidget.width() - rect.x() - self.chatRecordsWidget.width() - 29, self.chatShow.height())
         self.chatShowWidget.resize(self.mainWidget.width() - rect.x() - self.chatRecordsWidget.width(), self.chatShowWidget.height())
         self.chatInput.resize(self.mainWidget.width() - rect.x() - self.chatRecordsWidget.width() - 40, self.chatInput.height())
@@ -6070,31 +6069,29 @@ class MainWindow(QMainWindow):
 
     def chatRecordsUiMoveFinished(self):
         if not self.chatRecordsWidgetIsOpen:
-            self.chatRecordsFoldButton.hide()
+            """ self.chatRecordsFoldButton.hide() """
             #delete all item
             self.chatRecordsWidget.delAllListItems()
-        if self.sender() == self.chatRecordsAnimationMove:
-            self.messageWidgetRegenerate()
+        """ if self.sender() == self.chatRecordsAnimationMove: """
+        self.messageWidgetRegenerate()
 
-    def chatRecordsUiAnimationMove2(self, rect):
-        self.chatRecordsFoldButton.move(rect.x() + self.chatRecordsWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.chatRecordsFoldButton.height()) // 2)
+    """ def chatRecordsUiAnimationMove2(self, rect):
+        self.chatRecordsFoldButton.move(rect.x() + self.chatRecordsWidget.width(), (self.mainWidget.height() + self.titleWidget.height() - self.chatRecordsFoldButton.height()) // 2) """
 
-    def chatRecordsFoldButtonClicked(self):
+    """ def chatRecordsFoldButtonClicked(self):
         if not self.settingWidgetIsOpen:
-            """ print('chatRecordsFoldButtonClicked, not settingWidgetIsOpen') """
             self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
             self.chatRecordsAnimationMove.setEndValue(QRect(-self.chatRecordsWidget.width(), self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
             self.chatRecordsAnimationMove.start()
             self.chatRecordsWidgetIsOpen = False
             self.chatRecordsIsTop = False
         else:
-            """ print('chatRecordsFoldButtonClicked, settingWidgetIsOpen') """
             self.chatRecordsAnimationMove2.setStartValue(self.chatRecordsWidget.geometry())
             self.chatRecordsAnimationMove2.setEndValue(QRect(-self.chatRecordsWidget.width(), self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
             self.chatRecordsAnimationMove2.start()
             self.chatRecordsWidgetIsOpen = False
             self.chatRecordsIsTop = False
-            self.settingIsTop = True
+            self.settingIsTop = True """
 
     def baseUrlTextChanged(self, text):
         try:
@@ -6625,17 +6622,17 @@ class MainWindow(QMainWindow):
 
     def showChatRecords(self):
         if not self.chatRecordsWidgetIsOpen:
-            if not self.settingWidgetIsOpen:
-                self.saveCurChatRecord()
-                self.chatRecordsGenerateItem()
-                #show chatRecordsWidget
-                self.chatRecordsWidget.raise_()
-                self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
-                self.chatRecordsAnimationMove.setEndValue(QRect(0, self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
-                self.chatRecordsAnimationMove.start()
-                self.chatRecordsWidgetIsOpen = True
-                self.chatRecordsIsTop = True
-            else:
+            """ if not self.settingWidgetIsOpen: """
+            self.saveCurChatRecord()
+            self.chatRecordsGenerateItem()
+            #show chatRecordsWidget
+            self.chatRecordsWidget.raise_()
+            self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
+            self.chatRecordsAnimationMove.setEndValue(QRect(0, self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
+            self.chatRecordsAnimationMove.start()
+            self.chatRecordsWidgetIsOpen = True
+            """ self.chatRecordsIsTop = True """
+            """ else:
                 self.saveCurChatRecord()
                 self.chatRecordsGenerateItem()
                 #show chatRecordsWidget
@@ -6645,29 +6642,35 @@ class MainWindow(QMainWindow):
                 self.chatRecordsAnimationMove2.start()
                 self.chatRecordsWidgetIsOpen = True
                 self.chatRecordsIsTop = True
-                self.settingIsTop = False
-            self.chatRecordsFoldButton.raise_()
-            self.chatRecordsFoldButton.show()
+                self.settingIsTop = False """
+            """ self.chatRecordsFoldButton.raise_()
+            self.chatRecordsFoldButton.show() """
         else:
-            if self.chatRecordsIsTop:
-                if not self.settingWidgetIsOpen:
-                    self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
-                    self.chatRecordsAnimationMove.setEndValue(QRect(-self.chatRecordsWidget.width(), self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
-                    self.chatRecordsAnimationMove.start()
-                    self.chatRecordsWidgetIsOpen = False
-                    self.chatRecordsIsTop = False
-                else:
-                    self.chatRecordsAnimationMove2.setStartValue(self.chatRecordsWidget.geometry())
-                    self.chatRecordsAnimationMove2.setEndValue(QRect(-self.chatRecordsWidget.width(), self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
-                    self.chatRecordsAnimationMove2.start()
-                    self.chatRecordsWidgetIsOpen = False
-                    self.chatRecordsIsTop = False
-                    self.settingIsTop = True
-            else:
+            """ if self.chatRecordsIsTop:
+                if not self.settingWidgetIsOpen: """
+            if self.settingWidgetIsOpen:
+                self.settingAnimationMove.setStartValue(self.settingWidget.geometry())
+                self.settingAnimationMove.setEndValue(QRect(-self.settingWidget.width(), self.titleWidget.height(), self.settingWidget.width(), self.settingWidget.height()))
+                self.settingAnimationMove.start()
+                self.settingWidgetIsOpen = False
+                """ self.settingIsTop = False """
+            self.chatRecordsAnimationMove.setStartValue(self.chatRecordsWidget.geometry())
+            self.chatRecordsAnimationMove.setEndValue(QRect(-self.chatRecordsWidget.width(), self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
+            self.chatRecordsAnimationMove.start()
+            self.chatRecordsWidgetIsOpen = False
+            """ self.chatRecordsIsTop = False """
+            """ else:
+                self.chatRecordsAnimationMove2.setStartValue(self.chatRecordsWidget.geometry())
+                self.chatRecordsAnimationMove2.setEndValue(QRect(-self.chatRecordsWidget.width(), self.titleWidget.height(), self.chatRecordsWidget.width(), self.chatRecordsWidget.height()))
+                self.chatRecordsAnimationMove2.start()
+                self.chatRecordsWidgetIsOpen = False
+                self.chatRecordsIsTop = False
+                self.settingIsTop = True """
+            """ else:
                 self.chatRecordsWidget.raise_()
                 self.chatRecordsFoldButton.raise_()
                 self.chatRecordsIsTop = True
-                self.settingIsTop = False
+                self.settingIsTop = False """
         #pushButtonIsPress
         self.pushButtonIsPress = True
 

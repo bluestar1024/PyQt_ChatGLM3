@@ -31,12 +31,14 @@ mathjax_script_path = os.path.normpath(os.path.join(current_dir, '..', 'mathjax/
 chat_records_dir = os.path.normpath(os.path.join(current_dir, '..', 'chatrecords'))
 code_theme_file_path = os.path.normpath(os.path.join(current_dir, '..', 'config', 'dark_theme.xml'))
 
-init_base_url = "http://7613907zg6.vicp.fun:45861/v1"
+""" init_base_url = "http://7613907zg6.vicp.fun:45861/v1" """
+init_base_url = "http://127.0.0.1:11434/v1"
 init_api_key = "EMPTY"
-init_model = "deepseek-r1:14b"
+""" init_model = "deepseek-r1:14b" """
+init_model = "deepseek-r1:1.5b"
 maxTokens_minimum = 0
 maxTokens_maximum = 32768
-init_maxTokens_currentVal = 3000
+init_maxTokens_currentVal = 5000
 topP_minimum = 0
 topP_maximum = 1
 init_topP_currentVal = 0.8
@@ -290,7 +292,7 @@ print(total)
 这些代码都使用了高斯公式来计算从 1 到 100 的和，结果都是 5050。
 '''
 
-'''class messageThread(QThread):
+class messageThread(QThread):
     newMessage = pyqtSignal(str)
 
     def __init__(self, contentInput, context=None, use_stream=True, parent=None):
@@ -341,8 +343,8 @@ print(total)
                 self.newMessage.emit(self.contentOutput)
         else:
             print("Error:", response.status_code)
-        return'''
-class messageThread(QThread):
+        return
+""" class messageThread(QThread):
     newMessage = pyqtSignal(str)
 
     def __init__(self, contentInput, context=None, use_stream=True, parent=None):
@@ -367,7 +369,7 @@ class messageThread(QThread):
 
     def stop(self):
         self.terminate()
-        self.wait()
+        self.wait() """
 
 class PushButton(QPushButton):
     def __init__(self, tipText='', tipOffsetX=10, tipOffsetY=40, parent=None):
@@ -955,6 +957,7 @@ class CustomLabel(QLabel):
 
 class TextShow(QWidget):
     setSizeFinished = pyqtSignal()
+    executeNext = pyqtSignal()
     """ setTexting = pyqtSignal(bool) """
 
     def __init__(self, text, isUser=True, maxWidth=810, parent=None):
@@ -1079,6 +1082,7 @@ class TextShow(QWidget):
             self.setFixedSize(self.label.width() + 10, self.label.height())
 
     def onPageLoadFinished(self, success):
+        print('onPageLoadFinished')
         js = """
         function getPageSize() {
             var body = document.body;
@@ -1102,11 +1106,15 @@ class TextShow(QWidget):
 
     def updateSize(self, result):
         width, height = result
-        """ print('TextShow width, height:', width + 10, height + 10) """
+        if width == 1:
+            print('TextShow size:', width, height)
+            self.onPageLoadFinished(True)
+            return
         if width != 0 and height != 0:
             self.webEngineView.setFixedSize(width, height)
             self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height())
             self.setSizeFinished.emit()
+            self.executeNext.emit()
 
     def getAlignmentClass(self, format_string):
         # 根据对齐格式返回相应的class名
@@ -1313,11 +1321,16 @@ class TextShow(QWidget):
             self.isLabel = False
             """ self.setTexting.emit(self.isLabel) """
 
+        print('toggleWidget')
+
     """ def connectSetTexting(self, fun):
         self.setTexting.connect(fun) """
 
     """ def getWebEngineView(self):
         return self.webEngineView """
+
+    def connectExecuteNext(self, fun):
+        self.executeNext.connect(fun)
 
     def hasSelectedText(self):
         if self.isLabel:
@@ -2040,8 +2053,22 @@ class LineNumberArea(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.fillRect(event.rect(), self.backgroundColor)
-        """ painter.fillRect(event.rect(), QColor(Qt.red)) """
+        """ painter.fillRect(event.rect(), self.backgroundColor) """
+        #QPainterPath
+        path = QPainterPath()
+        path.setFillRule(Qt.WindingFill)
+        path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 7, 7)
+        path.addRect(self.rect().x(), self.rect().y(), 7, 7)
+        path.addRect(self.rect().width() - 7, self.rect().y(), 7, 7)
+        path.addRect(self.rect().width() - 7, self.rect().height() - 7, 7, 7)
+        #QBrush
+        brush = QBrush(Qt.SolidPattern)
+        brush.setColor(self.backgroundColor)
+        #QPainter setting
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(brush)
+        painter.drawPath(path.simplified())
+        #QPen
         pen = QPen(self.numberColor)
         painter.setPen(pen)
         painter.setFont(self.editor.font())
@@ -2062,7 +2089,7 @@ class LineNumberArea(QWidget):
         painter.end()
 
     def setLightBackgroundColor(self):
-        self.backgroundColor = QColor(236, 236, 228)
+        self.backgroundColor = QColor(255, 255, 255)
         self.numberColor = QColor(78, 86, 92)
 
     def setDarkBackgroundColor(self):
@@ -2139,7 +2166,7 @@ class CodeEdit(QTextEdit):
             self.setStyleSheet('''
             QTextEdit {
                 border: none;
-                background-color: #ecece4;
+                background-color: #ffffff;
                 border-bottom-left-radius: 7px;
                 border-bottom-right-radius: 7px;
             }
@@ -2305,6 +2332,8 @@ class CodeEdit(QTextEdit):
     } """
 
 class QSyntaxStyle(QObject):
+    style = None
+
     def __init__(self, parent=None):
         super(QSyntaxStyle, self).__init__(parent)
         self.m_name = ""
@@ -2378,21 +2407,22 @@ class QSyntaxStyle(QObject):
 
     @staticmethod
     def defaultStyle():
-        if not hasattr(QSyntaxStyle.defaultStyle, "style"):
-            QSyntaxStyle.defaultStyle.style = QSyntaxStyle()
-            if not QSyntaxStyle.defaultStyle.style.isLoaded():
-                # 初始化资源文件
-                # Q_INIT_RESOURCE(qcodeeditor_resources)
-                fl = QFile(code_theme_file_path)
+        """ print('QSyntaxStyle defaultStyle') """
+        QSyntaxStyle.style = QSyntaxStyle()
+        if not QSyntaxStyle.style.isLoaded():
+            # 初始化资源文件
+            # Q_INIT_RESOURCE(qcodeeditor_resources)
+            """ print('code_theme_file_path', code_theme_file_path) """
+            fl = QFile(code_theme_file_path)
 
-                if not fl.open(QIODevice.ReadOnly):
-                    print("Can't open default style file.")
-                    return QSyntaxStyle.defaultStyle.style
+            if not fl.open(QIODevice.ReadOnly):
+                print("Can't open default style file.")
+                return QSyntaxStyle.style
 
-                data = fl.readAll().data().decode('utf-8')
-                if not QSyntaxStyle.defaultStyle.style.load(data):
-                    print("Can't load default style.")
-        return QSyntaxStyle.defaultStyle.style
+            data = fl.readAll().data().decode('utf-8')
+            if not QSyntaxStyle.style.load(data):
+                print("Can't load default style.")
+        return QSyntaxStyle.style
 
 class QStyleSyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, document: QTextDocument = None):
@@ -3308,12 +3338,7 @@ class CodeShow(QWidget):
         self.codeText = codeText
         self.lexerName = lexerName
         self.maxWidth = maxWidth
-        self.setObjectName('CodeShow')
-        self.setStyleSheet('''
-        #CodeShow {
-            border-radius: 7px;
-        }
-        ''')
+        self.resize(self.maxWidth + 2, 40)
         #topWidget QWidget
         self.topWidget = QWidget()
         """ self.topWidget.setFixedHeight(20) """
@@ -3427,10 +3452,27 @@ class CodeShow(QWidget):
         self.setLayout(self.mainVLayout)
         self.mainVLayout.addWidget(self.topWidget)
         self.mainVLayout.addWidget(self.codeEdit)
-        self.mainVLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainVLayout.setContentsMargins(1, 1, 1, 1)
         self.mainVLayout.setSpacing(0)
         #singleShot
         QTimer.singleShot(1, self.onSetText)
+        #BColor
+        self.BColor = QColor(Qt.transparent)
+
+    def paintEvent(self, event):
+        #QPainter create
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        #QPen
+        pen = QPen(self.BColor)
+        painter.setPen(pen)
+        #QPainterPath
+        path = QPainterPath()
+        path.setFillRule(Qt.WindingFill)
+        path.addRoundedRect(self.rect().x(), self.rect().y(), self.rect().width(), self.rect().height(), 10, 10)
+        painter.drawPath(path.simplified())
+        #QPainter end
+        painter.end()
 
     def onSetText(self):
         self.codeEdit.setText(self.codeText)
@@ -3448,7 +3490,7 @@ class CodeShow(QWidget):
         return self.lexerName
 
     def OnSizeFinished(self):
-        self.setFixedSize(self.maxWidth, self.codeEdit.height() + self.topWidget.height())
+        self.setFixedSize(self.maxWidth + 2, self.codeEdit.height() + self.topWidget.height() + 2)
         """ print('CodeShow:', self.height(), self.codeEdit.height(), self.topWidget.height()) """
 
     def connectCodeCopyButtonClick(self, fun):
@@ -3465,7 +3507,7 @@ class CodeShow(QWidget):
         if self.isLightThemeStyle:
             self.topWidget.setStyleSheet('''
             QWidget {
-                background-color: #ccccc4;
+                background-color: #f3f4f3;
                 border-top-left-radius: 7px;
                 border-top-right-radius: 7px;
             }
@@ -3480,6 +3522,7 @@ class CodeShow(QWidget):
             else:
                 self.wordWrapButton.setIcon(QIcon(f"{self.dark_word_wrap_images_path}"))
             self.codeCopyButton.setIcon(QIcon(f"{self.dark_code_copy_images_path}"))
+            self.BColor = QColor(196, 196, 212)
         else:
             self.topWidget.setStyleSheet('''
             QWidget {
@@ -3498,7 +3541,9 @@ class CodeShow(QWidget):
             else:
                 self.wordWrapButton.setIcon(QIcon(f"{self.light_word_wrap_images_path}"))
             self.codeCopyButton.setIcon(QIcon(f"{self.light_code_copy_images_path}"))
+            self.BColor = QColor(Qt.transparent)
         self.codeEdit.setThemeStyle(self.isLightThemeStyle)
+        self.repaint()
 
     def setLineWordWrapMode(self):
         self.isWordWrap = not self.isWordWrap
@@ -3952,6 +3997,10 @@ class MessageWidget(QWidget):
     def connectSetTexting(self, fun):
         self.setTexting.connect(fun)
 
+    def connectExecuteNext(self, fun):
+        if self.isUser:
+            self.textShow.connectExecuteNext(fun)
+
     def toggleWidget(self):
         """ print('toggleWidget') """
         if self.isUser:
@@ -3986,10 +4035,11 @@ class MessageWidget(QWidget):
                         """ print('ThinkWidget sizeFinish:', self.thinkWidgetSizeFinshedCount, self.textShowSizeFinshedCount) """
                         self.resizeFinished.emit()
                         self.setTexting.emit(False)
-                        if self.thinkButton.getThinkTimeLength() == 0:
-                            self.thinkButton.setThinkTimeLength(self.thinkTimeLengthList[self.thinkTimeIndex])
-                        else:
-                            self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
+                        if self.thinkText != '':
+                            if self.thinkButton.getThinkTimeLength() == 0:
+                                self.thinkButton.setThinkTimeLength(self.thinkTimeLengthList[self.thinkTimeIndex])
+                            else:
+                                self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
                         """ print('thinkTimeLengthList:', self.thinkTimeLengthList) """
             else:
                 self.textShowSizeFinshedCount += 1
@@ -4000,10 +4050,11 @@ class MessageWidget(QWidget):
                         """ print('TextShow sizeFinish:', self.thinkWidgetSizeFinshedCount, self.textShowSizeFinshedCount) """
                         self.resizeFinished.emit()
                         self.setTexting.emit(False)
-                        if self.thinkButton.getThinkTimeLength() == 0:
-                            self.thinkButton.setThinkTimeLength(self.thinkTimeLengthList[self.thinkTimeIndex])
-                        else:
-                            self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
+                        if self.thinkText != '':
+                            if self.thinkButton.getThinkTimeLength() == 0:
+                                self.thinkButton.setThinkTimeLength(self.thinkTimeLengthList[self.thinkTimeIndex])
+                            else:
+                                self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
                         """ print('thinkTimeLengthList:', self.thinkTimeLengthList) """
 
     def setSize(self):
@@ -5154,6 +5205,7 @@ class MainWindow(QMainWindow):
         self.isScreenHalf = False
         #lastNormalGeometry
         self.lastNormalGeometry = self.geometry()
+        """ print('lastNormalGeometry MainWindow init:', self.lastNormalGeometry) """
         #ui width and height
         self.uiRectWidth = self.width()
         self.uiRectHeight = self.height()
@@ -5365,18 +5417,31 @@ class MainWindow(QMainWindow):
         self.move(self.pressPosDistanceUiGlobalTL + globalPos)
 
     def mouseDoubleClickEvent(self, event):
-        self.isScreenMax = True
-        if not self.isScreenHalf:
-            self.lastNormalGeometry = self.geometry()
-            """ print('lastNormalGeometry DoubleClickEvent:', self.lastNormalGeometry) """
-        self.setGeometry(self.screen().availableGeometry())
-        self.maxButton.setIcon(QIcon(f"{self.normal_images_path}"))
-        self.mainWidget.setStyleSheet('''
-        #mainWidget {
-            background-color: #F0F0F0;
-        }
-        ''')
-        self.titleWidget.setRightAngle()
+        if self.isScreenMax:
+            self.isScreenMax = False
+            self.setGeometry(self.lastNormalGeometry)
+            """ print('lastNormalGeometry norm:', self.lastNormalGeometry) """
+            self.maxButton.setIcon(QIcon(f"{self.max_images_path}"))
+            self.mainWidget.setStyleSheet('''
+            #mainWidget {
+                border-radius: 16px;
+                background-color: #F0F0F0;
+            }
+            ''')
+            self.titleWidget.setRoundAngle()
+        else:
+            self.isScreenMax = True
+            if not self.isScreenHalf:
+                self.lastNormalGeometry = self.geometry()
+                """ print('lastNormalGeometry DoubleClickEvent:', self.lastNormalGeometry) """
+            self.setGeometry(self.screen().availableGeometry())
+            self.maxButton.setIcon(QIcon(f"{self.normal_images_path}"))
+            self.mainWidget.setStyleSheet('''
+            #mainWidget {
+                background-color: #F0F0F0;
+            }
+            ''')
+            self.titleWidget.setRightAngle()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -5386,7 +5451,7 @@ class MainWindow(QMainWindow):
                 self.pressPosDistanceUiGlobalTL = self.geometry().topLeft() - event.globalPos()
                 if (not self.isScreenHalf) and (not self.isScreenMax):
                     self.lastNormalGeometry = self.geometry()
-                    """ print('lastNormalGeometry event:', self.lastNormalGeometry) """
+                    """ print('lastNormalGeometry pressEvent:', self.lastNormalGeometry) """
         QMainWindow.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
@@ -5470,6 +5535,7 @@ class MainWindow(QMainWindow):
             """ self.mainWidget.setNormFlag()
             self.mainWidget.setFixedSize(self.width() - 20, self.height() - 20) """
             """ self.mainWidget.move(10, 10) """
+            self.mainWidget.setGeometry(10, 10, self.width() - 20, self.height() - 20)
         #setting widget set geometry
         self.settingWidget.resize(self.mainWidget.width() // 3, self.mainWidget.height() - self.titleWidget.height())
         if self.settingWidgetIsOpen:
@@ -6252,6 +6318,11 @@ class MainWindow(QMainWindow):
                 """ self.messageSendWidget.connectSetSizeFinished(self.messageWidgetResize) """
                 self.messageSendWidget.connectResizeFinished(self.messageWidgetResize)
                 self.messageSendWidget.connectSetTexting(self.getSetTexting)
+                self.messageSendWidget.connectExecuteNext(self.onExecuteNext)
+                #MessageWidget
+                self.messageSendWidget.toggleWidget()
+                print('messageSendWidget.toggleWidget')
+                #
                 self.messageWidgetList.append(self.messageSendWidget)
                 #itemSendWidget QWidget
                 self.itemSendWidget = ItemWidget(self)
@@ -6264,14 +6335,8 @@ class MainWindow(QMainWindow):
                 self.sendItem = QListWidgetItem(self.chatShow)
                 self.sendItem.setSizeHint(QSize(self.chatShow.width(), self.messageSendWidget.height() + 10))
                 self.chatShow.setItemWidget(self.sendItem, self.itemSendWidget)
-                #MessageWidget
-                self.messageSendWidget.toggleWidget()
                 #create thread
                 self.thread = messageThread(text, context=context)
-                self.thread.started.connect(self.messageStart)
-                self.thread.newMessage.connect(self.recvMessage)
-                self.thread.finished.connect(self.messageFinish)
-                self.thread.start()
                 """ #disable sendButton
                 self.chatInput.disableSendButton() """
                 #clear text of TextEditFull
@@ -6288,6 +6353,15 @@ class MainWindow(QMainWindow):
             if self.messageRecvWidget:
                 self.messageRecvWidget.breakHandle()
         """ self.isSending = not self.isSending """
+
+    def onExecuteNext(self):
+        QTimer.singleShot(50, self.startThread)
+
+    def startThread(self):
+        self.thread.started.connect(self.messageStart)
+        self.thread.newMessage.connect(self.recvMessage)
+        self.thread.finished.connect(self.messageFinish)
+        self.thread.start()
 
     def messageStart(self):
         #message
@@ -6329,7 +6403,9 @@ class MainWindow(QMainWindow):
     def recvMessage(self, text):
         if self.first:
             self.first = False
-            text = text.strip("\n ")
+            if text[:2] == '\n ':
+                text = text[2:]
+            """ text = text.strip("\n ") """
         self.Message += text
         if self.isContinueShow:
             #messageWidget set text

@@ -5,8 +5,8 @@
     <style name="Selection" foreground="#eff0f1" background="#3daee9"/>
     <style name="Parentheses" foreground="#ff0000" background="#b4eeb4"/>
     <style name="ParenthesesMismatch" background="#ff00ff"/>
-    <style name="Number" foreground="#d2bd48"/>
-    <style name="String" foreground="#399cc6"/>
+    <style name="Number" foreground="#6eb3e4"/>
+    <style name="String" foreground="#71b1e4"/>
     <style name="Module" foreground="#6dae59"/>
     <style name="Type" foreground="#6dae59"/>
     <style name="DefType" foreground="#4070e0"/>
@@ -14,8 +14,8 @@
     <style name="Global" foreground="#ce5c00"/>
     <style name="Static" foreground="#800080"/>
     <style name="VirtualMethod" foreground="#00677c" background="#ffffff" italic="true"/>
-    <style name="Function" foreground="#6dae59"/>
-    <style name="Keyword" foreground="#a6538c"/>
+    <style name="Function" foreground="#c49edc"/>
+    <style name="Keyword" foreground="#db6054"/>
     <style name="Vari" foreground="#4070e0"/>
     <style name="Dot" foreground="#b2aaa4"/>
     <style name="PrimitiveType" foreground="#a6538c"/>

@@ -5,21 +5,21 @@
     <style name="Selection" foreground="#eff0f1" background="#3daee9"/>
     <style name="Parentheses" foreground="#ff0000" background="#b4eeb4"/>
     <style name="ParenthesesMismatch" background="#ff00ff"/>
-    <style name="Number" foreground="#ffff00"/>
-    <style name="String" foreground="#399cc6"/>
+    <style name="Number" foreground="#0f68c6"/>
+    <style name="String" foreground="#2a4d7a"/>
     <style name="Module" foreground="#6dae59"/>
     <style name="Type" foreground="#6dae59"/>
-    <style name="DefType" foreground="#4070e0"/>
+    <style name="DefType" foreground="#355ea5"/>
     <style name="Local" foreground="#092e64"/>
     <style name="Global" foreground="#ce5c00"/>
     <style name="Static" foreground="#800080"/>
     <style name="VirtualMethod" foreground="#00677c" background="#ffffff" italic="true"/>
-    <style name="Function" foreground="#6dae59"/>
-    <style name="Keyword" foreground="#a6538c"/>
-    <style name="Vari" foreground="#4070e0"/>
+    <style name="Function" foreground="#7a49c7"/>
+    <style name="Keyword" foreground="#d63c4c"/>
+    <style name="Vari" foreground="#355ea5"/>
     <style name="Dot" foreground="#4e565c"/>
     <style name="PrimitiveType" foreground="#a6538c"/>
     <style name="Preprocessor" foreground="#d0605d"/>
     <style name="Label" foreground="#800000"/>
-    <style name="Comment" foreground="#aaa676"/>
+    <style name="Comment" foreground="#ccaa18"/>
 </style-scheme>

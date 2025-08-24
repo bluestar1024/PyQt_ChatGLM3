@@ -1,6 +1,6 @@
 http://127.0.0.1:11434/v1
 EMPTY
-qwen2.5:0.5b
+deepseek-r1:1.5b
 5000
 0.8
 0.8

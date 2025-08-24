@@ -22,6 +22,7 @@ import mistune
 
 #test
 import time
+import json
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 font_file_path = os.path.normpath(os.path.join(current_dir, '..', 'font', 'msyhl.ttc')).replace('\\', '/')
@@ -131,7 +132,7 @@ a.b.fun()
 </think>
 '''
 
-testText = '''<think>
+testText3 = '''<think>
 让我想一下两种方法。第一种方法更直观，适合新手理解。第二种方法效率更高，特别是当n很大的时候。那么对于这个问题来说，两种方式都行。我应该两种方法都写吗？可能问题只需要一种实现，但为了全面，我可以两种情况都考虑一下。
 
 那我先写出循环的方法。Java中，for循环从1到100，每次加i。代码结构大概是：
@@ -292,6 +293,152 @@ print(total)
 这些代码都使用了高斯公式来计算从 1 到 100 的和，结果都是 5050。
 '''
 
+testText4 = '''<think>
+让我想一下两种方法。第一种方法更直观，适合新手理解。第二种方法效率更高，特别是当n很大的时候。那么对于这个问题来说，两种方式都行。我应该两种方法都写吗？可能问题只需要一种实现，但为了全面，我可以两种情况都考虑一下。
+
+那我先写出循环的方法。Java中，for循环从1到100，每次加i。代码结构大概是：
+
+```python
+n = 101
+total = n * (n + 1) // 2
+print(total)
+```
+
+然后是Python的部分。Python的语法更简单，循环的话：
+### jfdls;lf
+```python
+n = 102
+total = n * (n + 1) // 2
+print(total)
+```
+
+总结一下，每个语言可以有两种实现方式，但问题可能只需要一种，所以我可以选择其中一种，比如公式的方法，这样更简洁高效。
+</think>
+
+以下是分别计算整数 1 到 100 的和的代码示例：
+
+### C++
+```python
+n = 103
+total = n * (n + 1) // 2
+print(total)
+```
+
+### Python
+```python
+n = 104
+total = n * (n + 1) // 2
+print(total)
+```
+
+这些代码都使用了高斯公式来计算从 1 到 100 的和，结果都是 5050。
+
+### C++
+```python
+n = 105
+total = n * (n + 1) // 2
+print(total)
+```
+
+### Python
+```python
+n = 106
+total = n * (n + 1) // 2
+print(total)
+```
+
+这些代码都使用了高斯公式来计算从 1 到 100 的和，结果都是 5050。
+
+### C++
+```python
+n = 107
+total = n * (n + 1) // 2
+print(total)
+```
+
+### Python
+```python
+n = 108
+total = n * (n + 1) // 2
+print(total)
+```
+
+这些代码都使用了高斯公式来计算从 1 到 100 的和，结果都是 5050。
+'''
+
+testText = '''<think>
+让我想一下两种方法。第一种方法更直观，适合新手理解。第二种方法效率更高，特别是当n很大的时候。那么对于这个问题来说，两种方式都行。我应该两种方法都写吗？可能问题只需要一种实现，但为了全面，我可以两种情况都考虑一下。
+
+那我先写出循环的方法。Java中，for循环从1到100，每次加i。代码结构大概是：
+
+```python
+n = 100
+total = n * (n + 1) // 2
+print(total)
+```
+
+然后是Python的部分。Python的语法更简单，循环的话：
+### jfdls;lf
+```python
+n = 100
+total = n * (n + 1) // 2
+print(total)
+```
+
+总结一下，每个语言可以有两种实现方式，但问题可能只需要一种，所以我可以选择其中一种，比如公式的方法，这样更简洁高效。
+</think>
+
+以下是分别计算整数 1 到 100 的和的代码示例：
+
+### C++
+```python
+n = 100
+total = n * (n + 1) // 2
+print(total)
+```
+
+### Python
+```python
+n = 100
+total = n * (n + 1) // 2
+print(total)
+```
+
+这些代码都使用了高斯公式来计算从 1 到 100 的和，结果都是 5050。
+
+### C++
+```python
+n = 100
+total = n * (n + 1) // 2
+print(total)
+```
+
+### Python
+```python
+n = 100
+total = n * (n + 1) // 2
+print(total)
+```
+
+这些代码都使用了高斯公式来计算从 1 到 100 的和，结果都是 5050。
+
+### C++
+```python
+n = 100
+total = n * (n + 1) // 2
+print(total)
+```
+
+### Python
+```python
+n = 100
+total = n * (n + 1) // 2
+print(total)
+```
+
+这些代码都使用了高斯公式来计算从 1 到 100 的和，结果都是 5050。
+'''
+
 class messageThread(QThread):
     newMessage = pyqtSignal(str)
 
@@ -344,6 +491,10 @@ class messageThread(QThread):
         else:
             print("Error:", response.status_code)
         return
+
+    def stop(self):
+        self.terminate()
+        self.wait()
 """ class messageThread(QThread):
     newMessage = pyqtSignal(str)
 
@@ -360,8 +511,8 @@ class messageThread(QThread):
     def run(self):
         self.contentOutput = testText
         if self.use_stream:
-            for i in range(0, len(self.contentOutput), 40):
-                self.newMessage.emit(self.contentOutput[i:i+40])
+            for i in range(0, len(self.contentOutput), 100):
+                self.newMessage.emit(self.contentOutput[i:i+100])
                 time.sleep(1)
         else:
             self.newMessage.emit(self.contentOutput)
@@ -907,7 +1058,10 @@ class WebEngineView(QWebEngineView):
         return QWebEngineView.eventFilter(self, obj, event)
 
     def connectPageLoadFinished(self, fun):
-        self.page().loadFinished.connect(fun)
+        self.loadFinished.connect(fun)
+
+    def connectContentsSizeChanged(self, fun):
+        self.page().contentsSizeChanged.connect(fun)
 
     def contextMenuEvent(self, event):
         # 忽略右键上下文菜单事件
@@ -982,6 +1136,7 @@ class TextShow(QWidget):
         self.webEngineView = WebEngineView()
         self.webEngineView.setMaximumWidth(self.maxWidth)
         self.webEngineView.connectPageLoadFinished(self.onPageLoadFinished)
+        self.webEngineView.connectContentsSizeChanged(self.onContentsSizeChanged)
         self.isLabel = True
         if not self.text == '':
             textWidth = 0
@@ -1019,6 +1174,12 @@ class TextShow(QWidget):
             self.setFixedSize(self.label.width() + 10, self.label.height())
         self.isUser = isUser
         self.isColorful = False
+        #
+        self.updateSizeTimer = QTimer(self)
+        self.updateSizeTimer.setSingleShot(True)
+        self.updateSizeTimer.timeout.connect(self.onUpdateSize)
+        #
+        self.firstExecuteNextEmit = True
 
     """ def paintEvent(self, event):
         #QPainter create
@@ -1082,15 +1243,27 @@ class TextShow(QWidget):
             self.setFixedSize(self.label.width() + 10, self.label.height())
 
     def onPageLoadFinished(self, success):
-        print('onPageLoadFinished')
+        print('TextShow onPageLoadFinished')
+        if success:
+            self.webEngineView.page().runJavaScript("document.body.style.overflowY = 'hidden';")
+            """ self.webEngineView.page().runJavaScript(js, self.updateSize) """
+
+    def onContentsSizeChanged(self, sizeF):
+        print('TextShow onContentsSizeChanged')
+        """ self.updateSize((sizeF.toSize().width(), sizeF.toSize().height())) """
+        """ if self.firstContentsSizeChanged:
+            self.firstContentsSizeChanged = False
+            QTimer.singleShot(20, self.onUpdateSize) """
+        self.updateSizeTimer.start(20)
+
+    def onUpdateSize(self):
+        """ self.updateSize((self.webEngineView.page().contentsSize().toSize().width(), self.webEngineView.page().contentsSize().toSize().height())) """
         js = """
         function getPageSize() {
             var body = document.body;
             var html = document.documentElement;
-            var width = Math.max(body.scrollWidth, body.offsetWidth,
-                                html.clientWidth, html.scrollWidth, html.offsetWidth);
-            var height = Math.max(body.scrollHeight, body.offsetHeight,
-                                html.clientHeight, html.scrollHeight, html.offsetHeight);
+            var width = Math.max(html.clientWidth, html.scrollWidth, html.offsetWidth);
+            var height = Math.max(html.clientHeight, html.scrollHeight, html.offsetHeight);
             var content = document.querySelector('.content');
             if (content) {
                 width = content.offsetWidth;
@@ -1100,21 +1273,26 @@ class TextShow(QWidget):
         }
         getPageSize();
         """
-        if success:
-            self.webEngineView.page().runJavaScript("document.body.style.overflowY = 'hidden';")
-            self.webEngineView.page().runJavaScript(js, self.updateSize)
+        """ self.webEngineView.page().runJavaScript("document.body.style.overflowY = 'hidden';") """
+        self.webEngineView.page().runJavaScript(js, self.updateSize)
 
     def updateSize(self, result):
-        width, height = result
-        if width == 1:
-            print('TextShow size:', width, height)
-            self.onPageLoadFinished(True)
-            return
-        if width != 0 and height != 0:
-            self.webEngineView.setFixedSize(width, height)
-            self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height())
-            self.setSizeFinished.emit()
-            self.executeNext.emit()
+        if result:
+            width, height = result
+            print('textShow size:', width, height)
+            """ if width == 1:
+                print('TextShow size:', width, height)
+                self.onPageLoadFinished(True)
+                return """
+            if width != 0 and height != 0:
+                self.webEngineView.setFixedSize(width, height)
+                self.setFixedSize(self.webEngineView.width() + 10, self.webEngineView.height())
+                self.setSizeFinished.emit()
+                if self.firstExecuteNextEmit:
+                    self.firstExecuteNextEmit = False
+                    self.executeNext.emit()
+        else:
+            self.updateSizeTimer.start(10)
 
     def getAlignmentClass(self, format_string):
         # 根据对齐格式返回相应的class名
@@ -1670,6 +1848,7 @@ class ThinkWidget(QWidget):
         self.webEngineView = WebEngineView()
         self.webEngineView.setMaximumWidth(self.maxWidth)
         self.webEngineView.connectPageLoadFinished(self.onPageLoadFinished)
+        self.webEngineView.connectContentsSizeChanged(self.onContentsSizeChanged)
         self.isLabel = True
         if not self.text == '':
             textWidth = 0
@@ -1705,6 +1884,10 @@ class ThinkWidget(QWidget):
             self.mainHLayout.setContentsMargins(0, 0, 0, 0)
             self.setLayout(self.mainHLayout)
             self.setFixedSize(self.label.width(), self.label.height())
+        #
+        self.updateSizeTimer = QTimer(self)
+        self.updateSizeTimer.setSingleShot(True)
+        self.updateSizeTimer.timeout.connect(self.onUpdateSize)
 
     """ def paintEvent(self, event):
         #QPainter create
@@ -1765,14 +1948,27 @@ class ThinkWidget(QWidget):
             self.setFixedSize(self.label.width(), self.label.height())
 
     def onPageLoadFinished(self, success):
+        print('ThinkWidget onPageLoadFinished')
+        if success:
+            self.webEngineView.page().runJavaScript("document.body.style.overflowY = 'hidden';")
+            """ self.webEngineView.page().runJavaScript(js, self.updateSize) """
+
+    def onContentsSizeChanged(self, sizeF):
+        print('TextShow onContentsSizeChanged')
+        """ self.updateSize((sizeF.toSize().width(), sizeF.toSize().height())) """
+        """ if self.firstContentsSizeChanged:
+            self.firstContentsSizeChanged = False
+            QTimer.singleShot(20, self.onUpdateSize) """
+        self.updateSizeTimer.start(20)
+
+    def onUpdateSize(self):
+        """ self.updateSize((self.webEngineView.page().contentsSize().toSize().width(), self.webEngineView.page().contentsSize().toSize().height())) """
         js = """
         function getPageSize() {
             var body = document.body;
             var html = document.documentElement;
-            var width = Math.max(body.scrollWidth, body.offsetWidth,
-                                html.clientWidth, html.scrollWidth, html.offsetWidth);
-            var height = Math.max(body.scrollHeight, body.offsetHeight,
-                                html.clientHeight, html.scrollHeight, html.offsetHeight);
+            var width = Math.max(html.clientWidth, html.scrollWidth, html.offsetWidth);
+            var height = Math.max(html.clientHeight, html.scrollHeight, html.offsetHeight);
             var content = document.querySelector('.content');
             if (content) {
                 width = content.offsetWidth;
@@ -1782,16 +1978,19 @@ class ThinkWidget(QWidget):
         }
         getPageSize();
         """
-        if success:
-            self.webEngineView.page().runJavaScript("document.body.style.overflowY = 'hidden';")
-            self.webEngineView.page().runJavaScript(js, self.updateSize)
+        """ self.webEngineView.page().runJavaScript("document.body.style.overflowY = 'hidden';") """
+        self.webEngineView.page().runJavaScript(js, self.updateSize)
 
     def updateSize(self, result):
-        width, height = result
-        if width != 0 and height != 0:
-            self.webEngineView.setFixedSize(width, height)
-            self.setFixedSize(self.webEngineView.width(), self.webEngineView.height())
-            self.setSizeFinished.emit()
+        if result:
+            width, height = result
+            print('ThinkWidget size:', width, height)
+            if width != 0 and height != 0:
+                self.webEngineView.setFixedSize(width, height)
+                self.setFixedSize(self.webEngineView.width(), self.webEngineView.height())
+                self.setSizeFinished.emit()
+        else:
+            self.updateSizeTimer.start(10)
 
     def getAlignmentClass(self, format_string):
         # 根据对齐格式返回相应的class名
@@ -2159,6 +2358,8 @@ class CodeEdit(QTextEdit):
         self.m_highlighter = self.m_highlighters["None"]
         """ #isAdjustSizeCalled
         self.isAdjustSizeCalled = False """
+        #isResetText
+        self.isResetText = False
 
     def setThemeStyle(self, isLightThemeStyle=False):
         global code_theme_file_path
@@ -2246,6 +2447,9 @@ class CodeEdit(QTextEdit):
         return 0
 
     def highlightCode(self, text, lexerName='python'):
+        appendText = text.replace(self.text, '')
+        if appendText == text and text in self.text:
+            self.isResetText = True
         self.text = text
         self.lexerName = lexerName
 
@@ -2260,22 +2464,36 @@ class CodeEdit(QTextEdit):
                 self.setHighlighter(self.m_highlighters["LUA"])
             case _:
                 self.setHighlighter(self.m_highlighters["Python"])
+        if not self.m_highlighter.document():
+            self.m_highlighter.setDocument(self.document())
         """ text = self.add_line_numbers(text) """
         """ formatter = HtmlFormatter(style=CustomStyle, noclasses=True)
         html = highlight(text, lexer, formatter) """
         """ html = html.replace('<pre style="line-height: 125%;">', '<pre style="line-height: 100%;">') """
         """ self.setHtml(html) """
-        self.setText(text)
+        """ self.setText(text) """
+        if not self.isResetText:
+            self.setUpdatesEnabled(False)
+            textCursor = QTextCursor(self.document())
+            textCursor.movePosition(QTextCursor.End)
+            textCursor.beginEditBlock()
+            textCursor.insertText(appendText)
+            textCursor.endEditBlock()
+            self.setUpdatesEnabled(True)
+        else:
+            self.setText(self.text)
+            self.isResetText = False
         """ self.setPlainText(text) """
 
     def setHighlighter(self, highlighter):
-        if self.m_highlighter:
-            self.m_highlighter.setDocument(None)
-        self.m_highlighter = highlighter
+        """ if self.m_highlighter:
+            self.m_highlighter.setDocument(None) """
+        if self.m_highlighter != highlighter:
+            self.m_highlighter = highlighter
         if self.m_highlighter:
             """ print('m_highlighter:', self.m_highlighter) """
             self.m_highlighter.setSyntaxStyle(QSyntaxStyle.defaultStyle())
-            self.m_highlighter.setDocument(self.document())
+            """ self.m_highlighter.setDocument(self.document()) """
 
     """ def add_line_numbers(self, text):
         # 根据 '\n' 分割字符串成多行
@@ -2332,8 +2550,6 @@ class CodeEdit(QTextEdit):
     } """
 
 class QSyntaxStyle(QObject):
-    style = None
-
     def __init__(self, parent=None):
         super(QSyntaxStyle, self).__init__(parent)
         self.m_name = ""
@@ -2407,22 +2623,21 @@ class QSyntaxStyle(QObject):
 
     @staticmethod
     def defaultStyle():
-        """ print('QSyntaxStyle defaultStyle') """
-        QSyntaxStyle.style = QSyntaxStyle()
-        if not QSyntaxStyle.style.isLoaded():
-            # 初始化资源文件
-            # Q_INIT_RESOURCE(qcodeeditor_resources)
-            """ print('code_theme_file_path', code_theme_file_path) """
-            fl = QFile(code_theme_file_path)
+        if not hasattr(QSyntaxStyle.defaultStyle, "style"):
+            QSyntaxStyle.defaultStyle.style = QSyntaxStyle()
+            if not QSyntaxStyle.defaultStyle.style.isLoaded():
+                # 初始化资源文件
+                # Q_INIT_RESOURCE(qcodeeditor_resources)
+                fl = QFile(code_theme_file_path)
 
-            if not fl.open(QIODevice.ReadOnly):
-                print("Can't open default style file.")
-                return QSyntaxStyle.style
+                if not fl.open(QIODevice.ReadOnly):
+                    print("Can't open default style file.")
+                    return QSyntaxStyle.defaultStyle.style
 
-            data = fl.readAll().data().decode('utf-8')
-            if not QSyntaxStyle.style.load(data):
-                print("Can't load default style.")
-        return QSyntaxStyle.style
+                data = fl.readAll().data().decode('utf-8')
+                if not QSyntaxStyle.defaultStyle.style.load(data):
+                    print("Can't load default style.")
+        return QSyntaxStyle.defaultStyle.style
 
 class QStyleSyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, document: QTextDocument = None):
@@ -2443,11 +2658,10 @@ class QCXXHighlighter(QStyleSyntaxHighlighter):
         
         # 初始化正则表达式模式：
         self.include_pattern = QRegularExpression(r'(^\s*#\s*include\s*([<"][^:?"<>\|]+[">]))')  # #include 语句
-        self.function_pattern = QRegularExpression(r'(\b([_a-zA-Z][_a-zA-Z0-9]*\s+)?((?:[_a-zA-Z][_a-zA-Z0-9]*\s*::\s*)*[_a-zA-Z][_a-zA-Z0-9]*)(?=\s*\())')  # 函数声明
+        """ self.function_pattern = QRegularExpression(r'(\b([_a-zA-Z][_a-zA-Z0-9]*\s+)?((?:[_a-zA-Z][_a-zA-Z0-9]*\s*::\s*)*[_a-zA-Z][_a-zA-Z0-9]*)(?=\s*\())')  # 函数声明
         self.m_functionPattern = QRegularExpression(r"(\b([A-Za-z0-9_]+(?:\.))*([A-Za-z0-9_]+)(?=\s*\())")
-        """ self.def_type_pattern = QRegularExpression(r'(\b([_a-zA-Z][_a-zA-Z0-9]*)\s+[_a-zA-Z][_a-zA-Z0-9]*\s*[;=])') """  # 类型定义
         self.def_type_pattern = QRegularExpression(r'(\b([_a-zA-Z][_a-zA-Z0-9]*)\s+([_a-zA-Z][_a-zA-Z0-9]*)\s*(?=[;=]))')
-        self.m_variPattern = QRegularExpression(r"(\b[A-Za-z_][A-Za-z0-9_]*\b)")
+        self.m_variPattern = QRegularExpression(r"(\b[A-Za-z_][A-Za-z0-9_]*\b)") """
         self.comment_start_pattern = QRegularExpression(r'/\*')  # 多行注释开始 /*
         self.comment_end_pattern = QRegularExpression(r'\*/')    # 多行注释结束 */
         
@@ -2476,10 +2690,10 @@ class QCXXHighlighter(QStyleSyntaxHighlighter):
             'format': 'Number'
         })
 
-        self.m_highlightDotRules.append((
+        """ self.m_highlightDotRules.append((
             QRegularExpression(r"((?<!\d)\.(?!\d))"),
             "Dot"
-        ))
+        )) """
 
         # 添加字符串的高亮规则
         self.highlight_rules.append({
@@ -2500,7 +2714,7 @@ class QCXXHighlighter(QStyleSyntaxHighlighter):
         })
 
     def highlightBlock(self, text):
-        match_iterator = self.m_variPattern.globalMatch(text)
+        """ match_iterator = self.m_variPattern.globalMatch(text)
         
         while match_iterator.hasNext():
             match = match_iterator.next()
@@ -2509,9 +2723,9 @@ class QCXXHighlighter(QStyleSyntaxHighlighter):
                 match.capturedStart(),
                 match.capturedLength(),
                 self.syntaxStyle().getFormat("Vari")
-            )
+            ) """
 
-        match_iterator = self.function_pattern.globalMatch(text)
+        """ match_iterator = self.function_pattern.globalMatch(text)
         while match_iterator.hasNext():
             match = match_iterator.next()
             # 高亮返回类型部分
@@ -2525,9 +2739,9 @@ class QCXXHighlighter(QStyleSyntaxHighlighter):
                 match.capturedStart(3),
                 match.capturedLength(3),
                 self.syntaxStyle().getFormat("Function")
-            )
+            ) """
 
-        match_iterator = self.m_functionPattern.globalMatch(text)
+        """ match_iterator = self.m_functionPattern.globalMatch(text)
         
         while match_iterator.hasNext():
             match = match_iterator.next()
@@ -2541,9 +2755,9 @@ class QCXXHighlighter(QStyleSyntaxHighlighter):
                 match.capturedStart(3),
                 match.capturedLength(3),
                 self.syntaxStyle().getFormat("Function")
-            )
+            ) """
 
-        match_iterator = self.def_type_pattern.globalMatch(text)
+        """ match_iterator = self.def_type_pattern.globalMatch(text)
         while match_iterator.hasNext():
             match = match_iterator.next()
             # 高亮类型名部分
@@ -2551,9 +2765,9 @@ class QCXXHighlighter(QStyleSyntaxHighlighter):
                 match.capturedStart(3),
                 match.capturedLength(3),
                 self.syntaxStyle().getFormat("DefType")
-            )
+            ) """
 
-        for rule in self.m_highlightDotRules:
+        """ for rule in self.m_highlightDotRules:
             pattern, format_name = rule
             match_iterator = pattern.globalMatch(text)
             
@@ -2563,7 +2777,7 @@ class QCXXHighlighter(QStyleSyntaxHighlighter):
                     match.capturedStart(),
                     match.capturedLength(),
                     self.syntaxStyle().getFormat(format_name)
-                )
+                ) """
 
         match_iterator = self.include_pattern.globalMatch(text)
         while match_iterator.hasNext():
@@ -2626,13 +2840,10 @@ class QPythonHighlighter(QStyleSyntaxHighlighter):
         self.m_highlightDotRules = []
         self.m_highlightStringRules = []
         self.m_highlightBlockRules = []
-        """ self.m_includePattern = QRegularExpression(r"(import \w+)") """
         self.m_includePattern = QRegularExpression(r"(?:from\s+(\w+(?:\.\w+)*)\s+)?import\s+((?:\w+(?:\s+as\s+\w+)?)(?:\s*,\s*\w+(?:\s+as\s+\w+)?)*|\*)")
-        """ self.m_functionPattern = QRegularExpression(r"(\b([A-Za-z0-9_]+(?:\.))*([A-Za-z0-9_]+)(?=\())") """
-        self.m_functionPattern = QRegularExpression(r"(\b([A-Za-z0-9_]+(?:\.))*([A-Za-z0-9_]+)(?=\s*\())")
-        """ self.m_defTypePattern = QRegularExpression(r"(\b([A-Za-z0-9_]+)\s+[A-Za-z]{1}[A-Za-z0-9_]+\s*[;=])") """
+        """ self.m_functionPattern = QRegularExpression(r"(\b([A-Za-z0-9_]+(?:\.))*([A-Za-z0-9_]+)(?=\s*\())")
         self.m_defTypePattern = QRegularExpression(r"(\b[A-Za-z_][A-Za-z0-9_]*\s*(?=\+?\s*=))")
-        self.m_variPattern = QRegularExpression(r"(\b[A-Za-z_][A-Za-z0-9_]*\b)")
+        self.m_variPattern = QRegularExpression(r"(\b[A-Za-z_][A-Za-z0-9_]*\b)") """
 
         """ current_dir = QDir.currentPath() """
         """ print("当前工作目录:", current_dir) """
@@ -2667,10 +2878,10 @@ class QPythonHighlighter(QStyleSyntaxHighlighter):
             "Number"
         ))
 
-        self.m_highlightDotRules.append((
+        """ self.m_highlightDotRules.append((
             QRegularExpression(r"((?<!\d)\.(?!\d))"),
             "Dot"
-        ))
+        )) """
         
         # Strings
         self.m_highlightStringRules.append((
@@ -2699,11 +2910,9 @@ class QPythonHighlighter(QStyleSyntaxHighlighter):
             QRegularExpression(r"(''')"),
             "String"
         ))
-        #
-        """ self.hCount = 0 """
 
     def highlightBlock(self, text: str) -> None:
-        match_iterator = self.m_variPattern.globalMatch(text)
+        """ match_iterator = self.m_variPattern.globalMatch(text)
         
         while match_iterator.hasNext():
             match = match_iterator.next()
@@ -2712,10 +2921,10 @@ class QPythonHighlighter(QStyleSyntaxHighlighter):
                 match.capturedStart(),
                 match.capturedLength(),
                 self.syntaxStyle().getFormat("Vari")
-            )
+            ) """
 
         # Checking for function
-        match_iterator = self.m_functionPattern.globalMatch(text)
+        """ match_iterator = self.m_functionPattern.globalMatch(text)
         
         while match_iterator.hasNext():
             match = match_iterator.next()
@@ -2729,9 +2938,9 @@ class QPythonHighlighter(QStyleSyntaxHighlighter):
                 match.capturedStart(3),
                 match.capturedLength(3),
                 self.syntaxStyle().getFormat("Function")
-            )
+            ) """
         
-        match_iterator = self.m_defTypePattern.globalMatch(text)
+        """ match_iterator = self.m_defTypePattern.globalMatch(text)
         
         while match_iterator.hasNext():
             match = match_iterator.next()
@@ -2740,9 +2949,9 @@ class QPythonHighlighter(QStyleSyntaxHighlighter):
                 match.capturedStart(),
                 match.capturedLength(),
                 self.syntaxStyle().getFormat("DefType")
-            )
+            ) """
 
-        for rule in self.m_highlightDotRules:
+        """ for rule in self.m_highlightDotRules:
             pattern, format_name = rule
             match_iterator = pattern.globalMatch(text)
             
@@ -2752,7 +2961,7 @@ class QPythonHighlighter(QStyleSyntaxHighlighter):
                     match.capturedStart(),
                     match.capturedLength(),
                     self.syntaxStyle().getFormat(format_name)
-                )
+                ) """
 
         match_iterator = self.m_includePattern.globalMatch(text)
         
@@ -2781,8 +2990,6 @@ class QPythonHighlighter(QStyleSyntaxHighlighter):
         # Handle multi-line highlighting rules (like triple-quoted strings)
         self.setCurrentBlockState(0)
         start_index = 0
-        """ self.hCount += 1 """
-        """ print('hCount:', self.hCount) """
         """ print('1 currentBlockState:', self.currentBlock(), self.currentBlockState()) """
         highlight_rule_id = self.previousBlockState()
         """ print('2 previousBlockState:', self.currentBlock(), highlight_rule_id) """
@@ -3917,6 +4124,10 @@ class MessageWidget(QWidget):
         self.mainHLayout.setSpacing(5)
         #main widget set size
         self.setFixedSize(self.imageLabel.width() + self.textBoxWidget.width() + 5, max(self.imageLabel.height(), self.textBoxWidget.height()))
+        #
+        self.aiUpdateSizeTimer = QTimer(self)
+        self.aiUpdateSizeTimer.setSingleShot(True)
+        self.aiUpdateSizeTimer.timeout.connect(self.onAiUpdateSize)
 
     def breakHandle(self):
         if not self.thinkTextIsRecvEnd:
@@ -3969,6 +4180,22 @@ class MessageWidget(QWidget):
                 else:
                     print('end_marker:空') """
                 code_blocks.append([language, code, end_marker])
+
+        """ current_file_dir = os.path.dirname(os.path.abspath(__file__))
+        parent_dir = os.path.dirname(current_file_dir)
+        output_dir = os.path.join(parent_dir, "test")
+        blocks = []
+        for idx, (lang, code, end_marker) in enumerate(code_blocks, start=1):
+            blocks.append({
+                "language": lang,
+                "code": code,
+                "index": idx
+            })
+        payload = {"blocks": blocks}
+        out_path = os.path.join(output_dir, 'code_records.json')
+        with open(out_path, "a", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+            f.write('\n\n') """
         return code_blocks
 
     def getThinkIsExpanded(self):
@@ -4026,13 +4253,11 @@ class MessageWidget(QWidget):
         if self.isUser:
             self.resizeFinished.emit()
         else:
-            if isinstance(self.sender(), ThinkWidget):
+            """ if isinstance(self.sender(), ThinkWidget):
                 self.thinkWidgetSizeFinshedCount += 1
                 if self.thinkWidgetSizeFinshedCount == len(self.thinkTextShowList):
                     self.thinkWidgetSizeFinshedCount = 0
-                    """ self.setSize() """
                     if self.thinkWidgetSizeFinshedCount == 0 and self.textShowSizeFinshedCount == 0:
-                        """ print('ThinkWidget sizeFinish:', self.thinkWidgetSizeFinshedCount, self.textShowSizeFinshedCount) """
                         self.resizeFinished.emit()
                         self.setTexting.emit(False)
                         if self.thinkText != '':
@@ -4040,22 +4265,29 @@ class MessageWidget(QWidget):
                                 self.thinkButton.setThinkTimeLength(self.thinkTimeLengthList[self.thinkTimeIndex])
                             else:
                                 self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
-                        """ print('thinkTimeLengthList:', self.thinkTimeLengthList) """
             else:
                 self.textShowSizeFinshedCount += 1
                 if self.textShowSizeFinshedCount == len(self.resultTextShowList):
                     self.textShowSizeFinshedCount = 0
-                    """ self.setSize() """
                     if self.thinkWidgetSizeFinshedCount == 0 and self.textShowSizeFinshedCount == 0:
-                        """ print('TextShow sizeFinish:', self.thinkWidgetSizeFinshedCount, self.textShowSizeFinshedCount) """
                         self.resizeFinished.emit()
                         self.setTexting.emit(False)
                         if self.thinkText != '':
                             if self.thinkButton.getThinkTimeLength() == 0:
                                 self.thinkButton.setThinkTimeLength(self.thinkTimeLengthList[self.thinkTimeIndex])
                             else:
-                                self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
-                        """ print('thinkTimeLengthList:', self.thinkTimeLengthList) """
+                                self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength() """
+            self.aiUpdateSizeTimer.start(10)
+
+    def onAiUpdateSize(self):
+        print('onAiUpdateSize')
+        self.resizeFinished.emit()
+        self.setTexting.emit(False)
+        if self.thinkText != '':
+            if self.thinkButton.getThinkTimeLength() == 0:
+                self.thinkButton.setThinkTimeLength(self.thinkTimeLengthList[self.thinkTimeIndex])
+            else:
+                self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
 
     def setSize(self):
         if self.isUser:
@@ -4233,6 +4465,24 @@ class MessageWidget(QWidget):
                         resultTempTextList = resultTempText.split('```' + language + '\n' + code + '```', maxsplit=1)
                     else:
                         resultTempTextList = resultTempText.split('```' + language + '\n' + code, maxsplit=1)
+
+                    """ current_file_dir = os.path.dirname(os.path.abspath(__file__))
+                    parent_dir = os.path.dirname(current_file_dir)
+                    output_dir = os.path.join(parent_dir, "test")
+                    blocks = []
+                    blocks.append({
+                        "resultText": self.resultText,
+                        "resultTempTextList": resultTempTextList,
+                        "resultTempText": resultTempText,
+                        "language": language,
+                        "code": code,
+                        "end_marker": end_marker
+                    })
+                    payload = {"blocks": blocks}
+                    out_path = os.path.join(output_dir, 'messageWidgetText_records1.json')
+                    with open(out_path, "a", encoding="utf-8") as f:
+                        json.dump(payload, f, ensure_ascii=False, indent=2)
+                        f.write('\n\n') """
                     resultSplitTextList.append(resultTempTextList[0])
                     resultTempText = resultTempTextList[1]
                 resultSplitTextList.append(resultTempText)
@@ -6355,6 +6605,7 @@ class MainWindow(QMainWindow):
         """ self.isSending = not self.isSending """
 
     def onExecuteNext(self):
+        print('onExecuteNext')
         QTimer.singleShot(50, self.startThread)
 
     def startThread(self):

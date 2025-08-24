@@ -8,7 +8,7 @@
     <style name="Number" foreground="#0f68c6"/>
     <style name="String" foreground="#2a4d7a"/>
     <style name="Module" foreground="#6dae59"/>
-    <style name="Type" foreground="#6dae59"/>
+    <style name="Type" foreground="#7a49c7"/>
     <style name="DefType" foreground="#355ea5"/>
     <style name="Local" foreground="#092e64"/>
     <style name="Global" foreground="#ce5c00"/>

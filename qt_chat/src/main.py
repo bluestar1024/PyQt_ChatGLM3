@@ -9,7 +9,7 @@ import sys, os
 from enum import Enum
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QAbstractItemView, QListWidget, QListWidgetItem, QSpinBox, QDoubleSpinBox, QSlider, QSizePolicy, QGridLayout, QLineEdit, QSplitter, QToolTip, QMenu, QFrame, QGraphicsDropShadowEffect
 from PyQt5.QtCore import pyqtSignal, QThread, Qt, QSize, QTimer, QDateTime, QRect, QVariant, QPropertyAnimation, QEasingCurve, QEvent, QPoint, pyqtProperty, QTimer, QCoreApplication, QUrl, QTime, QObject, QXmlStreamReader, QFile, QIODevice, QRegularExpression
-from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextCursor, QTextCharFormat, QTextDocument, QSyntaxHighlighter, QTextOption, QGuiApplication
+from PyQt5.QtGui import QPainter, QColor, QPainterPath, QBrush, QFontMetricsF, QFont, QIcon, QPalette, QPixmap, QPen, QCursor, QFontDatabase, QMouseEvent, QLinearGradient, QTextCursor, QTextCharFormat, QTextDocument, QSyntaxHighlighter, QTextOption, QTextLayout
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from openai import OpenAI
 import math
@@ -42,8 +42,7 @@ init_temperature_currentVal = 0.8
 temperature_singleStep = 0.01
 
 windowFontPointSize = 10
-bubbleFontPointSize = 10
-bubbleFontPixelSize = 20
+windowFontPixelSize = 20
 buttonFontPointSize = 9
 titleFontPointSize = 14
 textEditFullBGColor = QColor(224, 224, 224)
@@ -175,6 +174,7 @@ class FunWidget(QWidget):
                 self.titleLabel.setFont(font)
         self.titleLabel.setText('AI助理')
         self.titleLabel.adjustSize()
+        self.titleLabel.setFixedWidth(self.titleLabel.width() + 2)
         #funMidSubWidget QWidget
         self.funMidSubWidget = Widget()
         self.funMidSubWidget.resize(self.titleLabel.width(), self.titleLabel.height())
@@ -218,14 +218,93 @@ class FunWidget(QWidget):
         self.mainHLayout.addWidget(self.funRightSubWidget)
         self.mainHLayout.setContentsMargins(0, 0, 0, 0)
         #FunWidget adjust size
-        self.resize(1200, 60)
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        """ self.resize(1200, 60)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed) """
+        self.setFixedSize(1200, 60)
+        #setMouseTracking
+        self.setMouseTracking(True)
+        #widgetSizeDict
+        self.widgetSizeDict = {}
+        self.widgetSizeDict['self'] = self.size()
+        self.widgetSizeDict['chatRecordsButton'] = self.chatRecordsButton.size()
+        self.widgetSizeDict['chatRecordsButton iconSize'] = self.chatRecordsButton.iconSize()
+        self.widgetSizeDict['funLeftSubWidget'] = self.funLeftSubWidget.size()
+        self.widgetSizeDict['funLeftSubHLayout contentsMargins'] = self.funLeftSubHLayout.contentsMargins()
+        self.widgetSizeDict['titleLabel'] = self.titleLabel.size()
+        self.widgetSizeDict['funMidSubWidget'] = self.funMidSubWidget.size()
+        self.widgetSizeDict['funMidSubHLayout contentsMargins'] = self.funMidSubHLayout.contentsMargins()
+        self.widgetSizeDict['newChatButton'] = self.newChatButton.size()
+        self.widgetSizeDict['newChatButton iconSize'] = self.newChatButton.iconSize()
+        self.widgetSizeDict['funRightSubWidget'] = self.funRightSubWidget.size()
+        self.widgetSizeDict['funRightSubHLayout contentsMargins'] = self.funRightSubHLayout.contentsMargins()
+        self.widgetSizeDict['mainHLayout contentsMargins'] = self.mainHLayout.contentsMargins()
+
+    def mouseMoveEvent(self, event):
+        QWidget.mouseMoveEvent(self, event)
+        event.ignore()
 
     def connectChatRecordsButtonClick(self, fun):
         self.chatRecordsButton.clicked.connect(fun)
 
     def connectNewChatButtonClick(self, fun):
         self.newChatButton.clicked.connect(fun)
+
+    def setSize(self):
+        self.funLeftSubWidget.setFixedSize(round((self.width() - self.funMidSubWidget.width()) / 2), self.funLeftSubWidget.height())
+        self.funRightSubWidget.setFixedSize(round((self.width() - self.funMidSubWidget.width()) / 2), self.funRightSubWidget.height())
+
+    def saveWidgetSize(self):
+        #widgetSizeDict
+        self.widgetSizeDict['self'] = self.size()
+        self.widgetSizeDict['chatRecordsButton'] = self.chatRecordsButton.size()
+        self.widgetSizeDict['chatRecordsButton iconSize'] = self.chatRecordsButton.iconSize()
+        self.widgetSizeDict['funLeftSubWidget'] = self.funLeftSubWidget.size()
+        self.widgetSizeDict['funLeftSubHLayout contentsMargins'] = self.funLeftSubHLayout.contentsMargins()
+        self.widgetSizeDict['titleLabel'] = self.titleLabel.size()
+        self.widgetSizeDict['funMidSubWidget'] = self.funMidSubWidget.size()
+        self.widgetSizeDict['funMidSubHLayout contentsMargins'] = self.funMidSubHLayout.contentsMargins()
+        self.widgetSizeDict['newChatButton'] = self.newChatButton.size()
+        self.widgetSizeDict['newChatButton iconSize'] = self.newChatButton.iconSize()
+        self.widgetSizeDict['funRightSubWidget'] = self.funRightSubWidget.size()
+        self.widgetSizeDict['funRightSubHLayout contentsMargins'] = self.funRightSubHLayout.contentsMargins()
+        self.widgetSizeDict['mainHLayout contentsMargins'] = self.mainHLayout.contentsMargins()
+
+    def resetWidgetSize(self):
+        self.setSize()
+        self.saveWidgetSize()
+
+    def updateSize(self, curDpi, lastDpi):
+        self.setFixedSize(round(self.widgetSizeDict['self'].width() * curDpi / lastDpi), round(self.widgetSizeDict['self'].height() * curDpi / lastDpi))
+        self.chatRecordsButton.setFixedSize(round(self.widgetSizeDict['chatRecordsButton'].width() * curDpi / lastDpi), round(self.widgetSizeDict['chatRecordsButton'].height() * curDpi / lastDpi))
+        self.chatRecordsButton.setIconSize(QSize(round(self.widgetSizeDict['chatRecordsButton iconSize'].width() * curDpi / lastDpi), round(self.widgetSizeDict['chatRecordsButton iconSize'].height() * curDpi / lastDpi)))
+        self.chatRecordsButton.setStyleSheet(f'''
+        QPushButton{{
+            border: none;
+            border-radius: {self.chatRecordsButton.width() // 2}px;
+        }}
+        QPushButton:hover{{
+            background: #d0d0d0;
+        }}
+        ''')
+        self.funLeftSubWidget.setFixedSize(round(self.widgetSizeDict['funLeftSubWidget'].width() * curDpi / lastDpi), round(self.widgetSizeDict['funLeftSubWidget'].height() * curDpi / lastDpi))
+        self.funLeftSubHLayout.setContentsMargins(round(self.widgetSizeDict['funLeftSubHLayout contentsMargins'].left() * curDpi / lastDpi), round(self.widgetSizeDict['funLeftSubHLayout contentsMargins'].top() * curDpi / lastDpi), round(self.widgetSizeDict['funLeftSubHLayout contentsMargins'].right() * curDpi / lastDpi), round(self.widgetSizeDict['funLeftSubHLayout contentsMargins'].bottom() * curDpi / lastDpi))
+        self.titleLabel.setFixedSize(round(self.widgetSizeDict['titleLabel'].width() * curDpi / lastDpi), round(self.widgetSizeDict['titleLabel'].height() * curDpi / lastDpi))
+        self.funMidSubWidget.setFixedSize(round(self.widgetSizeDict['funMidSubWidget'].width() * curDpi / lastDpi), round(self.widgetSizeDict['funMidSubWidget'].height() * curDpi / lastDpi))
+        self.funMidSubHLayout.setContentsMargins(0, 0, 0, 0)
+        self.newChatButton.setFixedSize(round(self.widgetSizeDict['newChatButton'].width() * curDpi / lastDpi), round(self.widgetSizeDict['newChatButton'].height() * curDpi / lastDpi))
+        self.newChatButton.setIconSize(QSize(round(self.widgetSizeDict['newChatButton iconSize'].width() * curDpi / lastDpi), round(self.widgetSizeDict['newChatButton iconSize'].height() * curDpi / lastDpi)))
+        self.newChatButton.setStyleSheet(f'''
+        QPushButton{{
+            border: none;
+            border-radius: {self.newChatButton.width() // 2}px;
+        }}
+        QPushButton:hover{{
+            background: #d0d0d0;
+        }}
+        ''')
+        self.funRightSubWidget.setFixedSize(round(self.widgetSizeDict['funRightSubWidget'].width() * curDpi / lastDpi), round(self.widgetSizeDict['funRightSubWidget'].height() * curDpi / lastDpi))
+        self.funRightSubHLayout.setContentsMargins(round(self.widgetSizeDict['funRightSubHLayout contentsMargins'].left() * curDpi / lastDpi), round(self.widgetSizeDict['funRightSubHLayout contentsMargins'].top() * curDpi / lastDpi), round(self.widgetSizeDict['funRightSubHLayout contentsMargins'].right() * curDpi / lastDpi), round(self.widgetSizeDict['funRightSubHLayout contentsMargins'].bottom() * curDpi / lastDpi))
+        self.mainHLayout.setContentsMargins(0, 0, 0, 0)
 
 class ListWidget(QListWidget):
     def __init__(self, parent=None):
@@ -372,6 +451,10 @@ class TextEdit(QTextEdit):
         self.setMouseTracking(True)
         #isSending
         self.isSending = False
+        #widgetSizeDict
+        self.widgetSizeDict = {}
+        self.widgetSizeDict['sendButton'] = self.sendButton.size()
+        self.widgetSizeDict['sendButton iconSize'] = self.sendButton.iconSize()
 
     def contextMenuEvent(self, event):
         menu = CustomMenu(self)
@@ -428,6 +511,13 @@ class TextEdit(QTextEdit):
             event.accept()
         else:
             QTextEdit.keyPressEvent(self, event)
+
+    def updateSendButtonSize(self, curDpi, lastDpi):
+        self.sendButton.setFixedSize(round(self.widgetSizeDict['sendButton'].width() * curDpi / lastDpi), round(self.widgetSizeDict['sendButton'].height() * curDpi / lastDpi))
+        self.sendButton.setIconSize(QSize(round(self.widgetSizeDict['sendButton iconSize'].width() * curDpi / lastDpi), round(self.widgetSizeDict['sendButton iconSize'].height() * curDpi / lastDpi)))
+
+        self.widgetSizeDict['sendButton'] = self.sendButton.size()
+        self.widgetSizeDict['sendButton iconSize'] = self.sendButton.iconSize()
 
     def connectSendButtonClick(self, fun):
         self.sendButton.clicked.connect(fun)
@@ -551,6 +641,9 @@ class TextEditFull(QWidget):
 
     def clearFocus(self):
         self.textEdit.clearFocus()
+
+    def updateSendButtonSize(self, curDpi, lastDpi):
+        self.textEdit.updateSendButtonSize(curDpi, lastDpi)
 
     def resetWidgetSize(self):
         self.textEdit.resize(self.width() - 30, self.height() - 30)
@@ -693,7 +786,7 @@ class TextShow(QWidget):
             if font_families:
                 font_family = font_families[0]
                 self.font = QFont(font_family)
-                self.font.setPixelSize(bubbleFontPixelSize)
+                self.font.setPixelSize(windowFontPixelSize)
                 self.label.setFont(self.font)
                 self.font_metrics = QFontMetricsF(self.font)
         self.mainHLayout = QHBoxLayout()
@@ -948,7 +1041,7 @@ class TextShow(QWidget):
                         width: 100%;
                         height: 100%;
                         box-sizing: border-box;
-                        font-size: {bubbleFontPixelSize}px;
+                        font-size: {windowFontPixelSize}px;
                     }}
                     .content {{
                         width: auto;
@@ -1131,15 +1224,10 @@ class ThinkingButton(QWidget):
 
     def __init__(self, parent=None):
         super(ThinkingButton, self).__init__(parent)
-        self.setFixedHeight(30)
+        """ self.setFixedHeight(30) """
         self.setCursor(Qt.PointingHandCursor)
-        self.isShowThinkContent = False
+        self.isShowThinkContent = True
         self.backgroundColor = QColor(248, 248, 248)
-        #leftIconLabel QLabel
-        self.leftIconLabel = QLabel()
-        self.thinking_icon_images_path = os.path.join(images_dir, 'thinking_icon.png').replace('\\', '/')
-        self.leftIconLabel.setPixmap(QPixmap(f'{self.thinking_icon_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
-        self.leftIconLabel.setFixedSize(20, 20)
         #textLabel QLabel
         self.textLabel = QLabel('思考中...')
         font_id = QFontDatabase.addApplicationFont(font_file_path)
@@ -1148,7 +1236,7 @@ class ThinkingButton(QWidget):
             if font_families:
                 font_family = font_families[0]
                 font = QFont(font_family)
-                font.setPixelSize(bubbleFontPixelSize)
+                font.setPixelSize(windowFontPixelSize)
                 self.textLabel.setFont(font)
         self.textLabel.setTextFormat(Qt.PlainText)
         self.textLabel.setMargin(0)
@@ -1157,17 +1245,21 @@ class ThinkingButton(QWidget):
         self.textLabel.adjustSize()
         self.textLabel.setStyleSheet('''
         QLabel{
-            background: green;
             padding: 0px;
             margin: 0px;
         }
         ''')
+        #leftIconLabel QLabel
+        self.leftIconLabel = QLabel()
+        self.leftIconLabel.setFixedSize(self.textLabel.height() - 6, self.textLabel.height() - 6)
+        self.thinking_icon_images_path = os.path.join(images_dir, 'thinking_icon.png').replace('\\', '/')
+        self.leftIconLabel.setPixmap(QPixmap(f'{self.thinking_icon_images_path}').scaled(self.textLabel.height() - 6, self.textLabel.height() - 6, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         #rightIconLabel QLabel
         self.rightIconLabel = QLabel()
+        self.rightIconLabel.setFixedSize(self.textLabel.height() - 6, self.textLabel.height() - 6)
         self.arrow_up_images_path = os.path.join(images_dir, 'arrow_up.png').replace('\\', '/')
         self.arrow_down_images_path = os.path.join(images_dir, 'arrow_down.png').replace('\\', '/')
-        self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_up_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
-        self.rightIconLabel.setFixedSize(20, 20)
+        self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_up_images_path}').scaled(self.textLabel.height() - 6, self.textLabel.height() - 6, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         #QHBoxLayout
         mainHLayout = QHBoxLayout()
         self.setLayout(mainHLayout)
@@ -1176,19 +1268,10 @@ class ThinkingButton(QWidget):
         mainHLayout.addWidget(self.rightIconLabel)
         mainHLayout.setContentsMargins(5, 5, 5, 5)
         mainHLayout.setSpacing(0)
-        self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
+        self.setFixedSize(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10, self.textLabel.height() + 10)
         #thinkTime
         self.thinkTimeLength = 0
         self.startThinkTime = QTime.currentTime()
-
-    def getThinkTimeLength(self):
-        return self.thinkTimeLength
-
-    def setThinkTimeLength(self, thinkTimeLength):
-        self.thinkTimeLength = thinkTimeLength
-        self.textLabel.setText(f"已深度思考(用时{self.thinkTimeLength}秒)")
-        self.textLabel.adjustSize()
-        self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
 
     def enterEvent(self, event):
         self.backgroundColor = QColor(232, 232, 232)
@@ -1218,21 +1301,33 @@ class ThinkingButton(QWidget):
     def mousePressEvent(self, event):
         self.isShowThinkContent = not self.isShowThinkContent
         if self.isShowThinkContent:
-            self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_up_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
+            self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_up_images_path}').scaled(self.textLabel.height() - 6, self.textLabel.height() - 6, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         else:
-            self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_down_images_path}').scaled(20, 20, Qt.KeepAspectRatio))
+            self.rightIconLabel.setPixmap(QPixmap(f'{self.arrow_down_images_path}').scaled(self.textLabel.height() - 6, self.textLabel.height() - 6, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         self.clicked.emit()
         QWidget.mousePressEvent(self, event)
 
     def connectButtonClick(self, fun):
         self.clicked.connect(fun)
 
+    def setIsShowThinkContent(self, isShowThinkContent):
+        self.isShowThinkContent = isShowThinkContent
+
     def setThinkEnd(self):
         endThinkTime = QTime.currentTime()
         self.thinkTimeLength = self.startThinkTime.secsTo(endThinkTime)
         self.textLabel.setText(f"已深度思考(用时{self.thinkTimeLength}秒)")
         self.textLabel.adjustSize()
-        self.setFixedWidth(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10)
+        self.setFixedSize(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10, self.textLabel.height() + 10)
+
+    def getThinkTimeLength(self):
+        return self.thinkTimeLength
+
+    def setThinkTimeLength(self, thinkTimeLength):
+        self.thinkTimeLength = thinkTimeLength
+        self.textLabel.setText(f"已深度思考(用时{self.thinkTimeLength}秒)")
+        self.textLabel.adjustSize()
+        self.setFixedSize(self.leftIconLabel.width() + self.textLabel.width() + self.rightIconLabel.width() + 10, self.textLabel.height() + 10)
 
 class ThinkWidget(QWidget):
     setSizeFinished = pyqtSignal()
@@ -1251,7 +1346,7 @@ class ThinkWidget(QWidget):
             if font_families:
                 font_family = font_families[0]
                 self.font = QFont(font_family)
-                self.font.setPixelSize(bubbleFontPixelSize)
+                self.font.setPixelSize(windowFontPixelSize)
                 self.label.setFont(self.font)
                 self.font_metrics = QFontMetricsF(self.font)
         self.mainHLayout = QHBoxLayout()
@@ -1499,7 +1594,7 @@ class ThinkWidget(QWidget):
                         width: 100%;
                         height: 100%;
                         box-sizing: border-box;
-                        font-size: {bubbleFontPixelSize}px;
+                        font-size: {windowFontPixelSize}px;
                         color: gray;
                     }}
                     .content {{
@@ -2106,6 +2201,7 @@ class QPythonHighlighter(QStyleSyntaxHighlighter):
         # So they must be applied at last.
 
         # Numbers
+        """ QRegularExpression(r"(\b(0b|0x){0,1}[\d.']+\b)"), """
         self.m_highlightRules.append((
             QRegularExpression(r"(\b(0b|0x)?(\d{1,3}(_?\d{3})*(\.\d+)?)\b)"),
             "Number"
@@ -2168,7 +2264,7 @@ class QPythonHighlighter(QStyleSyntaxHighlighter):
         self.setCurrentBlockState(0)
         start_index = 0
         highlight_rule_id = self.previousBlockState()
-
+        
         start_index = 0
         block_start_index_list = []
 
@@ -2635,6 +2731,7 @@ class CodeShow(QWidget):
         self.resize(self.maxWidth + 2, 40)
         #topWidget QWidget
         self.topWidget = QWidget()
+        self.topWidgetMinimumHeight = 24
         self.topWidget.setStyleSheet('''
         QWidget {
             background-color: #34343c;
@@ -2642,6 +2739,10 @@ class CodeShow(QWidget):
             border-top-right-radius: 7px;
         }
         ''')
+        #topSubLeftWidget QWidget
+        self.topSubLeftWidget = QWidget()
+        #topSubRightWidget QWidget
+        self.topSubRightWidget = QWidget()
         #label QLabel
         self.label = QLabel(lexerName)
         font_id = QFontDatabase.addApplicationFont(font_file_path)
@@ -2655,13 +2756,17 @@ class CodeShow(QWidget):
         self.palette.setColor(QPalette.Text, QColor(Qt.white))
         self.label.setPalette(self.palette)
         self.label.adjustSize()
+        #setFixedHeight
+        self.topWidget.setFixedHeight(max(self.label.height(), self.topWidgetMinimumHeight))
+        self.topSubLeftWidget.setFixedHeight(self.topWidget.height())
+        self.topSubRightWidget.setFixedHeight(self.topWidget.height())
         #toggleThemeButton PushButton
         self.toggleThemeButton = PushButton(tipText='日间主题', tipOffsetX=15, tipOffsetY=35)
-        self.toggleThemeButton.setFixedSize(self.label.height(), self.label.height())
+        self.toggleThemeButton.setFixedSize(self.topSubRightWidget.height() - 10, self.topSubRightWidget.height() - 10)
         self.light_theme_images_path = os.path.join(images_dir, 'light_theme.png').replace('\\', '/')
         self.dark_theme_images_path = os.path.join(images_dir, 'dark_theme.png').replace('\\', '/')
         self.toggleThemeButton.setIcon(QIcon(f"{self.light_theme_images_path}"))
-        self.toggleThemeButton.setIconSize(QSize(20, 20))
+        self.toggleThemeButton.setIconSize(QSize(self.topSubRightWidget.height() - 10, self.topSubRightWidget.height() - 10))
         self.toggleThemeButton.setStyleSheet('''
         QPushButton{
             border: none;
@@ -2672,13 +2777,13 @@ class CodeShow(QWidget):
         self.isLightThemeStyle = False
         #wordWrapButton PushButton
         self.wordWrapButton = PushButton(tipText='折叠成单行', tipOffsetX=15, tipOffsetY=35)
-        self.wordWrapButton.setFixedSize(self.label.height(), self.label.height())
+        self.wordWrapButton.setFixedSize(self.topSubRightWidget.height() - 10, self.topSubRightWidget.height() - 10)
         self.light_word_wrap_images_path = os.path.join(images_dir, 'light_word_wrap.png').replace('\\', '/')
         self.light_single_line_images_path = os.path.join(images_dir, 'light_single_line.png').replace('\\', '/')
         self.dark_word_wrap_images_path = os.path.join(images_dir, 'dark_word_wrap.png').replace('\\', '/')
         self.dark_single_line_images_path = os.path.join(images_dir, 'dark_single_line.png').replace('\\', '/')
         self.wordWrapButton.setIcon(QIcon(f"{self.light_single_line_images_path}"))
-        self.wordWrapButton.setIconSize(QSize(20, 20))
+        self.wordWrapButton.setIconSize(QSize(self.topSubRightWidget.height() - 10, self.topSubRightWidget.height() - 10))
         self.wordWrapButton.setStyleSheet('''
         QPushButton{
             border: none;
@@ -2689,11 +2794,11 @@ class CodeShow(QWidget):
         self.isWordWrap = True
         #codeCopyButton PushButton
         self.codeCopyButton = PushButton(tipText='复制代码', tipOffsetX=15, tipOffsetY=35)
-        self.codeCopyButton.setFixedSize(self.label.height(), self.label.height())
+        self.codeCopyButton.setFixedSize(self.topSubRightWidget.height() - 10, self.topSubRightWidget.height() - 10)
         self.light_code_copy_images_path = os.path.join(images_dir, 'light_code_copy.png').replace('\\', '/')
         self.dark_code_copy_images_path = os.path.join(images_dir, 'dark_code_copy.png').replace('\\', '/')
         self.codeCopyButton.setIcon(QIcon(f"{self.light_code_copy_images_path}"))
-        self.codeCopyButton.setIconSize(QSize(20, 20))
+        self.codeCopyButton.setIconSize(QSize(self.topSubRightWidget.height() - 10, self.topSubRightWidget.height() - 10))
         self.codeCopyButton.setStyleSheet('''
         QPushButton{
             border: none;
@@ -2703,22 +2808,18 @@ class CodeShow(QWidget):
         self.codeCopyButton.clicked.connect(self.copyCode)
         #QClipboard
         self.clip = QApplication.clipboard()
-        #topSubLeftWidget QWidget
-        self.topSubLeftWidget = QWidget()
-        self.topSubLeftWidget.setFixedHeight(self.label.height())
+        #topSubLeftHLayout QHBoxLayout
         self.topSubLeftHLayout = QHBoxLayout()
         self.topSubLeftWidget.setLayout(self.topSubLeftHLayout)
         self.topSubLeftHLayout.setAlignment(Qt.AlignLeft)
-        self.topSubLeftHLayout.setContentsMargins(0, 0, 0, 0)
+        self.topSubLeftHLayout.setContentsMargins(0, (self.topSubLeftWidget.height() - self.label.height()) // 2, 0, (self.topSubLeftWidget.height() - self.label.height()) // 2)
         self.topSubLeftHLayout.addWidget(self.label)
-        #topSubRightWidget QWidget
-        self.topSubRightWidget = QWidget()
-        self.topSubRightWidget.setFixedHeight(self.label.height())
+        #topSubRightHLayout QHBoxLayout
         self.topSubRightHLayout = QHBoxLayout()
         self.topSubRightWidget.setLayout(self.topSubRightHLayout)
         self.topSubRightHLayout.setAlignment(Qt.AlignRight)
-        self.topSubRightHLayout.setContentsMargins(0, 0, 0, 0)
-        self.topSubRightHLayout.setSpacing(0)
+        self.topSubRightHLayout.setContentsMargins(0, 5, 0, 5)
+        self.topSubRightHLayout.setSpacing(5)
         self.topSubRightHLayout.addWidget(self.toggleThemeButton)
         self.topSubRightHLayout.addWidget(self.wordWrapButton)
         self.topSubRightHLayout.addWidget(self.codeCopyButton)
@@ -2728,7 +2829,6 @@ class CodeShow(QWidget):
         self.topHLayout.addWidget(self.topSubLeftWidget, 0, Qt.AlignLeft)
         self.topHLayout.addWidget(self.topSubRightWidget, 0, Qt.AlignRight)
         self.topHLayout.setContentsMargins(10, 0, 10, 0)
-        self.topWidget.setFixedHeight(self.label.height())
         #CodeEdit
         self.codeEdit = CodeEdit(self.maxWidth)
         self.codeEdit.setSizeFinished.connect(self.OnSizeFinished)
@@ -2931,6 +3031,7 @@ class MessageWidget(QWidget):
                 thinkSplitTextList.append(thinkTempText)
                 #ThinkingButton
                 self.thinkButton = ThinkingButton()
+                self.thinkButton.setIsShowThinkContent(self.thinkIsExpand)
                 self.thinkButton.connectButtonClick(self.thinkButtonClicked)
                 self.thinkButtonHaveCreated = True
                 #textLayout
@@ -2946,7 +3047,6 @@ class MessageWidget(QWidget):
                     else:
                         j += 1
                     self.thinkBackVLayout.addWidget(self.thinkCodeShowList[i])
-
                 if thinkSplitTextList[-1] != '':
                     self.thinkBackVLayout.addWidget(self.thinkTextShowList[-1])
                 self.textLayout.addWidget(self.thinkBackWidget)
@@ -3187,6 +3287,24 @@ class MessageWidget(QWidget):
             else:
                 self.thinkTimeLengthList[self.thinkTimeIndex] = self.thinkButton.getThinkTimeLength()
 
+    def updateFunWidgetSize(self, curDpi, initDpi):
+        if self.isUser:
+            self.copyButton.setFixedSize(round(self.copyButton.width() * curDpi / initDpi), round(self.copyButton.height() * curDpi / initDpi))
+            self.funHLayout.setContentsMargins(round(self.funHLayout.contentsMargins().left() * curDpi / initDpi), round(self.funHLayout.contentsMargins().top() * curDpi / initDpi), round(self.funHLayout.contentsMargins().right() * curDpi / initDpi), round(self.funHLayout.contentsMargins().bottom() * curDpi / initDpi))
+            self.funWidget.setFixedSize(round(self.funWidget.width() * curDpi / initDpi), round(self.funWidget.height() * curDpi / initDpi))
+            self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
+            self.setFixedSize(self.imageLabel.width() + self.textBoxWidget.width() + 5, max(self.imageLabel.height(), self.textBoxWidget.height()))
+        else:
+            if self.loadingWidgetIsRemove:
+                self.copyButton.setFixedSize(round(self.copyButton.width() * curDpi / initDpi), round(self.copyButton.height() * curDpi / initDpi))
+                if not self.renewResponseButtonIsRemove:
+                    self.renewResponseButton.setFixedSize(round(self.renewResponseButton.width() * curDpi / initDpi), round(self.renewResponseButton.height() * curDpi / initDpi))
+                    self.funHLayout.setSpacing(round(self.funHLayout.spacing() * curDpi / initDpi))
+                self.funHLayout.setContentsMargins(round(self.funHLayout.contentsMargins().left() * curDpi / initDpi), round(self.funHLayout.contentsMargins().top() * curDpi / initDpi), round(self.funHLayout.contentsMargins().right() * curDpi / initDpi), round(self.funHLayout.contentsMargins().bottom() * curDpi / initDpi))
+                self.funWidget.setFixedSize(round(self.funWidget.width() * curDpi / initDpi), round(self.funWidget.height() * curDpi / initDpi))
+                self.textBoxWidget.setFixedSize(max(self.textWidget.width(), self.funWidget.width()), self.textWidget.height() + self.funWidget.height())
+                self.setFixedSize(self.imageLabel.width() + self.textBoxWidget.width() + 5, max(self.imageLabel.height(), self.textBoxWidget.height()))
+
     def setSize(self):
         if self.isUser:
             self.textWidget.setFixedSize(self.textShow.width() + 10, self.textShow.height())
@@ -3276,6 +3394,7 @@ class MessageWidget(QWidget):
                 if not self.thinkButtonHaveCreated:
                     #ThinkingButton
                     self.thinkButton = ThinkingButton()
+                    self.thinkButton.setIsShowThinkContent(self.thinkIsExpand)
                     self.thinkButton.connectButtonClick(self.thinkButtonClicked)
                     self.thinkButtonHaveCreated = True
                     #textLayout
@@ -3307,7 +3426,6 @@ class MessageWidget(QWidget):
                         self.thinkBackVLayout.addWidget(self.thinkCodeShowList[i])
                 if thinkTextShowListLastLen < len(self.thinkTextShowList) - 1 - j and thinkSplitTextList[-1] != '':
                     self.thinkBackVLayout.addWidget(self.thinkTextShowList[-1])
-                #
                 if self.thinkTextIsRecvEnd and self.isRecvFirst:
                     self.thinkButton.setThinkEnd()
                     self.isRecvFirst = False
@@ -3440,7 +3558,7 @@ class MessageWidget(QWidget):
             self.funHLayout.removeWidget(self.renewResponseButton)
             self.renewResponseButton.deleteLater()
             self.renewResponseButtonIsRemove = True
-            self.funWidget.setFixedSize(26, 26)
+            self.funWidget.setFixedSize(self.copyButton.width() + self.funHLayout.contentsMargins().left() + self.funHLayout.contentsMargins().right(), self.copyButton.height() + self.funHLayout.contentsMargins().top() + self.funHLayout.contentsMargins().bottom())
 
     def hasSelectedText(self):
         if self.isUser:
@@ -3525,6 +3643,10 @@ class PrintLabel(QWidget):
         self.printTimer = QTimer(self)
         self.printTimer.timeout.connect(self.printEnd)
 
+    def updateSize(self, curDpi, lastDpi):
+        self.label.resize(round(self.label.width() * curDpi / lastDpi), round(self.label.height() * curDpi / lastDpi))
+        self.setFixedSize(self.label.width() + 10, self.label.height() + 10)
+
     def paintEvent(self, event):
         #QPainter create
         painter = QPainter(self)
@@ -3567,7 +3689,7 @@ class PrintLabel(QWidget):
 class Label(QLabel):
     def __init__(self, parent=None):
         super(Label, self).__init__(parent)
-        self.setFixedHeight(32)
+        self.resize(50, 32)
         font_id = QFontDatabase.addApplicationFont(font_file_path)
         if font_id != -1:
             font_families = QFontDatabase.applicationFontFamilies(font_id)
@@ -3579,34 +3701,50 @@ class Label(QLabel):
 class SettingEdit(QLineEdit):
     def __init__(self, parent=None):
         super(SettingEdit, self).__init__(parent)
-        self.setFixedHeight(32)
-        font_id = QFontDatabase.addApplicationFont(font_file_path)
-        if font_id != -1:
-            font_families = QFontDatabase.applicationFontFamilies(font_id)
-            if font_families:
-                font_family = font_families[0]
-                self.font = QFont(font_family, windowFontPointSize)
-                self.setFont(self.font)
+        self.resize(282, 32)
+        self.setStyleSheet(f'''
+        QLineEdit{{
+            border-left: 1px solid #e4e4e4;
+            border-top: 1px solid #e4e4e4;
+            border-right: 1px solid black;
+            border-bottom: 1px solid black;
+            background: transparent;
+            font-size: {windowFontPixelSize}px;
+        }}
+        ''')
+
+    def setSize(self, width, height):
+        self.setFixedSize(width, height)
+        self.setStyleSheet(f'''
+        QLineEdit{{
+            border-left: 1px solid #e4e4e4;
+            border-top: 1px solid #e4e4e4;
+            border-right: 1px solid black;
+            border-bottom: 1px solid black;
+            background: transparent;
+            font-size: {windowFontPixelSize}px;
+        }}
+        ''')
 
 class SpinBox(QSpinBox):
     def __init__(self, parent=None):
         super(SpinBox, self).__init__(parent)
-        self.setFixedHeight(32)
+        self.resize(170, 32)
         self.setCursor(Qt.PointingHandCursor)
         self.setAlignment(Qt.AlignHCenter)
-        up_arrow_images_path = os.path.join(images_dir, 'up_arrow.png').replace('\\', '/')
-        down_arrow_images_path = os.path.join(images_dir, 'down_arrow.png').replace('\\', '/')
+        self.up_arrow_images_path = os.path.join(images_dir, 'up_arrow.png').replace('\\', '/')
+        self.down_arrow_images_path = os.path.join(images_dir, 'down_arrow.png').replace('\\', '/')
         self.setStyleSheet(f'''
         QSpinBox{{
             border: 2px solid;
             border-radius: 8px;
             background: transparent;
-            font: {windowFontPointSize}pt;
+            font: {windowFontPixelSize}px;
         }}
         QSpinBox::up-button{{
             width: 16px;
             height: 16px;
-            border-image: url("{up_arrow_images_path}");
+            border-image: url("{self.up_arrow_images_path}");
         }}
         QSpinBox::up-button:pressed{{
             margin-top: 1px;
@@ -3614,7 +3752,34 @@ class SpinBox(QSpinBox):
         QSpinBox::down-button{{
             width: 16px;
             height: 16px;
-            border-image: url("{down_arrow_images_path}");
+            border-image: url("{self.down_arrow_images_path}");
+        }}
+        QSpinBox::down-button:pressed{{
+            margin-bottom: 1px;
+        }}
+        ''')
+
+    def setSize(self, width, height):
+        self.setFixedSize(width, height)
+        self.setStyleSheet(f'''
+        QSpinBox{{
+            border: 2px solid;
+            border-radius: 8px;
+            background: transparent;
+            font: {windowFontPixelSize}px;
+        }}
+        QSpinBox::up-button{{
+            width: {self.height() // 2}px;
+            height: {self.height() // 2}px;
+            border-image: url("{self.up_arrow_images_path}");
+        }}
+        QSpinBox::up-button:pressed{{
+            margin-top: 1px;
+        }}
+        QSpinBox::down-button{{
+            width: {self.height() // 2}px;
+            height: {self.height() // 2}px;
+            border-image: url("{self.down_arrow_images_path}");
         }}
         QSpinBox::down-button:pressed{{
             margin-bottom: 1px;
@@ -3632,22 +3797,22 @@ class SpinBox(QSpinBox):
 class DoubleSpinBox(QDoubleSpinBox):
     def __init__(self, parent=None):
         super(DoubleSpinBox, self).__init__(parent)
-        self.setFixedHeight(32)
+        self.resize(170, 32)
         self.setCursor(Qt.PointingHandCursor)
         self.setAlignment(Qt.AlignHCenter)
-        up_arrow_images_path = os.path.join(images_dir, 'up_arrow.png').replace('\\', '/')
-        down_arrow_images_path = os.path.join(images_dir, 'down_arrow.png').replace('\\', '/')
+        self.up_arrow_images_path = os.path.join(images_dir, 'up_arrow.png').replace('\\', '/')
+        self.down_arrow_images_path = os.path.join(images_dir, 'down_arrow.png').replace('\\', '/')
         self.setStyleSheet(f'''
         QDoubleSpinBox{{
             border: 2px solid;
             border-radius: 8px;
             background: transparent;
-            font: {windowFontPointSize}pt;
+            font: {windowFontPixelSize}px;
         }}
         QDoubleSpinBox::up-button{{
             width: 16px;
             height: 16px;
-            border-image: url("{up_arrow_images_path}");
+            border-image: url("{self.up_arrow_images_path}");
         }}
         QDoubleSpinBox::up-button:pressed{{
             margin-top: 1px;
@@ -3655,7 +3820,34 @@ class DoubleSpinBox(QDoubleSpinBox):
         QDoubleSpinBox::down-button{{
             width: 16px;
             height: 16px;
-            border-image: url("{down_arrow_images_path}");
+            border-image: url("{self.down_arrow_images_path}");
+        }}
+        QDoubleSpinBox::down-button:pressed{{
+            margin-bottom: 1px;
+        }}
+        ''')
+
+    def setSize(self, width, height):
+        self.setFixedSize(width, height)
+        self.setStyleSheet(f'''
+        QDoubleSpinBox{{
+            border: 2px solid;
+            border-radius: 8px;
+            background: transparent;
+            font: {windowFontPixelSize}px;
+        }}
+        QDoubleSpinBox::up-button{{
+            width: {self.height() // 2}px;
+            height: {self.height() // 2}px;
+            border-image: url("{self.up_arrow_images_path}");
+        }}
+        QDoubleSpinBox::up-button:pressed{{
+            margin-top: 1px;
+        }}
+        QDoubleSpinBox::down-button{{
+            width: {self.height() // 2}px;
+            height: {self.height() // 2}px;
+            border-image: url("{self.down_arrow_images_path}");
         }}
         QDoubleSpinBox::down-button:pressed{{
             margin-bottom: 1px;
@@ -3673,7 +3865,8 @@ class DoubleSpinBox(QDoubleSpinBox):
 class Slider(QSlider):
     def __init__(self, parent=None):
         super(Slider, self).__init__(parent)
-        self.setFixedHeight(26)
+        self.resize(340, 26)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         self.setOrientation(Qt.Horizontal)
         self.setStyleSheet('''
         QSlider::groove:horizontal{
@@ -3704,24 +3897,51 @@ class Slider(QSlider):
         QSlider.mouseReleaseEvent(self, event)
         event.ignore()
 
+    def setSize(self, width, height):
+        if height % 3 == 1:
+            height = height - 1
+        self.setFixedSize(width, height)
+        self.setStyleSheet(f'''
+        QSlider::groove:horizontal{{
+            height: {self.height() // 3}px;
+            border-radius: {self.height() // 6}px;
+            background-color: rgb(150, 150, 150);
+        }}
+        QSlider::handle:horizontal{{
+            width: {self.height()}px;
+            margin: {-(self.height() - self.height() // 3) // 2}px 0px {-(self.height() - self.height() // 3) // 2}px 0px;
+            border-radius: {self.height() // 2}px;
+            background-color: rgb(50, 50, 50);
+        }}
+        QSlider::handle:hover:horizontal{{
+            background-color: rgb(70, 70, 70);
+        }}
+        QSlider::sub-page:horizontal{{
+            border-radius: {self.height() // 6}px;
+            background-color: rgb(90, 90, 90);
+        }}
+        ''')
+
 class LineEdit(QLineEdit):
     def __init__(self):
         super(LineEdit, self).__init__()
-        self.setFixedSize(1200 // 3 - 80, 30)
+        self.setFixedSize(1200 // 3 - 82, 32)
         self.setPlaceholderText("输入搜索词")
         font_id = QFontDatabase.addApplicationFont(font_file_path)
         if font_id != -1:
             font_families = QFontDatabase.applicationFontFamilies(font_id)
             if font_families:
                 font_family = font_families[0]
-                self.font = QFont(font_family, windowFontPointSize)
+                """ self.font = QFont(font_family, windowFontPointSize) """
+                self.font = QFont(font_family)
+                self.font.setPixelSize(windowFontPixelSize)
                 self.setFont(self.font)
         #searchButton QPushButton
         self.searchButton = PushButton(tipText='搜索', tipOffsetX=5, tipOffsetY=35, parent=self)
-        self.searchButton.setFixedSize(30, 30)
+        self.searchButton.setFixedSize(32, 32)
         self.search_images_path = os.path.join(images_dir, 'search.png').replace('\\', '/')
         self.searchButton.setIcon(QIcon(f"{self.search_images_path}"))
-        self.searchButton.setIconSize(QSize(24, 24))
+        self.searchButton.setIconSize(QSize(30, 30))
         self.searchButton.move(0, 0)
         #LineEdit
         self.setStyleSheet('''
@@ -3732,12 +3952,46 @@ class LineEdit(QLineEdit):
             border: none;
             border-radius: 5px;
             background: #b8b8b8;
-            padding-left: 30px;
+            padding-left: 32;
         }
         ''')
+        #widgetSizeDict
+        self.widgetSizeDict = {}
+        self.widgetSizeDict['self'] = self.size()
+        self.widgetSizeDict['searchButton'] = self.searchButton.size()
+        self.widgetSizeDict['searchButton iconSize'] = self.searchButton.iconSize()
 
     def connectSearchButtonClick(self, fun):
         self.searchButton.clicked.connect(fun)
+
+    def resetWidgetSize(self):
+        #widgetSizeDict
+        self.widgetSizeDict['self'] = self.size()
+
+    def updateSize(self, curDpi, lastDpi):
+        self.setFixedSize(round(self.widgetSizeDict['self'].width() * curDpi / lastDpi), round(self.widgetSizeDict['self'].height() * curDpi / lastDpi))
+        self.searchButton.setFixedSize(round(self.widgetSizeDict['searchButton'].width() * curDpi / lastDpi), round(self.widgetSizeDict['searchButton'].height() * curDpi / lastDpi))
+        self.searchButton.setIconSize(QSize(round(self.widgetSizeDict['searchButton iconSize'].width() * curDpi / lastDpi), round(self.widgetSizeDict['searchButton iconSize'].height() * curDpi / lastDpi)))
+        #set font size
+        if self.font:
+            self.font.setPixelSize(windowFontPixelSize)
+            self.setFont(self.font)
+        #LineEdit
+        self.setStyleSheet(f'''
+        QPushButton{{
+            border: none;
+        }}
+        QLineEdit{{
+            border: none;
+            border-radius: 5px;
+            background: #b8b8b8;
+            padding-left: {self.searchButton.width()}px;
+        }}
+        ''')
+        #widgetSizeDict
+        self.widgetSizeDict['self'] = self.size()
+        self.widgetSizeDict['searchButton'] = self.searchButton.size()
+        self.widgetSizeDict['searchButton iconSize'] = self.searchButton.iconSize()
 
 class ChatRecordsWidget(QWidget):
     def __init__(self, parent=None):
@@ -3749,7 +4003,9 @@ class ChatRecordsWidget(QWidget):
             font_families = QFontDatabase.applicationFontFamilies(font_id)
             if font_families:
                 font_family = font_families[0]
-                self.font = QFont(font_family, windowFontPointSize)
+                """ self.font = QFont(font_family, windowFontPointSize) """
+                self.font = QFont(font_family)
+                self.font.setPixelSize(windowFontPixelSize)
         #settingButton PushButton
         self.settingButton = PushButton(tipText='设置', tipOffsetX=5, tipOffsetY=35)
         self.settingButton.setFixedSize(44, 44)
@@ -3767,8 +4023,9 @@ class ChatRecordsWidget(QWidget):
         ''')
         #buttonWidget QWidget
         self.buttonWidget = Widget()
-        self.buttonWidget.resize(44, 50)
-        self.buttonWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        """ self.buttonWidget.resize(44, 50)
+        self.buttonWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed) """
+        self.buttonWidget.setFixedSize(44, 50)
         #buttonVLayout QVBoxLayout
         self.buttonVLayout = QVBoxLayout()
         self.buttonWidget.setLayout(self.buttonVLayout)
@@ -3788,7 +4045,7 @@ class ChatRecordsWidget(QWidget):
                 font.setBold(True)
                 self.label.setFont(font)
         self.label.setText("聊天历史")
-        self.label.setAlignment(Qt.AlignLeft)
+        self.label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         #headWidget QWidget
         self.headWidget = Widget()
         self.headWidget.resize(self.width() - 40, 50)
@@ -3805,7 +4062,7 @@ class ChatRecordsWidget(QWidget):
         self.lineEdit = LineEdit()
         #clearAllButton QPushButton
         self.clearAllButton = PushButton(tipText='删除所有记录', tipOffsetX=25, tipOffsetY=35)
-        self.clearAllButton.setFixedSize(30, 30)
+        self.clearAllButton.setFixedSize(32, 32)
         self.clearAllButton.setIconSize(QSize(30, 30))
         self.clear_all_images_path = os.path.join(images_dir, 'clearAll.png').replace('\\', '/')
         self.clear_all_hover_images_path = os.path.join(images_dir, 'clearAll_hover.png').replace('\\', '/')
@@ -3823,7 +4080,7 @@ class ChatRecordsWidget(QWidget):
         ''')
         #searchWidget QWidget
         self.searchWidget = QWidget()
-        self.searchWidget.resize(self.width() - 40, 30)
+        self.searchWidget.resize(self.width() - 40, 32)
         self.searchWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         #searchHLayout QHBoxLayout
         self.searchHLayout = QHBoxLayout()
@@ -3836,7 +4093,7 @@ class ChatRecordsWidget(QWidget):
         self.searchHLayout.setStretch(1, 0)
         #QListWidget
         self.listWidget = QListWidget()
-        self.listWidget.setFixedSize(self.width() - 40, self.height() - 110)
+        self.listWidget.setFixedSize(self.width() - 40, self.height() - 112)
         self.listWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.listWidget.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.listWidget.setStyleSheet('''
@@ -3865,6 +4122,27 @@ class ChatRecordsWidget(QWidget):
         self.mainVLayout.setStretch(2, 1)
         #setMouseTracking
         self.setMouseTracking(True)
+        #widgetSizeDict
+        self.widgetSizeDict = {}
+        self.widgetSizeDict['self'] = self.size()
+        self.widgetSizeDict['settingButton'] = self.settingButton.size()
+        self.widgetSizeDict['settingButton iconSize'] = self.settingButton.iconSize()
+        self.widgetSizeDict['buttonWidget'] = self.buttonWidget.size()
+        self.widgetSizeDict['buttonVLayout contentsMargins'] = self.buttonVLayout.contentsMargins()
+        self.widgetSizeDict['label'] = self.label.size()
+        self.widgetSizeDict['headWidget'] = self.headWidget.size()
+        self.widgetSizeDict['headHLayout contentsMargins'] = self.headHLayout.contentsMargins()
+        self.widgetSizeDict['lineEdit'] = self.lineEdit.size()
+        self.widgetSizeDict['clearAllButton'] = self.clearAllButton.size()
+        self.widgetSizeDict['clearAllButton iconSize'] = self.clearAllButton.iconSize()
+        self.widgetSizeDict['searchWidget'] = self.searchWidget.size()
+        self.widgetSizeDict['searchHLayout contentsMargins'] = self.searchHLayout.contentsMargins()
+        self.widgetSizeDict['searchHLayout spacing'] = self.searchHLayout.spacing()
+        self.widgetSizeDict['listWidget'] = self.listWidget.size()
+        self.widgetSizeDict['mainWidget'] = self.mainWidget.size()
+        self.widgetSizeDict['mainVLayout contentsMargins'] = self.mainVLayout.contentsMargins()
+        self.widgetSizeDict['mainVLayout spacing'] = self.mainVLayout.spacing()
+        self.widgetSizeDict['chatRecordItem height'] = 60
 
     def paintEvent(self, event):
         #QPainter create
@@ -3906,11 +4184,68 @@ class ChatRecordsWidget(QWidget):
     def connectListItemClick(self, fun):
         self.listWidget.itemClicked.connect(fun)
 
-    def resetWidgetSize(self, width, height):
-        self.lineEdit.setFixedSize(width - 80, 30)
-        self.listWidget.setFixedSize(width - 40, height - 110)
-        self.mainWidget.resize(width, height)
-        self.resize(width, height)
+    def resetWidgetSize(self):
+        self.label.setFixedSize(self.width() - self.mainVLayout.contentsMargins().left() - self.mainVLayout.contentsMargins().right() - self.buttonWidget.width(), self.label.height())
+        self.headWidget.setFixedSize(self.width() - self.mainVLayout.contentsMargins().left() - self.mainVLayout.contentsMargins().right(), self.headWidget.height())
+        self.lineEdit.setFixedSize(self.width() - self.mainVLayout.contentsMargins().left() - self.mainVLayout.contentsMargins().right() - self.clearAllButton.width() - self.searchHLayout.spacing(), self.lineEdit.height())
+        self.lineEdit.resetWidgetSize()
+        self.searchWidget.setFixedSize(self.width() - self.mainVLayout.contentsMargins().left() - self.mainVLayout.contentsMargins().right(), self.searchWidget.height())
+        self.listWidget.setFixedSize(self.width() - self.mainVLayout.contentsMargins().left() - self.mainVLayout.contentsMargins().right(), self.height() - self.headWidget.height() - self.searchWidget.height() - self.mainVLayout.contentsMargins().top() - 2 * self.mainVLayout.spacing())
+        self.mainWidget.resize(self.width(), self.height())
+        #widgetSizeDict
+        self.widgetSizeDict['self'] = self.size()
+        self.widgetSizeDict['settingButton'] = self.settingButton.size()
+        self.widgetSizeDict['settingButton iconSize'] = self.settingButton.iconSize()
+        self.widgetSizeDict['buttonWidget'] = self.buttonWidget.size()
+        self.widgetSizeDict['buttonVLayout contentsMargins'] = self.buttonVLayout.contentsMargins()
+        self.widgetSizeDict['label'] = self.label.size()
+        self.widgetSizeDict['headWidget'] = self.headWidget.size()
+        self.widgetSizeDict['headHLayout contentsMargins'] = self.headHLayout.contentsMargins()
+        self.widgetSizeDict['lineEdit'] = self.lineEdit.size()
+        self.widgetSizeDict['clearAllButton'] = self.clearAllButton.size()
+        self.widgetSizeDict['clearAllButton iconSize'] = self.clearAllButton.iconSize()
+        self.widgetSizeDict['searchWidget'] = self.searchWidget.size()
+        self.widgetSizeDict['searchHLayout contentsMargins'] = self.searchHLayout.contentsMargins()
+        self.widgetSizeDict['searchHLayout spacing'] = self.searchHLayout.spacing()
+        self.widgetSizeDict['listWidget'] = self.listWidget.size()
+        self.widgetSizeDict['mainWidget'] = self.mainWidget.size()
+        self.widgetSizeDict['mainVLayout contentsMargins'] = self.mainVLayout.contentsMargins()
+        self.widgetSizeDict['mainVLayout spacing'] = self.mainVLayout.spacing()
+
+    def updateSize(self, curDpi, lastDpi):
+        self.resize(round(self.widgetSizeDict['self'].width() * curDpi / lastDpi), round(self.widgetSizeDict['self'].height() * curDpi / lastDpi))
+        self.settingButton.setFixedSize(round(self.widgetSizeDict['settingButton'].width() * curDpi / lastDpi), round(self.widgetSizeDict['settingButton'].height() * curDpi / lastDpi))
+        self.settingButton.setIconSize(QSize(round(self.widgetSizeDict['settingButton iconSize'].width() * curDpi / lastDpi), round(self.widgetSizeDict['settingButton iconSize'].height() * curDpi / lastDpi)))
+        self.settingButton.setStyleSheet(f'''
+        QPushButton{{
+            border: none;
+            border-radius: {self.settingButton.width() // 2}px;
+        }}
+        QPushButton:hover{{
+            background: #b0b0b0;
+        }}
+        ''')
+        self.buttonWidget.setFixedSize(round(self.widgetSizeDict['buttonWidget'].width() * curDpi / lastDpi), round(self.widgetSizeDict['buttonWidget'].height() * curDpi / lastDpi))
+        self.buttonVLayout.setContentsMargins(0, 0, 0, round(self.widgetSizeDict['buttonVLayout contentsMargins'].bottom() * curDpi / lastDpi))
+        self.label.setFixedSize(round(self.widgetSizeDict['label'].width() * curDpi / lastDpi), round(self.widgetSizeDict['label'].height() * curDpi / lastDpi))
+        self.headWidget.setFixedSize(round(self.widgetSizeDict['headWidget'].width() * curDpi / lastDpi), round(self.widgetSizeDict['headWidget'].height() * curDpi / lastDpi))
+        self.headHLayout.setContentsMargins(0, 0, 0, 0)
+        self.lineEdit.updateSize(curDpi, lastDpi)
+        self.clearAllButton.setFixedSize(round(self.widgetSizeDict['clearAllButton'].width() * curDpi / lastDpi), round(self.widgetSizeDict['clearAllButton'].height() * curDpi / lastDpi))
+        self.clearAllButton.setIconSize(QSize(round(self.widgetSizeDict['clearAllButton iconSize'].width() * curDpi / lastDpi), round(self.widgetSizeDict['clearAllButton iconSize'].height() * curDpi / lastDpi)))
+        self.searchWidget.setFixedSize(round(self.widgetSizeDict['searchWidget'].width() * curDpi / lastDpi), round(self.widgetSizeDict['searchWidget'].height() * curDpi / lastDpi))
+        self.searchHLayout.setContentsMargins(0, 0, 0, 0)
+        self.searchHLayout.setSpacing(round(self.widgetSizeDict['searchHLayout spacing'] * curDpi / lastDpi))
+        self.listWidget.setFixedSize(round(self.widgetSizeDict['listWidget'].width() * curDpi / lastDpi), round(self.widgetSizeDict['listWidget'].height() * curDpi / lastDpi))
+        self.mainWidget.resize(round(self.widgetSizeDict['mainWidget'].width() * curDpi / lastDpi), round(self.widgetSizeDict['mainWidget'].height() * curDpi / lastDpi))
+        self.mainVLayout.setContentsMargins(round(self.widgetSizeDict['mainVLayout contentsMargins'].left() * curDpi / lastDpi), round(self.widgetSizeDict['mainVLayout contentsMargins'].top() * curDpi / lastDpi), round(self.widgetSizeDict['mainVLayout contentsMargins'].right() * curDpi / lastDpi), 0)
+        self.mainVLayout.setSpacing(round(self.widgetSizeDict['mainVLayout spacing'] * curDpi / lastDpi))
+
+        self.widgetSizeDict['chatRecordItem height'] = round(self.widgetSizeDict['chatRecordItem height'] * curDpi / lastDpi)
+        self.font.setPixelSize(windowFontPixelSize)
+        for i in range(0, self.listWidget.count()):
+            self.listWidget.item(i).setSizeHint(QSize(self.listWidget.width(), self.widgetSizeDict['chatRecordItem height']))
+            self.listWidget.item(i).setFont(self.font)
 
     def getLineEditText(self):
         return self.lineEdit.text()
@@ -3918,7 +4253,8 @@ class ChatRecordsWidget(QWidget):
     def addListItem(self, string):
         self.chatRecordItem = QListWidgetItem(string)
         self.listWidget.insertItem(0, self.chatRecordItem)
-        self.chatRecordItem.setSizeHint(QSize(self.listWidget.width(), 60))
+        self.chatRecordItem.setSizeHint(QSize(self.listWidget.width(), self.widgetSizeDict['chatRecordItem height']))
+        self.font.setPixelSize(windowFontPixelSize)
         self.chatRecordItem.setFont(self.font)
         return self.chatRecordItem
 
@@ -3960,6 +4296,38 @@ class SettingWidget(QWidget):
     def mouseMoveEvent(self, event):
         QWidget.mouseMoveEvent(self, event)
         event.ignore()
+
+class TitleButton(QPushButton):
+    def __init__(self, tipText='', tipOffsetX=10, tipOffsetY=40, parent=None):
+        super(TitleButton, self).__init__(parent)
+        self.setMouseTracking(True)
+        self.setCursor(Qt.PointingHandCursor)
+        self.tipText = tipText
+        self.tipStartPos = QPoint(self.rect().topLeft().x() - tipOffsetX, self.rect().topLeft().y() - tipOffsetY)
+
+    def mousePressEvent(self, event):
+        QPushButton.mousePressEvent(self, event)
+        event.ignore()
+
+    def mouseMoveEvent(self, event):
+        QPushButton.mouseMoveEvent(self, event)
+        event.ignore()
+
+    def mouseReleaseEvent(self, event):
+        QPushButton.mouseReleaseEvent(self, event)
+        event.ignore()
+
+    def event(self, event):
+        if event.type() == QEvent.ToolTip:
+            font_id = QFontDatabase.addApplicationFont(font_file_path)
+            if font_id != -1:
+                font_families = QFontDatabase.applicationFontFamilies(font_id)
+                if font_families:
+                    font_family = font_families[0]
+                    font = QFont(font_family, buttonFontPointSize)
+                    QToolTip.setFont(font)
+            QToolTip.showText(self.mapToGlobal(self.tipStartPos), self.tipText, self)
+        return QPushButton.event(self, event)
 
 class TitleWidget(QWidget):
     def __init__(self, parent=None):
@@ -4045,9 +4413,8 @@ class RegionEnum(Enum):
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        self.setMinimumSize(624, 416)
+        self.setMinimumSize(1110, 795)
         self.resize(1220, 820)
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
         self.setMouseTracking(True)
@@ -4101,7 +4468,7 @@ class MainWindow(QMainWindow):
         self.splitter.setHandleWidth(0)
         #contentWidget QWidget
         self.contentWidget = Widget()
-        self.contentWidget.resize(1200, 764)
+        self.contentWidget.resize(1200, 760)
         self.contentWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         #contentVLayout QVBoxLayout
         self.contentVLayout = QVBoxLayout()
@@ -4160,7 +4527,6 @@ class MainWindow(QMainWindow):
         self.chatRecordsAnimationMove.finished.connect(self.chatRecordsUiMoveFinished)
         #chatRecordsWidgetIsOpen
         self.chatRecordsWidgetIsOpen = False
-
         #emptyTextLabel PrintLabel
         self.emptyTextLabel = PrintLabel('文本不能为空', self)
         self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() + 10)
@@ -4180,7 +4546,7 @@ class MainWindow(QMainWindow):
         self.pushButtonIsPress = False
         #screen
         self.lastScreen = self.curScreen = self.screen()
-        self.dpi = 0.0
+        self.initDpi = self.lastDpi = self.curDpi = self.curScreen.logicalDotsPerInch()
         self.screenChanged = False
         #thinkExpandedList
         self.thinkExpandedList = []
@@ -4200,6 +4566,21 @@ class MainWindow(QMainWindow):
         self.uiRectWidth = self.width()
         self.uiRectHeight = self.height()
         self.isChangeRectFirst = False
+        #
+        self.screens = QApplication.instance().screens()
+        for screen in self.screens:
+            screen.logicalDotsPerInchChanged.connect(self.onDpiChanged)
+        #isDpiChanged
+        self.isDpiChanged = False
+        #widgetSizeDict
+        self.widgetSizeDict = {}
+        self.widgetSizeDict['MainWindow'] = self.size()
+        self.widgetSizeDict['MainWindow minimumSize'] = self.minimumSize()
+        self.widgetSizeDict['mainWidget'] = self.mainWidget.size()
+        self.widgetSizeDict['mainWidget x'] = self.mainWidget.x()
+        self.widgetSizeDict['mainWidget y'] = self.mainWidget.y()
+        #avoidRepeatSelfFun
+        self.avoidRepeatSelfFun = False
 
     def moveEvent(self, event):
         #screen
@@ -4217,7 +4598,7 @@ class MainWindow(QMainWindow):
         self.cursorGlobalX = self.cursorGlobalPos.x()
         self.cursorGlobalY = self.cursorGlobalPos.y()
         self.uiGlobalTL = self.mainWidget.mapToGlobal(QPoint(0, 0))
-        self.uiGlobalBR = self.mainWidget.mapToGlobal(QPoint(self.mainWidget.width(), self.mainWidget.height()))
+        self.uiGlobalBR = self.mainWidget.mapToGlobal(QPoint(self.mainWidget.width() - 1, self.mainWidget.height() - 1))
         if not self.mouseLeftButtonIsPress:
             self.regionDivision()
         else:
@@ -4226,32 +4607,33 @@ class MainWindow(QMainWindow):
             else:
                 if self.regionDir == RegionEnum.TITLE:
                     self.UiDrag(event.globalPos())
-                    screen_geometry = self.screen().availableGeometry()
-                    if event.globalPos().x() <= screen_geometry.x():
-                        if not (self.width() == screen_geometry.width() // 2 and self.height() == screen_geometry.height()):
-                            self.uiRectWidth = self.width()
-                            self.uiRectHeight = self.height()
-                            self.isChangeRectFirst = True
-                        self.setGeometry(screen_geometry.x(), screen_geometry.y(), screen_geometry.width() // 2, screen_geometry.height())
-                        self.mainWidget.setGeometry(0, 0, self.width(), self.height())
-                        self.mainWidget.setStyleSheet('''
-                        #mainWidget {
-                            background-color: #F0F0F0;
-                        }
-                        ''')
-                        self.titleWidget.setRightAngle()
-                        self.isScreenHalf = True
-                    else:
-                        if self.isChangeRectFirst:
-                            self.isChangeRectFirst = False
-                            self.resize(self.uiRectWidth, self.uiRectHeight)
+                    if not (len(self.screens) > 1):
+                        screen_geometry = self.screen().availableGeometry()
+                        if event.globalPos().x() <= screen_geometry.x():
+                            if not (self.width() == screen_geometry.width() // 2 and self.height() == screen_geometry.height()):
+                                self.uiRectWidth = self.width()
+                                self.uiRectHeight = self.height()
+                                self.isChangeRectFirst = True
+                            self.setGeometry(screen_geometry.x(), screen_geometry.y(), screen_geometry.width() // 2, screen_geometry.height())
+                            self.mainWidget.setGeometry(0, 0, self.width(), self.height())
                             self.mainWidget.setStyleSheet('''
                             #mainWidget {
-                                border-radius: 16px;
                                 background-color: #F0F0F0;
                             }
                             ''')
-                            self.titleWidget.setRoundAngle()
+                            self.titleWidget.setRightAngle()
+                            self.isScreenHalf = True
+                        else:
+                            if self.isChangeRectFirst:
+                                self.isChangeRectFirst = False
+                                self.resize(self.uiRectWidth, self.uiRectHeight)
+                                self.mainWidget.setStyleSheet('''
+                                #mainWidget {
+                                    border-radius: 16px;
+                                    background-color: #F0F0F0;
+                                }
+                                ''')
+                                self.titleWidget.setRoundAngle()
         QMainWindow.mouseMoveEvent(self, event)
 
     def isItemShowFull(self, widget):
@@ -4365,68 +4747,92 @@ class MainWindow(QMainWindow):
         uiGlobalRect = QRect(self.uiGlobalTL, self.uiGlobalBR)
         match self.regionDir:
             case RegionEnum.LEFT:
-                if self.uiGlobalBR.x() - self.cursorGlobalX > self.minimumWidth():
+                if self.uiGlobalBR.x() - self.cursorGlobalX > self.minimumWidth() - 2 * self.widgetSizeDict['mainWidget x']:
                     uiGlobalRect.setX(self.cursorGlobalX)
+                else:
+                    uiGlobalRect.setX(self.uiGlobalBR.x() - (self.minimumWidth() - 2 * self.widgetSizeDict['mainWidget x']) + 1)
             case RegionEnum.RIGHT:
-                if self.cursorGlobalX - self.uiGlobalTL.x() > self.minimumWidth():
+                if self.cursorGlobalX - self.uiGlobalTL.x() > self.minimumWidth() - 2 * self.widgetSizeDict['mainWidget x']:
                     uiGlobalRect.setWidth(self.cursorGlobalX - self.uiGlobalTL.x())
+                else:
+                    uiGlobalRect.setWidth(self.minimumWidth() - 2 * self.widgetSizeDict['mainWidget x'])
             case RegionEnum.TOP:
-                if self.uiGlobalBR.y() - self.cursorGlobalY > self.minimumHeight():
+                if self.uiGlobalBR.y() - self.cursorGlobalY > self.minimumHeight() - 2 * self.widgetSizeDict['mainWidget y']:
                     uiGlobalRect.setY(self.cursorGlobalY)
+                else:
+                    uiGlobalRect.setY(self.uiGlobalBR.y() - (self.minimumHeight() - 2 * self.widgetSizeDict['mainWidget y']) + 1)
             case RegionEnum.BOTTOM:
-                if self.cursorGlobalY - self.uiGlobalTL.y() > self.minimumHeight():
+                if self.cursorGlobalY - self.uiGlobalTL.y() > self.minimumHeight() - 2 * self.widgetSizeDict['mainWidget y']:
                     uiGlobalRect.setHeight(self.cursorGlobalY - self.uiGlobalTL.y())
+                else:
+                    uiGlobalRect.setHeight(self.minimumHeight() - 2 * self.widgetSizeDict['mainWidget y'])
             case RegionEnum.LEFTTOP:
-                if self.uiGlobalBR.x() - self.cursorGlobalX > self.minimumWidth():
+                if self.uiGlobalBR.x() - self.cursorGlobalX > self.minimumWidth() - 2 * self.widgetSizeDict['mainWidget x']:
                     uiGlobalRect.setX(self.cursorGlobalX)
-                if self.uiGlobalBR.y() - self.cursorGlobalY > self.minimumHeight():
+                else:
+                    uiGlobalRect.setX(self.uiGlobalBR.x() - (self.minimumWidth() - 2 * self.widgetSizeDict['mainWidget x']) + 1)
+                if self.uiGlobalBR.y() - self.cursorGlobalY > self.minimumHeight() - 2 * self.widgetSizeDict['mainWidget y']:
                     uiGlobalRect.setY(self.cursorGlobalY)
+                else:
+                    uiGlobalRect.setY(self.uiGlobalBR.y() - (self.minimumHeight() - 2 * self.widgetSizeDict['mainWidget y']) + 1)
             case RegionEnum.RIGHTTOP:
-                if self.cursorGlobalX - self.uiGlobalTL.x() > self.minimumWidth():
+                if self.cursorGlobalX - self.uiGlobalTL.x() > self.minimumWidth() - 2 * self.widgetSizeDict['mainWidget x']:
                     uiGlobalRect.setWidth(self.cursorGlobalX - self.uiGlobalTL.x())
-                if self.uiGlobalBR.y() - self.cursorGlobalY > self.minimumHeight():
+                else:
+                    uiGlobalRect.setWidth(self.minimumWidth() - 2 * self.widgetSizeDict['mainWidget x'])
+                if self.uiGlobalBR.y() - self.cursorGlobalY > self.minimumHeight() - 2 * self.widgetSizeDict['mainWidget y']:
                     uiGlobalRect.setY(self.cursorGlobalY)
+                else:
+                    uiGlobalRect.setY(self.uiGlobalBR.y() - (self.minimumHeight() - 2 * self.widgetSizeDict['mainWidget y']) + 1)
             case RegionEnum.LEFTBOTTOM:
-                if self.uiGlobalBR.x() - self.cursorGlobalX > self.minimumWidth():
+                if self.uiGlobalBR.x() - self.cursorGlobalX > self.minimumWidth() - 2 * self.widgetSizeDict['mainWidget x']:
                     uiGlobalRect.setX(self.cursorGlobalX)
-                if self.cursorGlobalY - self.uiGlobalTL.y() > self.minimumHeight():
+                else:
+                    uiGlobalRect.setX(self.uiGlobalBR.x() - (self.minimumWidth() - 2 * self.widgetSizeDict['mainWidget x']) + 1)
+                if self.cursorGlobalY - self.uiGlobalTL.y() > self.minimumHeight() - 2 * self.widgetSizeDict['mainWidget y']:
                     uiGlobalRect.setHeight(self.cursorGlobalY - self.uiGlobalTL.y())
+                else:
+                    uiGlobalRect.setHeight(self.minimumHeight() - 2 * self.widgetSizeDict['mainWidget y'])
             case RegionEnum.RIGHTBOTTOM:
-                if self.cursorGlobalX - self.uiGlobalTL.x() > self.minimumWidth():
+                if self.cursorGlobalX - self.uiGlobalTL.x() > self.minimumWidth() - 2 * self.widgetSizeDict['mainWidget x']:
                     uiGlobalRect.setWidth(self.cursorGlobalX - self.uiGlobalTL.x())
-                if self.cursorGlobalY - self.uiGlobalTL.y() > self.minimumHeight():
+                else:
+                    uiGlobalRect.setWidth(self.minimumWidth() - 2 * self.widgetSizeDict['mainWidget x'])
+                if self.cursorGlobalY - self.uiGlobalTL.y() > self.minimumHeight() - 2 * self.widgetSizeDict['mainWidget y']:
                     uiGlobalRect.setHeight(self.cursorGlobalY - self.uiGlobalTL.y())
-        windowGlobalRect = QRect(uiGlobalRect.x() - 10, uiGlobalRect.y() - 10, uiGlobalRect.width() + 20, uiGlobalRect.height() + 20)
+                else:
+                    uiGlobalRect.setHeight(self.minimumHeight() - 2 * self.widgetSizeDict['mainWidget y'])
+        windowGlobalRect = QRect(uiGlobalRect.x() - self.widgetSizeDict['mainWidget x'], uiGlobalRect.y() - self.widgetSizeDict['mainWidget y'], uiGlobalRect.width() + 2 * self.widgetSizeDict['mainWidget x'], uiGlobalRect.height() + 2 * self.widgetSizeDict['mainWidget y'])
         self.setGeometry(windowGlobalRect)
-        #self.setGeometry(uiGlobalRect)
 
     def UiDrag(self, globalPos):
         self.move(self.pressPosDistanceUiGlobalTL + globalPos)
 
     def mouseDoubleClickEvent(self, event):
-        if self.isScreenMax:
-            self.isScreenMax = False
-            self.setGeometry(self.lastNormalGeometry)
-            self.maxButton.setIcon(QIcon(f"{self.max_images_path}"))
-            self.mainWidget.setStyleSheet('''
-            #mainWidget {
-                border-radius: 16px;
-                background-color: #F0F0F0;
-            }
-            ''')
-            self.titleWidget.setRoundAngle()
-        else:
-            self.isScreenMax = True
-            if not self.isScreenHalf:
-                self.lastNormalGeometry = self.geometry()
-            self.setGeometry(self.screen().availableGeometry())
-            self.maxButton.setIcon(QIcon(f"{self.normal_images_path}"))
-            self.mainWidget.setStyleSheet('''
-            #mainWidget {
-                background-color: #F0F0F0;
-            }
-            ''')
-            self.titleWidget.setRightAngle()
+        if self.regionDir == RegionEnum.TITLE:
+            if self.isScreenMax:
+                self.isScreenMax = False
+                self.setGeometry(self.lastNormalGeometry)
+                self.maxButton.setIcon(QIcon(f"{self.max_images_path}"))
+                self.mainWidget.setStyleSheet('''
+                #mainWidget {
+                    border-radius: 16px;
+                    background-color: #F0F0F0;
+                }
+                ''')
+                self.titleWidget.setRoundAngle()
+            else:
+                self.isScreenMax = True
+                if not self.isScreenHalf:
+                    self.lastNormalGeometry = self.geometry()
+                self.setGeometry(self.screen().availableGeometry())
+                self.maxButton.setIcon(QIcon(f"{self.normal_images_path}"))
+                self.mainWidget.setStyleSheet('''
+                #mainWidget {
+                    background-color: #F0F0F0;
+                }
+                ''')
+                self.titleWidget.setRightAngle()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -4464,24 +4870,134 @@ class MainWindow(QMainWindow):
                     self.chatInput.backgroundColorShowDark()
                     self.chatInput.clearFocus()
             if self.screenChanged:
-                self.dpi = self.curScreen.logicalDotsPerInch()
-                global bubbleFontPixelSize
-                bubbleFontPixelSize = math.ceil(bubbleFontPointSize * (self.dpi / 72))
+                self.curDpi = self.curScreen.logicalDotsPerInch()
+                global windowFontPixelSize
+                windowFontPixelSize = math.ceil(windowFontPointSize * (self.curDpi / 72))
                 self.screenChanged = False
             if self.isRegenerate:
                 self.isRegenerate = False
                 self.messageWidgetRegenerate()
         QMainWindow.mouseReleaseEvent(self, event)
 
+    def onDpiChanged(self):
+        self.lastDpi = self.curDpi
+        self.curDpi = self.curScreen.logicalDotsPerInch()
+        global windowFontPixelSize
+        windowFontPixelSize = math.ceil(windowFontPointSize * (self.curDpi / 72))
+        self.isDpiChanged = True
+
     def resizeEvent(self, event):
+        if self.avoidRepeatSelfFun:
+            self.avoidRepeatSelfFun = False
+            return
+        #isDpiChanged
+        if self.isDpiChanged:
+            #mainWindow set minimumSize
+            self.setMinimumSize(round(self.widgetSizeDict['MainWindow minimumSize'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['MainWindow minimumSize'].height() * self.curDpi / self.lastDpi))
+            self.widgetSizeDict['MainWindow minimumSize'] = self.minimumSize()
         #mainWidget Frame
         if self.isScreenMax:
             self.mainWidget.setGeometry(0, 0, self.width(), self.height())
         else:
-            self.mainWidget.setGeometry(10, 10, self.width() - 20, self.height() - 20)
-        #setting widget set geometry
+            #isDpiChanged
+            if self.isDpiChanged:
+                self.mainWidget.setGeometry(round(self.widgetSizeDict['mainWidget x'] * self.curDpi / self.lastDpi), round(self.widgetSizeDict['mainWidget y'] * self.curDpi / self.lastDpi), round(self.widgetSizeDict['mainWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['mainWidget'].height() * self.curDpi / self.lastDpi))
+                self.widgetSizeDict['mainWidget'] = self.mainWidget.size()
+                self.widgetSizeDict['mainWidget x'] = self.mainWidget.x()
+                self.widgetSizeDict['mainWidget y'] = self.mainWidget.y()
+            else:
+                self.mainWidget.setGeometry(self.widgetSizeDict['mainWidget x'], self.widgetSizeDict['mainWidget y'], self.width() - 2 * self.widgetSizeDict['mainWidget x'], self.height() - 2 * self.widgetSizeDict['mainWidget y'])
+                self.widgetSizeDict['mainWidget'] = self.mainWidget.size()
+        #isDpiChanged
+        if self.isDpiChanged:
+            self.emptyTextLabel.updateSize(self.curDpi, self.lastDpi)
+            self.textCopyLabel.updateSize(self.curDpi, self.lastDpi)
+
+            self.baseUrlLabel.setFixedSize(round(self.widgetSizeDict['baseUrlLabel'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['baseUrlLabel'].height() * self.curDpi / self.lastDpi))
+            self.apiKeyLabel.setFixedSize(round(self.widgetSizeDict['apiKeyLabel'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['apiKeyLabel'].height() * self.curDpi / self.lastDpi))
+            self.modelNameLabel.setFixedSize(round(self.widgetSizeDict['modelNameLabel'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['modelNameLabel'].height() * self.curDpi / self.lastDpi))
+            self.maxTokensLabel.setFixedSize(round(self.widgetSizeDict['maxTokensLabel'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['maxTokensLabel'].height() * self.curDpi / self.lastDpi))
+            self.topPLabel.setFixedSize(round(self.widgetSizeDict['topPLabel'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['topPLabel'].height() * self.curDpi / self.lastDpi))
+            self.temperatureLabel.setFixedSize(round(self.widgetSizeDict['temperatureLabel'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['temperatureLabel'].height() * self.curDpi / self.lastDpi))
+
+            self.baseUrlEdit.setSize(round(self.widgetSizeDict['baseUrlEdit'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['baseUrlEdit'].height() * self.curDpi / self.lastDpi))
+            self.apiKeyEdit.setSize(round(self.widgetSizeDict['apiKeyEdit'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['apiKeyEdit'].height() * self.curDpi / self.lastDpi))
+            self.modelNameEdit.setSize(round(self.widgetSizeDict['modelNameEdit'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['modelNameEdit'].height() * self.curDpi / self.lastDpi))
+
+            self.baseUrlHLayout.setContentsMargins(round(self.widgetSizeDict['baseUrlHLayout contentsMargins'].left() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['baseUrlHLayout contentsMargins'].top() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['baseUrlHLayout contentsMargins'].right() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['baseUrlHLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.apiKeyHLayout.setContentsMargins(round(self.widgetSizeDict['apiKeyHLayout contentsMargins'].left() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['apiKeyHLayout contentsMargins'].top() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['apiKeyHLayout contentsMargins'].right() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['apiKeyHLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.modelNameHLayout.setContentsMargins(round(self.widgetSizeDict['modelNameHLayout contentsMargins'].left() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['modelNameHLayout contentsMargins'].top() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['modelNameHLayout contentsMargins'].right() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['modelNameHLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.baseUrlHLayout.setSpacing(round(self.widgetSizeDict['baseUrlHLayout spacing'] * self.curDpi / self.lastDpi))
+            self.apiKeyHLayout.setSpacing(round(self.widgetSizeDict['apiKeyHLayout spacing'] * self.curDpi / self.lastDpi))
+            self.modelNameHLayout.setSpacing(round(self.widgetSizeDict['modelNameHLayout spacing'] * self.curDpi / self.lastDpi))
+
+            self.baseUrlWidget.setFixedSize(round(self.widgetSizeDict['baseUrlWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['baseUrlWidget'].height() * self.curDpi / self.lastDpi))
+            if self.baseUrlWidget.width() < self.baseUrlLabel.width() + self.baseUrlEdit.width() + self.baseUrlHLayout.spacing():
+                self.baseUrlHLayout.setSpacing(self.baseUrlWidget.width() - self.baseUrlLabel.width() - self.baseUrlEdit.width() - 1)
+            self.apiKeyWidget.setFixedSize(round(self.widgetSizeDict['apiKeyWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['apiKeyWidget'].height() * self.curDpi / self.lastDpi))
+            if self.apiKeyWidget.width() < self.apiKeyLabel.width() + self.apiKeyEdit.width() + self.apiKeyHLayout.spacing():
+                self.apiKeyHLayout.setSpacing(self.apiKeyWidget.width() - self.apiKeyLabel.width() - self.apiKeyEdit.width() - 1)
+            self.modelNameWidget.setFixedSize(round(self.widgetSizeDict['modelNameWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['modelNameWidget'].height() * self.curDpi / self.lastDpi))
+            if self.modelNameWidget.width() < self.modelNameLabel.width() + self.modelNameEdit.width() + self.modelNameHLayout.spacing():
+                self.modelNameHLayout.setSpacing(self.modelNameWidget.width() - self.modelNameLabel.width() - self.modelNameEdit.width() - 1)
+            self.modelSelectVLayout.setContentsMargins(round(self.widgetSizeDict['modelSelectVLayout contentsMargins'].left() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['modelSelectVLayout contentsMargins'].top() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['modelSelectVLayout contentsMargins'].right() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['modelSelectVLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.modelSelectVLayout.setSpacing(round(self.widgetSizeDict['modelSelectVLayout spacing'] * self.curDpi / self.lastDpi))
+            self.modelSelectWidget.setFixedSize(round(self.widgetSizeDict['modelSelectWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['modelSelectWidget'].height() * self.curDpi / self.lastDpi))
+
+            self.maxTokensWidget.setFixedSize(round(self.widgetSizeDict['maxTokensWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['maxTokensWidget'].height() * self.curDpi / self.lastDpi))
+            self.maxTokensVLayout.setContentsMargins(round(self.widgetSizeDict['maxTokensVLayout contentsMargins'].left() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['maxTokensVLayout contentsMargins'].top() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['maxTokensVLayout contentsMargins'].right() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['maxTokensVLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.topPWidget.setFixedSize(round(self.widgetSizeDict['topPWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['topPWidget'].height() * self.curDpi / self.lastDpi))
+            self.topPVLayout.setContentsMargins(round(self.widgetSizeDict['topPVLayout contentsMargins'].left() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['topPVLayout contentsMargins'].top() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['topPVLayout contentsMargins'].right() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['topPVLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.temperatureWidget.setFixedSize(round(self.widgetSizeDict['temperatureWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['temperatureWidget'].height() * self.curDpi / self.lastDpi))
+            self.temperatureVLayout.setContentsMargins(round(self.widgetSizeDict['temperatureVLayout contentsMargins'].left() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['temperatureVLayout contentsMargins'].top() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['temperatureVLayout contentsMargins'].right() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['temperatureVLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+
+            self.maxTokensTopSubWidget.setFixedSize(round(self.widgetSizeDict['maxTokensTopSubWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['maxTokensTopSubWidget'].height() * self.curDpi / self.lastDpi))
+            self.topPTopSubWidget.setFixedSize(round(self.widgetSizeDict['topPTopSubWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['topPTopSubWidget'].height() * self.curDpi / self.lastDpi))
+            self.temperatureTopSubWidget.setFixedSize(round(self.widgetSizeDict['temperatureTopSubWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['temperatureTopSubWidget'].height() * self.curDpi / self.lastDpi))
+            self.maxTokensTopSubHLayout.setContentsMargins(0, round(self.widgetSizeDict['maxTokensTopSubHLayout contentsMargins'].top() * self.curDpi / self.lastDpi), 0, round(self.widgetSizeDict['maxTokensTopSubHLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.topPTopSubHLayout.setContentsMargins(0, round(self.widgetSizeDict['topPTopSubHLayout contentsMargins'].top() * self.curDpi / self.lastDpi), 0, round(self.widgetSizeDict['topPTopSubHLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.temperatureTopSubHLayout.setContentsMargins(0, round(self.widgetSizeDict['temperatureTopSubHLayout contentsMargins'].top() * self.curDpi / self.lastDpi), 0, round(self.widgetSizeDict['temperatureTopSubHLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.maxTokensTopSubHLayout.setSpacing(self.maxTokensTopSubWidget.width() // 2 - self.maxTokensLabel.width())
+            self.topPTopSubHLayout.setSpacing(self.topPTopSubWidget.width() // 2 - self.topPLabel.width())
+            self.temperatureTopSubHLayout.setSpacing(self.temperatureTopSubWidget.width() // 2 - self.temperatureLabel.width())
+            self.maxTokensBox.setSize(self.maxTokensTopSubWidget.width() // 2, round(self.widgetSizeDict['maxTokensBox'].height() * self.curDpi / self.lastDpi))
+            self.topPBox.setSize(self.topPTopSubWidget.width() // 2, round(self.widgetSizeDict['topPBox'].height() * self.curDpi / self.lastDpi))
+            self.temperatureBox.setSize(self.temperatureTopSubWidget.width() // 2, round(self.widgetSizeDict['temperatureBox'].height() * self.curDpi / self.lastDpi))
+
+            self.maxTokensBottomSubWidget.setFixedSize(round(self.widgetSizeDict['maxTokensBottomSubWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['maxTokensBottomSubWidget'].height() * self.curDpi / self.lastDpi))
+            self.topPBottomSubWidget.setFixedSize(round(self.widgetSizeDict['topPBottomSubWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['topPBottomSubWidget'].height() * self.curDpi / self.lastDpi))
+            self.temperatureBottomSubWidget.setFixedSize(round(self.widgetSizeDict['temperatureBottomSubWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['temperatureBottomSubWidget'].height() * self.curDpi / self.lastDpi))
+            self.maxTokensBottomSubHLayout.setContentsMargins(0, round(self.widgetSizeDict['maxTokensBottomSubHLayout contentsMargins'].top() * self.curDpi / self.lastDpi), 0, round(self.widgetSizeDict['maxTokensBottomSubHLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.topPBottomSubHLayout.setContentsMargins(0, round(self.widgetSizeDict['topPBottomSubHLayout contentsMargins'].top() * self.curDpi / self.lastDpi), 0, round(self.widgetSizeDict['topPBottomSubHLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.temperatureBottomSubHLayout.setContentsMargins(0, round(self.widgetSizeDict['temperatureBottomSubHLayout contentsMargins'].top() * self.curDpi / self.lastDpi), 0, round(self.widgetSizeDict['temperatureBottomSubHLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.maxTokensSlider.setSize(round(self.widgetSizeDict['maxTokensSlider'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['maxTokensSlider'].height() * self.curDpi / self.lastDpi))
+            self.topPSlider.setSize(round(self.widgetSizeDict['topPSlider'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['topPSlider'].height() * self.curDpi / self.lastDpi))
+            self.temperatureSlider.setSize(round(self.widgetSizeDict['temperatureSlider'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['temperatureSlider'].height() * self.curDpi / self.lastDpi))
+
+            self.titleIconLabel.setFixedSize(round(self.widgetSizeDict['titleIconLabel'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['titleIconLabel'].height() * self.curDpi / self.lastDpi))
+            self.titleLeftSubWidget.resize(round(self.widgetSizeDict['titleLeftSubWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['titleLeftSubWidget'].height() * self.curDpi / self.lastDpi))
+            self.minButton.setFixedSize(round(self.widgetSizeDict['minButton'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['minButton'].height() * self.curDpi / self.lastDpi))
+            self.minButton.setIconSize(QSize(round(self.widgetSizeDict['minButton iconSize'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['minButton iconSize'].height() * self.curDpi / self.lastDpi)))
+            self.maxButton.setFixedSize(round(self.widgetSizeDict['maxButton'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['maxButton'].height() * self.curDpi / self.lastDpi))
+            self.maxButton.setIconSize(QSize(round(self.widgetSizeDict['maxButton iconSize'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['maxButton iconSize'].height() * self.curDpi / self.lastDpi)))
+            self.closeButton.setFixedSize(round(self.widgetSizeDict['closeButton'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['closeButton'].height() * self.curDpi / self.lastDpi))
+            self.closeButton.setIconSize(QSize(round(self.widgetSizeDict['closeButton iconSize'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['closeButton iconSize'].height() * self.curDpi / self.lastDpi)))
+            self.titleRightSubWidget.resize(round(self.widgetSizeDict['titleRightSubWidget'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['titleRightSubWidget'].height() * self.curDpi / self.lastDpi))
+            self.titleWidget.setFixedHeight(round(self.widgetSizeDict['titleWidget'].height() * self.curDpi / self.lastDpi))
+
+            self.chatRecordsWidget.updateSize(self.curDpi, self.lastDpi)
+
+            self.chatFun.updateSize(self.curDpi, self.lastDpi)
+
+            self.chatInput.updateSendButtonSize(self.curDpi, self.lastDpi)
+
+        #mainWidget
         self.settingWidget.resize(self.mainWidget.width() // 3, self.mainWidget.height() - self.titleWidget.height())
-        if self.settingWidgetIsOpen:
+        self.chatRecordsWidget.resize(self.mainWidget.width() // 3, self.mainWidget.height() - self.titleWidget.height())
+        self.chatRecordsWidget.resetWidgetSize()
+        if self.settingWidgetIsOpen or self.chatRecordsWidgetIsOpen:
+            self.chatFun.setFixedSize(self.mainWidget.width() * 2 // 3, self.chatFun.height())
+            self.chatFun.resetWidgetSize()
             self.chatShow.resize(self.mainWidget.width() * 2 // 3 - 29, self.chatShow.height())
             self.chatShowWidget.resize(self.mainWidget.width() * 2 // 3, self.chatShowWidget.height())
             self.chatInput.resize(self.mainWidget.width() * 2 // 3 - 40, self.chatInput.height())
@@ -4489,22 +5005,68 @@ class MainWindow(QMainWindow):
             self.chatInputWidget.resize(self.mainWidget.width() * 2 // 3, self.chatInputWidget.height())
             self.splitter.resize(self.mainWidget.width() * 2 // 3, self.splitter.height())
             self.contentVLayout.setContentsMargins(self.mainWidget.width() // 3, 0, 0, 0)
+            if self.settingWidgetIsOpen:
+                self.settingWidget.move(0, self.titleWidget.height())
+            else:
+                self.settingWidget.move(-self.settingWidget.width(), self.titleWidget.height())
+            if self.chatRecordsWidgetIsOpen:
+                self.chatRecordsWidget.move(0, self.titleWidget.height())
+            else:
+                self.chatRecordsWidget.move(-self.chatRecordsWidget.width(), self.titleWidget.height())
         else:
+            self.chatFun.setFixedSize(self.mainWidget.width(), self.chatFun.height())
+            self.chatFun.resetWidgetSize()
+            self.chatInput.resetWidgetSize()
             self.settingWidget.move(-self.settingWidget.width(), self.titleWidget.height())
-        #chatRecords widget set geometry
-        self.chatRecordsWidget.resetWidgetSize(self.mainWidget.width() // 3, self.mainWidget.height() - self.titleWidget.height())
-        if self.chatRecordsWidgetIsOpen:
-            self.chatShow.resize(self.mainWidget.width() * 2 // 3 - 29, self.chatShow.height())
-            self.chatShowWidget.resize(self.mainWidget.width() * 2 // 3, self.chatShowWidget.height())
-            self.chatInput.resize(self.mainWidget.width() * 2 // 3 - 40, self.chatInput.height())
-            self.chatInput.resetWidgetSize()
-            self.chatInputWidget.resize(self.mainWidget.width() * 2 // 3, self.chatInputWidget.height())
-            self.splitter.resize(self.mainWidget.width() * 2 // 3, self.splitter.height())
-            self.contentVLayout.setContentsMargins(self.mainWidget.width() // 3, 0, 0, 0)
-        else:
             self.chatRecordsWidget.move(-self.chatRecordsWidget.width(), self.titleWidget.height())
-        #TextEditFull adjust size
-        self.chatInput.resetWidgetSize()
+
+        #isDpiChanged
+        if self.isDpiChanged:
+            self.settingVLayout.setContentsMargins(round(self.widgetSizeDict['settingVLayout contentsMargins'].left() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['settingVLayout contentsMargins'].top() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['settingVLayout contentsMargins'].right() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['settingVLayout contentsMargins'].bottom() * self.curDpi / self.lastDpi))
+            self.settingVLayout.setSpacing(round(self.widgetSizeDict['settingVLayout spacing'] * self.curDpi / self.lastDpi))
+            if self.settingWidget.height() < self.modelSelectWidget.height() + self.maxTokensWidget.height() + self.topPWidget.height() + self.temperatureWidget.height() + self.settingVLayout.contentsMargins().top() + self.settingVLayout.contentsMargins().bottom() + 3 * self.settingVLayout.spacing():
+                settingVLayoutVMargins = round((self.settingWidget.height() - (self.modelSelectWidget.height() + self.maxTokensWidget.height() + self.topPWidget.height() + self.temperatureWidget.height())) * 1 / 4)
+                settingVLayoutSpacing = round((self.settingWidget.height() - (self.modelSelectWidget.height() + self.maxTokensWidget.height() + self.topPWidget.height() + self.temperatureWidget.height())) * 1 / 6)
+                self.settingVLayout.setContentsMargins(self.settingVLayout.contentsMargins().left(), settingVLayoutVMargins, self.settingVLayout.contentsMargins().right(), settingVLayoutVMargins)
+                self.settingVLayout.setSpacing(settingVLayoutSpacing)
+
+        #settingWidget
+        self.modelSelectWidget.setFixedSize(self.settingWidget.width() - self.settingVLayout.contentsMargins().left() - self.settingVLayout.contentsMargins().right(), round((self.settingWidget.height() - self.settingVLayout.contentsMargins().top() - self.settingVLayout.contentsMargins().bottom() - 3 * self.settingVLayout.spacing()) * 190 / 580))
+        self.maxTokensWidget.setFixedSize(self.settingWidget.width() - self.settingVLayout.contentsMargins().left() - self.settingVLayout.contentsMargins().right(), round((self.settingWidget.height() - self.settingVLayout.contentsMargins().top() - self.settingVLayout.contentsMargins().bottom() - 3 * self.settingVLayout.spacing()) * 130 / 580))
+        self.topPWidget.setFixedSize(self.settingWidget.width() - self.settingVLayout.contentsMargins().left() - self.settingVLayout.contentsMargins().right(), round((self.settingWidget.height() - self.settingVLayout.contentsMargins().top() - self.settingVLayout.contentsMargins().bottom() - 3 * self.settingVLayout.spacing()) * 130 / 580))
+        self.temperatureWidget.setFixedSize(self.settingWidget.width() - self.settingVLayout.contentsMargins().left() - self.settingVLayout.contentsMargins().right(), round((self.settingWidget.height() - self.settingVLayout.contentsMargins().top() - self.settingVLayout.contentsMargins().bottom() - 3 * self.settingVLayout.spacing()) * 130 / 580))
+
+        self.baseUrlWidget.setFixedSize(self.modelSelectWidget.width() - self.modelSelectVLayout.contentsMargins().left() - self.modelSelectVLayout.contentsMargins().right(), round((self.modelSelectWidget.height() - self.modelSelectVLayout.contentsMargins().top() - self.modelSelectVLayout.contentsMargins().bottom() - 2 * self.modelSelectVLayout.spacing()) / 3))
+        self.apiKeyWidget.setFixedSize(self.modelSelectWidget.width() - self.modelSelectVLayout.contentsMargins().left() - self.modelSelectVLayout.contentsMargins().right(), round((self.modelSelectWidget.height() - self.modelSelectVLayout.contentsMargins().top() - self.modelSelectVLayout.contentsMargins().bottom() - 2 * self.modelSelectVLayout.spacing()) / 3))
+        self.modelNameWidget.setFixedSize(self.modelSelectWidget.width() - self.modelSelectVLayout.contentsMargins().left() - self.modelSelectVLayout.contentsMargins().right(), round((self.modelSelectWidget.height() - self.modelSelectVLayout.contentsMargins().top() - self.modelSelectVLayout.contentsMargins().bottom() - 2 * self.modelSelectVLayout.spacing()) / 3))
+
+        self.baseUrlLabel.setFixedSize(self.baseUrlLabel.size())
+        self.apiKeyLabel.setFixedSize(self.apiKeyLabel.size())
+        self.modelNameLabel.setFixedSize(self.modelNameLabel.size())
+        self.baseUrlEdit.setFixedSize(self.baseUrlWidget.width() - self.baseUrlHLayout.contentsMargins().left() - self.baseUrlHLayout.contentsMargins().right() - self.baseUrlHLayout.spacing() - self.baseUrlLabel.width() - 1, self.baseUrlEdit.height())
+        self.apiKeyEdit.setFixedSize(self.baseUrlWidget.width() - self.baseUrlHLayout.contentsMargins().left() - self.baseUrlHLayout.contentsMargins().right() - self.baseUrlHLayout.spacing() - self.apiKeyLabel.width() - 1, self.apiKeyEdit.height())
+        self.modelNameEdit.setFixedSize(self.baseUrlWidget.width() - self.baseUrlHLayout.contentsMargins().left() - self.baseUrlHLayout.contentsMargins().right() - self.baseUrlHLayout.spacing() - self.modelNameLabel.width() - 1, self.modelNameEdit.height())
+
+        self.maxTokensTopSubWidget.setFixedSize(self.maxTokensWidget.width() - self.maxTokensVLayout.contentsMargins().left() - self.maxTokensVLayout.contentsMargins().right(), round((self.maxTokensWidget.height() - self.maxTokensVLayout.contentsMargins().top() - self.maxTokensVLayout.contentsMargins().bottom()) / 2))
+        self.maxTokensBottomSubWidget.setFixedSize(self.maxTokensWidget.width() - self.maxTokensVLayout.contentsMargins().left() - self.maxTokensVLayout.contentsMargins().right(), round((self.maxTokensWidget.height() - self.maxTokensVLayout.contentsMargins().top() - self.maxTokensVLayout.contentsMargins().bottom()) / 2))
+        self.topPTopSubWidget.setFixedSize(self.topPWidget.width() - self.topPVLayout.contentsMargins().left() - self.topPVLayout.contentsMargins().right(), round((self.topPWidget.height() - self.topPVLayout.contentsMargins().top() - self.topPVLayout.contentsMargins().bottom()) / 2))
+        self.topPBottomSubWidget.setFixedSize(self.topPWidget.width() - self.topPVLayout.contentsMargins().left() - self.topPVLayout.contentsMargins().right(), round((self.topPWidget.height() - self.topPVLayout.contentsMargins().top() - self.topPVLayout.contentsMargins().bottom()) / 2))
+        self.temperatureTopSubWidget.setFixedSize(self.temperatureWidget.width() - self.temperatureVLayout.contentsMargins().left() - self.temperatureVLayout.contentsMargins().right(), round((self.temperatureWidget.height() - self.temperatureVLayout.contentsMargins().top() - self.temperatureVLayout.contentsMargins().bottom()) / 2))
+        self.temperatureBottomSubWidget.setFixedSize(self.temperatureWidget.width() - self.temperatureVLayout.contentsMargins().left() - self.temperatureVLayout.contentsMargins().right(), round((self.temperatureWidget.height() - self.temperatureVLayout.contentsMargins().top() - self.temperatureVLayout.contentsMargins().bottom()) / 2))
+
+        self.maxTokensLabel.setFixedSize(self.maxTokensLabel.size())
+        self.topPLabel.setFixedSize(self.topPLabel.size())
+        self.temperatureLabel.setFixedSize(self.temperatureLabel.size())
+        self.maxTokensTopSubHLayout.setSpacing(self.maxTokensTopSubWidget.width() // 2 - self.maxTokensLabel.width())
+        self.topPTopSubHLayout.setSpacing(self.topPTopSubWidget.width() // 2 - self.topPLabel.width())
+        self.temperatureTopSubHLayout.setSpacing(self.temperatureTopSubWidget.width() // 2 - self.temperatureLabel.width())
+        self.maxTokensBox.setFixedSize(self.maxTokensTopSubWidget.width() // 2, self.maxTokensBox.height())
+        self.topPBox.setFixedSize(self.topPTopSubWidget.width() // 2, self.topPBox.height())
+        self.temperatureBox.setFixedSize(self.temperatureTopSubWidget.width() // 2, self.temperatureBox.height())
+        self.maxTokensSlider.setFixedSize(self.maxTokensBottomSubWidget.width(), self.maxTokensSlider.height())
+        self.topPSlider.setFixedSize(self.topPBottomSubWidget.width(), self.topPSlider.height())
+        self.temperatureSlider.setFixedSize(self.temperatureBottomSubWidget.width(), self.temperatureSlider.height())
+
         #move emptyTextLabel
         self.emptyTextLabel.move((self.width() - self.emptyTextLabel.width()) // 2, self.titleWidget.height() + self.chatFun.height() + self.chatShowWidget.height() + 10)
         #move textCopyLabel
@@ -4514,6 +5076,86 @@ class MainWindow(QMainWindow):
         if self.isRegenerateFirst:
             self.isRegenerateFirst = False
             self.isRegenerate = False
+        #isDpiChanged
+        if self.isDpiChanged:
+            self.isDpiChanged = False
+            if (round(self.widgetSizeDict['MainWindow'].width() * self.curDpi / self.lastDpi) != self.width()) or (round(self.widgetSizeDict['MainWindow'].height() * self.curDpi / self.lastDpi) != self.height()):
+                self.avoidRepeatSelfFun = True
+                self.resize(round(self.widgetSizeDict['MainWindow'].width() * self.curDpi / self.lastDpi), round(self.widgetSizeDict['MainWindow'].height() * self.curDpi / self.lastDpi))
+            self.isRegenerate = False
+            self.messageWidgetRegenerate()
+
+        #widgetSizeDict
+        self.widgetSizeDict['baseUrlWidget'] = self.baseUrlWidget.size()
+        self.widgetSizeDict['baseUrlLabel'] = self.baseUrlLabel.size()
+        self.widgetSizeDict['baseUrlEdit'] = self.baseUrlEdit.size()
+        self.widgetSizeDict['baseUrlHLayout contentsMargins'] = self.baseUrlHLayout.contentsMargins()
+        self.widgetSizeDict['baseUrlHLayout spacing'] = self.baseUrlHLayout.spacing()
+
+        self.widgetSizeDict['apiKeyWidget'] = self.apiKeyWidget.size()
+        self.widgetSizeDict['apiKeyLabel'] = self.apiKeyLabel.size()
+        self.widgetSizeDict['apiKeyEdit'] = self.apiKeyEdit.size()
+        self.widgetSizeDict['apiKeyHLayout contentsMargins'] = self.apiKeyHLayout.contentsMargins()
+        self.widgetSizeDict['apiKeyHLayout spacing'] = self.apiKeyHLayout.spacing()
+
+        self.widgetSizeDict['modelNameWidget'] = self.modelNameWidget.size()
+        self.widgetSizeDict['modelNameLabel'] = self.modelNameLabel.size()
+        self.widgetSizeDict['modelNameEdit'] = self.modelNameEdit.size()
+        self.widgetSizeDict['modelNameHLayout contentsMargins'] = self.modelNameHLayout.contentsMargins()
+        self.widgetSizeDict['modelNameHLayout spacing'] = self.modelNameHLayout.spacing()
+
+        self.widgetSizeDict['modelSelectWidget'] = self.modelSelectWidget.size()
+        self.widgetSizeDict['modelSelectVLayout contentsMargins'] = self.modelSelectVLayout.contentsMargins()
+        self.widgetSizeDict['modelSelectVLayout spacing'] = self.modelSelectVLayout.spacing()
+
+        self.widgetSizeDict['maxTokensWidget'] = self.maxTokensWidget.size()
+        self.widgetSizeDict['maxTokensVLayout contentsMargins'] = self.maxTokensVLayout.contentsMargins()
+        self.widgetSizeDict['maxTokensTopSubWidget'] = self.maxTokensTopSubWidget.size()
+        self.widgetSizeDict['maxTokensTopSubHLayout contentsMargins'] = self.maxTokensTopSubHLayout.contentsMargins()
+        self.widgetSizeDict['maxTokensTopSubHLayout spacing'] = self.maxTokensTopSubHLayout.spacing()
+        self.widgetSizeDict['maxTokensLabel'] = self.maxTokensLabel.size()
+        self.widgetSizeDict['maxTokensBox'] = self.maxTokensBox.size()
+        self.widgetSizeDict['maxTokensBottomSubWidget'] = self.maxTokensBottomSubWidget.size()
+        self.widgetSizeDict['maxTokensBottomSubHLayout contentsMargins'] = self.maxTokensBottomSubHLayout.contentsMargins()
+        self.widgetSizeDict['maxTokensSlider'] = self.maxTokensSlider.size()
+
+        self.widgetSizeDict['topPWidget'] = self.topPWidget.size()
+        self.widgetSizeDict['topPVLayout contentsMargins'] = self.topPVLayout.contentsMargins()
+        self.widgetSizeDict['topPTopSubWidget'] = self.topPTopSubWidget.size()
+        self.widgetSizeDict['topPTopSubHLayout contentsMargins'] = self.topPTopSubHLayout.contentsMargins()
+        self.widgetSizeDict['topPTopSubHLayout spacing'] = self.topPTopSubHLayout.spacing()
+        self.widgetSizeDict['topPLabel'] = self.topPLabel.size()
+        self.widgetSizeDict['topPBox'] = self.topPBox.size()
+        self.widgetSizeDict['topPBottomSubWidget'] = self.topPBottomSubWidget.size()
+        self.widgetSizeDict['topPBottomSubHLayout contentsMargins'] = self.topPBottomSubHLayout.contentsMargins()
+        self.widgetSizeDict['topPSlider'] = self.topPSlider.size()
+
+        self.widgetSizeDict['temperatureWidget'] = self.temperatureWidget.size()
+        self.widgetSizeDict['temperatureVLayout contentsMargins'] = self.temperatureVLayout.contentsMargins()
+        self.widgetSizeDict['temperatureTopSubWidget'] = self.temperatureTopSubWidget.size()
+        self.widgetSizeDict['temperatureTopSubHLayout contentsMargins'] = self.temperatureTopSubHLayout.contentsMargins()
+        self.widgetSizeDict['temperatureTopSubHLayout spacing'] = self.temperatureTopSubHLayout.spacing()
+        self.widgetSizeDict['temperatureLabel'] = self.temperatureLabel.size()
+        self.widgetSizeDict['temperatureBox'] = self.temperatureBox.size()
+        self.widgetSizeDict['temperatureBottomSubWidget'] = self.temperatureBottomSubWidget.size()
+        self.widgetSizeDict['temperatureBottomSubHLayout contentsMargins'] = self.temperatureBottomSubHLayout.contentsMargins()
+        self.widgetSizeDict['temperatureSlider'] = self.temperatureSlider.size()
+
+        self.widgetSizeDict['settingVLayout contentsMargins'] = self.settingVLayout.contentsMargins()
+        self.widgetSizeDict['settingVLayout spacing'] = self.settingVLayout.spacing()
+
+        self.widgetSizeDict['titleIconLabel'] = self.titleIconLabel.size()
+        self.widgetSizeDict['titleLeftSubWidget'] = self.titleLeftSubWidget.size()
+        self.widgetSizeDict['minButton'] = self.minButton.size()
+        self.widgetSizeDict['minButton iconSize'] = self.minButton.iconSize()
+        self.widgetSizeDict['maxButton'] = self.maxButton.size()
+        self.widgetSizeDict['maxButton iconSize'] = self.maxButton.iconSize()
+        self.widgetSizeDict['closeButton'] = self.closeButton.size()
+        self.widgetSizeDict['closeButton iconSize'] = self.closeButton.iconSize()
+        self.widgetSizeDict['titleRightSubWidget'] = self.titleRightSubWidget.size()
+        self.widgetSizeDict['titleWidget'] = self.titleWidget.size()
+
+        self.widgetSizeDict['MainWindow'] = self.size()
 
     def titleWidgetInit(self):
         #titleIconLabel QLabel
@@ -4532,8 +5174,8 @@ class MainWindow(QMainWindow):
         self.titleLeftSubHLayout.addWidget(self.titleIconLabel)
         self.titleLeftSubHLayout.setAlignment(Qt.AlignLeft)
         self.titleLeftSubHLayout.setContentsMargins(10, 5, 5, 5)
-        #minButton PushButton
-        self.minButton = PushButton(tipText='', tipOffsetX=10, tipOffsetY=35)
+        #minButton TitleButton
+        self.minButton = TitleButton(tipText='', tipOffsetX=10, tipOffsetY=35)
         self.minButton.setFixedSize(50, 40)
         self.min_images_path = os.path.join(images_dir, 'min.png').replace('\\', '/')
         self.minButton.setIcon(QIcon(f"{self.min_images_path}"))
@@ -4547,8 +5189,8 @@ class MainWindow(QMainWindow):
         }
         ''')
         self.minButton.clicked.connect(self.UiMinimize)
-        #maxButton PushButton
-        self.maxButton = PushButton(tipText='', tipOffsetX=10, tipOffsetY=35)
+        #maxButton TitleButton
+        self.maxButton = TitleButton(tipText='', tipOffsetX=10, tipOffsetY=35)
         self.maxButton.setFixedSize(50, 40)
         self.max_images_path = os.path.join(images_dir, 'max.png').replace('\\', '/')
         self.normal_images_path = os.path.join(images_dir, 'normal.png').replace('\\', '/')
@@ -4563,8 +5205,8 @@ class MainWindow(QMainWindow):
         }
         ''')
         self.maxButton.clicked.connect(self.UiMaximize)
-        #closeButton PushButton
-        self.closeButton = PushButton(tipText='', tipOffsetX=5, tipOffsetY=35)
+        #closeButton TitleButton
+        self.closeButton = TitleButton(tipText='', tipOffsetX=5, tipOffsetY=35)
         self.closeButton.setFixedSize(50, 40)
         self.close_images_path = os.path.join(images_dir, 'close.png').replace('\\', '/')
         self.closeButton.setIcon(QIcon(f"{self.close_images_path}"))
@@ -4667,6 +5309,15 @@ class MainWindow(QMainWindow):
         self.maxTokensLabel.setText("Max Tokens")
         self.topPLabel.setText("Top P")
         self.temperatureLabel.setText("Temperature")
+        self.baseUrlLabel.adjustSize()
+        self.baseUrlLabel.setFixedWidth(self.baseUrlLabel.width() + 2)
+        self.apiKeyLabel.adjustSize()
+        self.apiKeyLabel.setFixedWidth(self.apiKeyLabel.width() + 2)
+        self.modelNameLabel.adjustSize()
+        self.modelNameLabel.setFixedWidth(self.modelNameLabel.width() + 2)
+        self.maxTokensLabel.adjustSize()
+        self.topPLabel.adjustSize()
+        self.temperatureLabel.adjustSize()
         #setting QLineEdit
         self.baseUrlEdit = SettingEdit()
         self.apiKeyEdit = SettingEdit()
@@ -4710,7 +5361,7 @@ class MainWindow(QMainWindow):
         self.temperatureSlider.valueChanged.connect(self.temperatureSliderValueChanged)
         #setting ModelSelect QWidget
         self.modelSelectWidget = QWidget()
-        self.modelSelectWidget.resize(370, 190)
+        self.modelSelectWidget.setFixedSize(370, 190)
         self.modelSelectWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.modelSelectWidget.setObjectName("modelSelectWidget")
         self.modelSelectWidget.setStyleSheet('''
@@ -4721,7 +5372,7 @@ class MainWindow(QMainWindow):
         ''')
         #setting base url QWidget
         self.baseUrlWidget = QWidget()
-        self.baseUrlWidget.resize(340, 32)
+        self.baseUrlWidget.setFixedSize(340, 40)
         self.baseUrlWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.baseUrlWidget.setObjectName("baseUrlWidget")
         self.baseUrlWidget.setStyleSheet('''
@@ -4732,12 +5383,14 @@ class MainWindow(QMainWindow):
         #setting base url QHBoxLayout
         self.baseUrlHLayout = QHBoxLayout()
         self.baseUrlWidget.setLayout(self.baseUrlHLayout)
+        self.baseUrlHLayout.setSpacing(9)
+        self.baseUrlEdit.setFixedSize(self.baseUrlWidget.width() - self.baseUrlLabel.width() - 10, self.baseUrlEdit.height())
         self.baseUrlHLayout.addWidget(self.baseUrlLabel)
         self.baseUrlHLayout.addWidget(self.baseUrlEdit)
-        self.baseUrlHLayout.setContentsMargins(0, 0, 0, 0)
+        self.baseUrlHLayout.setContentsMargins(0, 4, 0, 4)
         #setting api key QWidget
         self.apiKeyWidget = QWidget()
-        self.apiKeyWidget.resize(340, 32)
+        self.apiKeyWidget.setFixedSize(340, 40)
         self.apiKeyWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.apiKeyWidget.setObjectName("apiKeyWidget")
         self.apiKeyWidget.setStyleSheet('''
@@ -4748,12 +5401,14 @@ class MainWindow(QMainWindow):
         #setting api key QHBoxLayout
         self.apiKeyHLayout = QHBoxLayout()
         self.apiKeyWidget.setLayout(self.apiKeyHLayout)
+        self.apiKeyHLayout.setSpacing(9)
+        self.apiKeyEdit.setFixedSize(self.apiKeyWidget.width() - self.apiKeyLabel.width() - 10, self.apiKeyEdit.height())
         self.apiKeyHLayout.addWidget(self.apiKeyLabel)
         self.apiKeyHLayout.addWidget(self.apiKeyEdit)
-        self.apiKeyHLayout.setContentsMargins(0, 0, 0, 0)
+        self.apiKeyHLayout.setContentsMargins(0, 4, 0, 4)
         #setting model name QWidget
         self.modelNameWidget = QWidget()
-        self.modelNameWidget.resize(340, 32)
+        self.modelNameWidget.setFixedSize(340, 40)
         self.modelNameWidget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.modelNameWidget.setObjectName("modelNameWidget")
         self.modelNameWidget.setStyleSheet('''
@@ -4764,17 +5419,19 @@ class MainWindow(QMainWindow):
         #setting model name QHBoxLayout
         self.modelNameHLayout = QHBoxLayout()
         self.modelNameWidget.setLayout(self.modelNameHLayout)
+        self.modelNameHLayout.setSpacing(9)
+        self.modelNameEdit.setFixedSize(self.modelNameWidget.width() - self.modelNameLabel.width() - 10, self.modelNameEdit.height())
         self.modelNameHLayout.addWidget(self.modelNameLabel)
         self.modelNameHLayout.addWidget(self.modelNameEdit)
-        self.modelNameHLayout.setContentsMargins(0, 0, 0, 0)
+        self.modelNameHLayout.setContentsMargins(0, 4, 0, 4)
         #setting model select QVBoxLayout
         self.modelSelectVLayout = QVBoxLayout()
         self.modelSelectWidget.setLayout(self.modelSelectVLayout)
         self.modelSelectVLayout.addWidget(self.baseUrlWidget)
         self.modelSelectVLayout.addWidget(self.apiKeyWidget)
         self.modelSelectVLayout.addWidget(self.modelNameWidget)
-        self.modelSelectVLayout.setContentsMargins(15, 27, 15, 27)
-        self.modelSelectVLayout.setSpacing(20)
+        self.modelSelectVLayout.setContentsMargins(15, 20, 15, 20)
+        self.modelSelectVLayout.setSpacing(15)
         #setting maxTokens QWidget
         self.maxTokensWidget = QWidget()
         self.maxTokensWidget.resize(370, 130)
@@ -4799,6 +5456,7 @@ class MainWindow(QMainWindow):
         #setting maxTokens top sub QHBoxLayout
         self.maxTokensTopSubHLayout = QHBoxLayout()
         self.maxTokensTopSubWidget.setLayout(self.maxTokensTopSubHLayout)
+        self.maxTokensTopSubHLayout.setSpacing(self.maxTokensTopSubWidget.width() // 2 - self.maxTokensLabel.width())
         self.maxTokensTopSubHLayout.addWidget(self.maxTokensLabel)
         self.maxTokensTopSubHLayout.addWidget(self.maxTokensBox)
         self.maxTokensTopSubHLayout.setContentsMargins(0, 5, 0, 3)
@@ -4848,6 +5506,7 @@ class MainWindow(QMainWindow):
         #setting topP top sub QHBoxLayout
         self.topPTopSubHLayout = QHBoxLayout()
         self.topPTopSubWidget.setLayout(self.topPTopSubHLayout)
+        self.topPTopSubHLayout.setSpacing(self.topPTopSubWidget.width() // 2 - self.topPLabel.width())
         self.topPTopSubHLayout.addWidget(self.topPLabel)
         self.topPTopSubHLayout.addWidget(self.topPBox)
         self.topPTopSubHLayout.setContentsMargins(0, 5, 0, 3)
@@ -4897,6 +5556,7 @@ class MainWindow(QMainWindow):
         #setting temperature top sub QHBoxLayout
         self.temperatureTopSubHLayout = QHBoxLayout()
         self.temperatureTopSubWidget.setLayout(self.temperatureTopSubHLayout)
+        self.temperatureTopSubHLayout.setSpacing(self.temperatureTopSubWidget.width() // 2 - self.temperatureLabel.width())
         self.temperatureTopSubHLayout.addWidget(self.temperatureLabel)
         self.temperatureTopSubHLayout.addWidget(self.temperatureBox)
         self.temperatureTopSubHLayout.setContentsMargins(0, 5, 0, 3)
@@ -4933,7 +5593,7 @@ class MainWindow(QMainWindow):
         self.settingVLayout.addWidget(self.maxTokensWidget)
         self.settingVLayout.addWidget(self.topPWidget)
         self.settingVLayout.addWidget(self.temperatureWidget)
-        self.settingVLayout.setContentsMargins(15, 47, 15, 47)
+        self.settingVLayout.setContentsMargins(15, 45, 15, 45)
         self.settingVLayout.setSpacing(30)
         #settingAnimationMove QPropertyAnimation
         self.settingAnimationMove = QPropertyAnimation(self.settingWidget, b'geometry')
@@ -4952,6 +5612,8 @@ class MainWindow(QMainWindow):
         self.pushButtonIsPress = True
 
     def chatRecordsUiAnimationMove(self, rect):
+        self.chatFun.setFixedSize(self.mainWidget.width() - rect.x() - self.chatRecordsWidget.width(), self.chatFun.height())
+        self.chatFun.setSize()
         self.chatShow.resize(self.mainWidget.width() - rect.x() - self.chatRecordsWidget.width() - 29, self.chatShow.height())
         self.chatShowWidget.resize(self.mainWidget.width() - rect.x() - self.chatRecordsWidget.width(), self.chatShowWidget.height())
         self.chatInput.resize(self.mainWidget.width() - rect.x() - self.chatRecordsWidget.width() - 40, self.chatInput.height())
@@ -4961,6 +5623,7 @@ class MainWindow(QMainWindow):
         self.contentVLayout.setContentsMargins(rect.x() + self.chatRecordsWidget.width(), 0, 0, 0)
 
     def chatRecordsUiMoveFinished(self):
+        self.chatFun.saveWidgetSize()
         if not self.chatRecordsWidgetIsOpen:
             #delete all item
             self.chatRecordsWidget.delAllListItems()
@@ -5119,6 +5782,7 @@ class MainWindow(QMainWindow):
                 #MessageWidget
                 self.thinkTimeLengthList.append(0)
                 self.messageSendWidget = MessageWidget(text, self.textCopy, self.messageRenewResponse, self.chatShow, self.thinkTimeLengthList, len(self.messageWidgetList), isUser=True, textMaxWidth=self.chatShow.width() * 3 // 4)
+                self.messageSendWidget.updateFunWidgetSize(self.curDpi, self.initDpi)
                 self.messageSendWidget.connectResizeFinished(self.messageWidgetResize)
                 self.messageSendWidget.connectSetTexting(self.getSetTexting)
                 self.messageSendWidget.connectExecuteNext(self.onExecuteNext)
@@ -5212,6 +5876,7 @@ class MainWindow(QMainWindow):
         self.chatInput.textEdit.textChanged.emit()
         #messageRecvWidget
         self.messageRecvWidget.removeLoadingWidget()
+        self.messageRecvWidget.updateFunWidgetSize(self.curDpi, self.initDpi)
         self.messageRecvWidget.toggleWidget()
         #chatShow itemWidget adjust size
         self.itemRecvWidget.setFixedSize(self.chatShow.width(), self.messageRecvWidget.height() + 10)
@@ -5406,7 +6071,11 @@ class MainWindow(QMainWindow):
                 self.messageWidget.connectResizeFinished(self.messageWidgetResize)
                 self.messageWidget.connectSetTexting(self.getSetTexting)
                 if not isUser:
-                    self.messageWidget.removeLoadingWidget()
+                    if i == len(lines) - 1:
+                        if lastIsToggle:
+                            self.messageWidget.removeLoadingWidget()
+                    else:
+                        self.messageWidget.removeLoadingWidget()
                 self.messageWidgetList.append(self.messageWidget)
                 #itemWidget QWidget
                 self.itemWidget = ItemWidget(self)
@@ -5425,8 +6094,10 @@ class MainWindow(QMainWindow):
                 #MessageWidget
                 if i == len(lines) - 1:
                     if lastIsToggle:
+                        self.messageWidget.updateFunWidgetSize(self.curDpi, self.initDpi)
                         self.messageWidget.toggleWidget()
                 else:
+                    self.messageWidget.updateFunWidgetSize(self.curDpi, self.initDpi)
                     self.messageWidget.toggleWidget()
                 #clear text
                 text = ''
